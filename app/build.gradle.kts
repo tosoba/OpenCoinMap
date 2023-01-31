@@ -1,7 +1,6 @@
 plugins {
   id("opencoinmap.android.application")
   id("opencoinmap.android.hilt")
-
 }
 
 android {
@@ -33,8 +32,6 @@ android {
   }
 
   kotlinOptions { jvmTarget = "1.8" }
-
-  buildFeatures { viewBinding = true }
 
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }

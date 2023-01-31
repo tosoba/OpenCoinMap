@@ -25,6 +25,8 @@ internal fun Project.configureKotlinAndroid(
       isCoreLibraryDesugaringEnabled = true
     }
 
+    buildFeatures { viewBinding = true }
+
     kotlinOptions {
       // Treat all Kotlin warnings as errors (disabled by default)
       // Override by setting warningsAsErrors=true in your ~/.gradle/gradle.properties

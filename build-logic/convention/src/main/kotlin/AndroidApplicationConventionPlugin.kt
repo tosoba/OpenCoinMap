@@ -20,6 +20,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         defaultConfig.targetSdk = 33
         configureFlavors(this)
       }
+
       extensions.configure<ApplicationAndroidComponentsExtension> { configurePrintApksTask(this) }
     }
   }

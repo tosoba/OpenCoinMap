@@ -1,4 +1,6 @@
 import com.android.build.gradle.LibraryExtension
+import com.trm.opencoinmap.configureFlavors
+import com.trm.opencoinmap.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -15,11 +17,16 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         apply("opencoinmap.android.hilt")
       }
 
-//      extensions.configure<LibraryExtension> {
-//        defaultConfig {
-//          testInstrumentationRunner = "com.trm.opencoinmap.core.testing.OpenCoinMapTestRunner"
-//        }
-//      }
+      //      extensions.configure<LibraryExtension> {
+      //        defaultConfig {
+      //          testInstrumentationRunner =
+      // "com.trm.opencoinmap.core.testing.OpenCoinMapTestRunner"
+      //        }
+      //      }
+
+      extensions.configure<LibraryExtension> {
+        configureKotlinAndroid(this)
+      }
 
       val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 

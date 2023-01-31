@@ -1,6 +1,5 @@
 plugins {
     id("opencoinmap.android.library")
-    id("opencoinmap.android.library.jacoco")
     id("opencoinmap.android.hilt")
 }
 
