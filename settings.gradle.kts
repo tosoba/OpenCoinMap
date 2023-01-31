@@ -18,3 +18,19 @@ dependencyResolutionManagement {
 rootProject.name = "OpenCoinMap"
 
 include(":app")
+
+include(":core:common")
+
+include(":core:domain")
+
+include(":core:data")
+
+include(":core:database")
+
+include(":core:network")
+
+include(":core:ui")
+
+include(":feature:map")
+
+include(":sync")
