@@ -1,20 +1,21 @@
 plugins {
-  id("com.android.application")
-  id("org.jetbrains.kotlin.android")
+  id("opencoinmap.android.application")
+  id("opencoinmap.android.hilt")
+
 }
 
 android {
   namespace = "com.trm.opencoinmap"
-  compileSdk = 33
 
   defaultConfig {
     applicationId = "com.trm.opencoinmap"
-    minSdk = 21
-    targetSdk = 33
     versionCode = 1
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    vectorDrawables {
+      useSupportLibrary = true
+    }
   }
 
   buildTypes {
@@ -34,6 +35,8 @@ android {
   kotlinOptions { jvmTarget = "1.8" }
 
   buildFeatures { viewBinding = true }
+
+  testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 dependencies {
@@ -44,7 +47,5 @@ dependencies {
   implementation(libs.androidx.navigation.ui)
   implementation(libs.google.material)
 
-  testImplementation("junit:junit:4.13.2")
-  androidTestImplementation("androidx.test.ext:junit:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  testImplementation(libs.junit4)
 }
