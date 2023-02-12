@@ -14,10 +14,9 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.tracing.ktx)
     implementation(libs.androidx.startup)
     implementation(libs.androidx.work.ktx)
+    implementation(libs.androidx.work.rx)
     implementation(libs.hilt.ext.work)
 
     kapt(libs.hilt.ext.compiler)
