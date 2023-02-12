@@ -35,7 +35,6 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
         add("implementation", libs.findLibrary("viewBinding.propertyDelegate").get())
         add("implementation", libs.findLibrary("coil.kt").get())
-        add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())
 
         add("testImplementation", kotlin("test"))
         add("androidTestImplementation", kotlin("test"))

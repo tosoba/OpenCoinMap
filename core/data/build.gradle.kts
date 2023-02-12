@@ -18,6 +18,4 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.work.ktx)
-
-    implementation(libs.kotlinx.coroutines.android)
 }

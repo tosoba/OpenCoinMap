@@ -12,8 +12,6 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
 
-    implementation(libs.kotlinx.coroutines.android)
-
     implementation(libs.androidx.startup)
     implementation(libs.androidx.work.ktx)
     implementation(libs.androidx.work.rx)
