@@ -10,7 +10,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.google.android.material.snackbar.Snackbar
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,13 +27,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     val navController = findNavController(R.id.nav_host_fragment_content_main)
     appBarConfiguration = AppBarConfiguration(navController.graph)
     setupActionBarWithNavController(navController, appBarConfiguration)
-
-    binding.fab.setOnClickListener { view ->
-      Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-        .setAnchorView(R.id.fab)
-        .setAction("Action", null)
-        .show()
-    }
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -48,8 +40,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       else -> super.onOptionsItemSelected(item)
     }
 
-  override fun onSupportNavigateUp(): Boolean {
-    val navController = findNavController(R.id.nav_host_fragment_content_main)
-    return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-  }
+  override fun onSupportNavigateUp(): Boolean =
+    findNavController(R.id.nav_host_fragment_content_main).navigateUp(appBarConfiguration) ||
+      super.onSupportNavigateUp()
 }
