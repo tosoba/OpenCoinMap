@@ -9,4 +9,8 @@ dependencies {
   implementation(libs.osmdroid)
   implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+  implementation(libs.rx.android)
+  implementation(libs.rx.java)
+  implementation(libs.rx.kotlin)
 }
