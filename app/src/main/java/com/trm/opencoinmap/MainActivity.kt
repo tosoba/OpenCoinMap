@@ -9,21 +9,19 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(R.layout.activity_main) {
+  private val binding by viewBinding(ActivityMainBinding::bind)
   private lateinit var appBarConfiguration: AppBarConfiguration
-  private lateinit var binding: ActivityMainBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     super.onCreate(savedInstanceState)
-
-    binding = ActivityMainBinding.inflate(layoutInflater)
-    setContentView(binding.root)
 
     setSupportActionBar(binding.toolbar)
 
@@ -44,12 +42,11 @@ class MainActivity : AppCompatActivity() {
     return true
   }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
+  override fun onOptionsItemSelected(item: MenuItem): Boolean =
+    when (item.itemId) {
       R.id.action_settings -> true
       else -> super.onOptionsItemSelected(item)
     }
-  }
 
   override fun onSupportNavigateUp(): Boolean {
     val navController = findNavController(R.id.nav_host_fragment_content_main)

@@ -52,6 +52,7 @@ dependencies {
   implementation(libs.androidx.navigation.fragment)
   implementation(libs.androidx.navigation.ui)
   implementation(libs.google.material)
+  implementation(libs.viewBinding.propertyDelegate)
 
   implementation(libs.osmdroid)
 
