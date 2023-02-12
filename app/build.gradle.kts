@@ -53,5 +53,7 @@ dependencies {
   implementation(libs.androidx.navigation.ui)
   implementation(libs.google.material)
 
+  implementation(libs.osmdroid)
+
   testImplementation(libs.junit4)
 }
