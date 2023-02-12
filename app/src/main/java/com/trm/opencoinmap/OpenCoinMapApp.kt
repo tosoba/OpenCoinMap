@@ -1,8 +1,10 @@
 package com.trm.opencoinmap
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 import org.osmdroid.config.Configuration
 
+@HiltAndroidApp
 class OpenCoinMapApp : Application() {
   override fun onCreate() {
     super.onCreate()
