@@ -5,9 +5,9 @@ import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 
 interface CoinMapApi {
-  @GET("/venues") fun getVenues(): Single<VenuesResponse>
+  @GET("/api/v1/venues") fun getVenues(): Single<VenuesResponse>
 
   companion object {
-    internal const val BASE_URL = "https://coinmap.org/api/v1/"
+    internal const val BASE_URL = "https://coinmap.org/"
   }
 }
