@@ -1,6 +1,5 @@
 plugins {
     id("kotlin")
-    id("kotlin-kapt")
 }
 
 dependencies {
@@ -8,5 +7,4 @@ dependencies {
     implementation(libs.rx.kotlin)
 
     implementation(libs.dagger.dagger)
-    kapt(libs.dagger.compiler)
 }

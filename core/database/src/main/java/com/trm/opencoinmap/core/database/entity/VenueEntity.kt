@@ -9,7 +9,7 @@ data class VenueEntity(
   @PrimaryKey val id: Long,
   val lat: Double,
   val lon: Double,
-  @ColumnInfo("category") val category: String,
+  val category: String,
   val name: String,
   @ColumnInfo("created_on") val createdOn: Long,
 )
