@@ -2,7 +2,7 @@ package com.trm.opencoinmap.feature.map
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.trm.opencoinmap.common.view.get
+import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

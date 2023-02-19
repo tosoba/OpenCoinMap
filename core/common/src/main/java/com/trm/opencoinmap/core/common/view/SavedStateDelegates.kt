@@ -1,4 +1,4 @@
-package com.trm.opencoinmap.common.view
+package com.trm.opencoinmap.core.common.view
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
