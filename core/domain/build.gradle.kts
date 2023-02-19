@@ -4,7 +4,8 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinx.datetime)
+    implementation(libs.rx.java)
+    implementation(libs.rx.kotlin)
 
     implementation(libs.dagger.dagger)
     kapt(libs.dagger.compiler)

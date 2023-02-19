@@ -14,7 +14,10 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:database"))
     implementation(project(":core:domain"))
-//    implementation(project(":core:network"))
+    implementation(project(":core:network"))
+
+    implementation(libs.rx.java)
+    implementation(libs.rx.kotlin)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.work.ktx)

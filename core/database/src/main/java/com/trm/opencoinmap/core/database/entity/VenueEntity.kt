@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity("venue")
 data class VenueEntity(
-  @PrimaryKey val id: Int,
+  @PrimaryKey val id: Long,
   val lat: Double,
   val lon: Double,
   @ColumnInfo("category") val category: String,

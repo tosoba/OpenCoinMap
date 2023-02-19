@@ -58,5 +58,7 @@ dependencies {
 
   implementation(libs.osmdroid)
 
+  implementation(libs.timber)
+
   testImplementation(libs.junit4)
 }

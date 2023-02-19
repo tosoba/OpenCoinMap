@@ -7,9 +7,11 @@ plugins {
 android { namespace = "com.trm.opencoinmap.core.database" }
 
 dependencies {
-    implementation(libs.kotlinx.datetime)
+    implementation(libs.rx.java)
+    implementation(libs.rx.kotlin)
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.room.rx)
     ksp(libs.room.compiler)
 }

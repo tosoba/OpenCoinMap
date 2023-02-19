@@ -14,13 +14,11 @@ object Sync {
   }
 }
 
-internal const val SyncWorkName = "SyncWorkName"
-
 class SyncInitializer : Initializer<Sync> {
   override fun create(context: Context): Sync {
     WorkManager.getInstance(context).apply {
       enqueueUniquePeriodicWork(
-        SyncWorkName,
+        SyncWorker.WORK_NAME,
         ExistingPeriodicWorkPolicy.KEEP,
         SyncWorker.workRequest(),
       )

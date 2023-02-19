@@ -42,11 +42,12 @@ protobufPlugin = "0.8.19"
 retrofit = "2.9.0"
 retrofitKotlinxSerializationJson = "0.8.0"
 retrofitRxJavaAdapter = "3.0.0"
-room = "2.5.0-rc01"
+room = "2.5.0"
 rxAndroid = "3.0.2"
 rxKotlin = "3.0.1"
 rxJava = "3.1.5"
 secrets = "2.0.1"
+timber = "5.0.1"
 turbine = "0.12.1"
 viewBindingPropertyDelegate = "1.5.8"
 
@@ -108,9 +109,11 @@ retrofit-rxjava-adapter = { group = "com.github.akarnokd", name = "rxjava3-retro
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-rx = { group = "androidx.room", name = "room-rxjava3", version.ref = "room" }
 rx-android = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxAndroid" }
 rx-java = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxJava" }
 rx-kotlin = { group = "io.reactivex.rxjava3", name = "rxkotlin", version.ref = "rxKotlin" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 viewBinding-propertyDelegate = { group = "com.github.kirich1409", name = "viewbindingpropertydelegate-noreflection", version.ref = "viewBindingPropertyDelegate" }
 

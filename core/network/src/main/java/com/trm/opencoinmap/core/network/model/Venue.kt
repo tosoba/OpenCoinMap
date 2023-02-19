@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Venue(
-  @SerialName("id") val id: Int?,
+  @SerialName("id") val id: Long?,
   @SerialName("lat") val lat: Double?,
   @SerialName("lon") val lon: Double?,
   @SerialName("category") val category: String?,
