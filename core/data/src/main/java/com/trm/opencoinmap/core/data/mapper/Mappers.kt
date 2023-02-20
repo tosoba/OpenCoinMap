@@ -17,6 +17,16 @@ fun VenueResponseItem.asEntity(): VenueEntity =
 fun VenueEntity.asDomainModel(): Venue =
   Venue(id = id, lat = lat, lon = lon, category = category, name = name, createdOn = createdOn)
 
+fun Venue.asEntity(): VenueEntity =
+  VenueEntity(
+    id = id,
+    lat = lat,
+    lon = lon,
+    category = category,
+    name = name,
+    createdOn = createdOn
+  )
+
 fun VenueResponseItem.asDomainModel(): Venue =
   Venue(
     id = requireNotNull(id),

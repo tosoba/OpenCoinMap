@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity("venue")
+@Entity(tableName = "venue")
 data class VenueEntity(
   @PrimaryKey val id: Long,
   val lat: Double,

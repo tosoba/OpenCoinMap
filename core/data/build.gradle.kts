@@ -2,6 +2,7 @@ plugins {
     id("opencoinmap.android.library")
     id("opencoinmap.android.hilt")
     id("kotlinx-serialization")
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -18,6 +19,11 @@ dependencies {
 
     implementation(libs.rx.java)
     implementation(libs.rx.kotlin)
+
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.rx)
+    ksp(libs.room.compiler)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.work.ktx)

@@ -9,10 +9,18 @@ import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface VenueDao {
-  @Upsert fun upsert(entities: List<VenueEntity>): Completable
+  @Upsert fun upsertCompletable(entities: List<VenueEntity>): Completable
+
+  @Upsert fun upsert(entities: List<VenueEntity>)
 
   @Query(
-    "SELECT * FROM venue WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon"
+    "SELECT * FROM venue " +
+      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "AND EXISTS (" +
+      "SELECT * FROM bounds WHERE whole = TRUE " +
+      "UNION " +
+      "SELECT * FROM bounds WHERE min_lat <= :minLat AND max_lat >= :maxLat AND min_lon <= :minLon AND max_lon >= :maxLon" +
+      ")"
   )
   fun selectInBounds(
     minLat: Double,
@@ -20,6 +28,4 @@ interface VenueDao {
     minLon: Double,
     maxLon: Double
   ): Single<List<VenueEntity>>
-
-  @Query("SELECT EXISTS(SELECT * FROM venue LIMIT 1)") fun anyExists(): Single<Boolean>
 }
