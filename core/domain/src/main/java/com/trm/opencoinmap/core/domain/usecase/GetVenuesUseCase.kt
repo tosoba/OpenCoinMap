@@ -2,8 +2,8 @@ package com.trm.opencoinmap.core.domain.usecase
 
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
+import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -16,10 +16,10 @@ class GetVenuesUseCase @Inject constructor(private val repo: VenueRepo) {
   operator fun invoke(args: Args) {
     val (minLat, maxLat, minLon, maxLon) = args
     if (
-      minLat < -90.0 ||
-        maxLat > 90.0 ||
-        minLon < -180.0 ||
-        maxLon > 180.0 ||
+      minLat < BoundsConstants.MIN_LAT ||
+        maxLat > BoundsConstants.MAX_LAT ||
+        minLon < BoundsConstants.MIN_LON ||
+        maxLon > BoundsConstants.MAX_LON ||
         minLat >= maxLat ||
         minLon >= maxLon
     ) {

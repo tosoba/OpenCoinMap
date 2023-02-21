@@ -10,6 +10,7 @@ import com.trm.opencoinmap.core.database.entity.BoundsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
+import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
 import io.reactivex.rxjava3.core.Completable
@@ -31,7 +32,7 @@ constructor(
         response.venues?.filter(VenueResponseItem::isValid)?.map(VenueResponseItem::asEntity)
           ?: emptyList()
       }
-      .flatMapCompletable(venueDao::upsertCompletable)
+      .flatMapCompletable(::insertVenuesInWholeBounds)
 
   override fun getVenuesInLatLngBounds(
     minLat: Double,
@@ -87,6 +88,23 @@ constructor(
             minLon = minLon,
             maxLon = maxLon,
             whole = false
+          )
+        )
+      }
+    }
+
+  private fun insertVenuesInWholeBounds(venues: List<VenueEntity>): Completable =
+    Completable.fromAction {
+      db.runInTransaction {
+        venueDao.upsert(venues)
+        boundsDao.deleteNonWhole()
+        boundsDao.upsert(
+          BoundsEntity(
+            minLat = BoundsConstants.MIN_LAT,
+            maxLat = BoundsConstants.MAX_LAT,
+            minLon = BoundsConstants.MIN_LON,
+            maxLon = BoundsConstants.MAX_LON,
+            whole = true
           )
         )
       }

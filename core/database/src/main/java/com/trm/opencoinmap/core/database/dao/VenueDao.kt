@@ -9,8 +9,6 @@ import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface VenueDao {
-  @Upsert fun upsertCompletable(entities: List<VenueEntity>): Completable
-
   @Upsert fun upsert(entities: List<VenueEntity>)
 
   @Query(
