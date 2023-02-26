@@ -10,10 +10,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GetVenuesUseCase @Inject constructor(private val repo: VenueRepo) {
+class VenuesInBoundsSubjectUseCase @Inject constructor(private val repo: VenueRepo) {
   private val loadSubject = PublishSubject.create<Args>()
 
-  operator fun invoke(args: Args) {
+  fun onNext(args: Args) {
     val (minLat, maxLat, minLon, maxLon) = args
     if (
       minLat < BoundsConstants.MIN_LAT ||
@@ -28,8 +28,8 @@ class GetVenuesUseCase @Inject constructor(private val repo: VenueRepo) {
     loadSubject.onNext(args)
   }
 
-  operator fun invoke(): Observable<List<Venue>> =
-    loadSubject.debounce(1L, TimeUnit.SECONDS).switchMapSingle { args ->
+  fun observable(): Observable<List<Venue>> =
+    loadSubject.distinctUntilChanged().debounce(1L, TimeUnit.SECONDS).switchMapSingle { args ->
       val (minLat, maxLat, minLon, maxLon) = args
       repo.getVenuesInLatLngBounds(
         minLat = minLat,
