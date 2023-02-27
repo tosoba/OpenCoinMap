@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.feature.map
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -7,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.disposeOnDestroy
+import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
@@ -18,6 +20,7 @@ import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
 
 @AndroidEntryPoint
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -53,17 +56,16 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     viewModel.venuesInBounds
       .subscribe { venues ->
         overlays.clear()
-        venues.forEach { venue ->
-          overlays.add(
-            Marker(this).apply {
-              position = GeoPoint(venue.lat, venue.lon)
-              image = markerDrawable
-              setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            }
-          )
-        }
+        overlays.addAll(venues.map { venue -> venueMarker(venue, markerDrawable) })
         invalidate()
       }
       .disposeOnDestroy(viewLifecycleOwner.lifecycle)
   }
+
+  private fun MapView.venueMarker(venue: Venue, markerDrawable: Drawable?): Overlay =
+    Marker(this).apply {
+      position = GeoPoint(venue.lat, venue.lon)
+      image = markerDrawable
+      setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    }
 }
