@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.trm.opencoinmap.core.database.entity.VenueEntity
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
 @Dao
@@ -26,4 +25,10 @@ interface VenueDao {
     minLon: Double,
     maxLon: Double
   ): Single<List<VenueEntity>>
+
+  @Query(
+    "SELECT COUNT(*) FROM venue " +
+      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon"
+  )
+  fun countInBounds(minLat: Double, maxLat: Double, minLon: Double, maxLon: Double): Single<Int>
 }
