@@ -41,13 +41,21 @@ constructor(
     maxLon: Double
   ): Single<List<Venue>> =
     venueDao
-      .selectInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
-      .map { it.map(VenueEntity::asDomainModel) }
-      .flatMap { venues ->
-        if (venues.isEmpty()) {
-          getAndInsertVenuesFromNetwork(minLat, maxLat, minLon, maxLon)
+      .allExistInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
+      .flatMap { allExist ->
+        if (allExist) {
+          venueDao.countInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
         } else {
-          Single.just(venues)
+          getAndInsertVenuesFromNetwork(minLat, maxLat, minLon, maxLon)
+        }
+      }
+      .flatMap { count ->
+        if (count < 1_000) {
+          venueDao.selectInBounds(minLat, maxLat, minLon, maxLon).map {
+            it.map(VenueEntity::asDomainModel)
+          }
+        } else {
+          Single.just(emptyList())
         }
       }
 
@@ -56,7 +64,7 @@ constructor(
     maxLat: Double,
     minLon: Double,
     maxLon: Double
-  ): Single<List<Venue>> =
+  ): Single<Int> =
     openCoinMapApi
       .getVenues(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
       .map { it.venues?.map(VenueResponseItem::asDomainModel) ?: emptyList() }
@@ -68,7 +76,7 @@ constructor(
             minLon = minLon,
             maxLon = maxLon
           )
-          .toSingleDefault(venues)
+          .toSingleDefault(venues.size)
       }
 
   private fun insertVenuesInBounds(
