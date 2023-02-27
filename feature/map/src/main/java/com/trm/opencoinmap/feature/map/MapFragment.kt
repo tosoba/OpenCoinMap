@@ -17,7 +17,6 @@ import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
 
 @AndroidEntryPoint
@@ -54,9 +53,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     viewModel.venuesInBounds
       .subscribe { venues ->
         overlays.clear()
-        val overlay = FolderOverlay()
         venues.forEach { venue ->
-          overlay.add(
+          overlays.add(
             Marker(this).apply {
               position = GeoPoint(venue.lat, venue.lon)
               image = markerDrawable
@@ -64,8 +62,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
             }
           )
         }
-
-        overlays.add(overlay)
+        invalidate()
       }
       .disposeOnDestroy(viewLifecycleOwner.lifecycle)
   }
