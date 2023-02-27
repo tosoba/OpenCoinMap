@@ -30,14 +30,23 @@ class VenuesInBoundsSubjectUseCase @Inject constructor(private val repo: VenueRe
 
   fun observable(): Observable<List<Venue>> =
     loadSubject.distinctUntilChanged().debounce(1L, TimeUnit.SECONDS).switchMapSingle { args ->
-      val (minLat, maxLat, minLon, maxLon) = args
+      val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args
       repo.getVenuesInLatLngBounds(
         minLat = minLat,
         maxLat = maxLat,
         minLon = minLon,
-        maxLon = maxLon
+        maxLon = maxLon,
+        latDivisor = latDivisor,
+        lonDivisor = lonDivisor,
       )
     }
 
-  data class Args(val minLat: Double, val maxLat: Double, val minLon: Double, val maxLon: Double)
+  data class Args(
+    val minLat: Double,
+    val maxLat: Double,
+    val minLon: Double,
+    val maxLon: Double,
+    val latDivisor: Int,
+    val lonDivisor: Int
+  )
 }

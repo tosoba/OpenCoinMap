@@ -14,6 +14,9 @@ import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
 import com.trm.opencoinmap.feature.map.util.setDefaultConfig
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -36,9 +39,23 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     restorePosition(viewModel.mapPosition)
     addMapListener(
       object : MapListener {
+        val latDivisor: Int
+        val lonDivisor: Int
+
+        init {
+          val widthDp = resources.configuration.screenWidthDp.toDouble()
+          val heightDp = resources.configuration.screenHeightDp.toDouble()
+          val multiplier = (max(widthDp, heightDp) / min(widthDp, heightDp)).roundToInt()
+          val smallerDivisor = 2
+          val largerDivisor = smallerDivisor * multiplier
+          latDivisor = if (heightDp > widthDp) largerDivisor else smallerDivisor
+          lonDivisor = if (widthDp > heightDp) largerDivisor else smallerDivisor
+        }
+
         override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
         override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
-        private fun onMapInteraction(): Boolean {
+
+        fun onMapInteraction(): Boolean {
           viewModel.mapPosition =
             MapPosition(
               latitude = mapCenter.latitude,
@@ -46,7 +63,11 @@ class MapFragment : Fragment(R.layout.fragment_map) {
               zoom = zoomLevelDouble,
               orientation = mapOrientation
             )
-          viewModel.onBoundingBox(boundingBox)
+          viewModel.onBoundingBox(
+            boundingBox = boundingBox,
+            latDivisor = latDivisor,
+            lonDivisor = lonDivisor
+          )
           return false
         }
       }

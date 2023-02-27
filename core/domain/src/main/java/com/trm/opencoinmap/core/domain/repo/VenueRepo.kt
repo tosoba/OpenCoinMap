@@ -11,6 +11,8 @@ interface VenueRepo {
     minLat: Double,
     maxLat: Double,
     minLon: Double,
-    maxLon: Double
+    maxLon: Double,
+    latDivisor: Int,
+    lonDivisor: Int,
   ): Single<List<Venue>>
 }

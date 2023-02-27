@@ -38,7 +38,9 @@ constructor(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
-    maxLon: Double
+    maxLon: Double,
+    latDivisor: Int,
+    lonDivisor: Int,
   ): Single<List<Venue>> =
     venueDao
       .allExistInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
@@ -46,7 +48,12 @@ constructor(
         if (allExist) {
           venueDao.countInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
         } else {
-          getAndInsertVenuesFromNetwork(minLat, maxLat, minLon, maxLon)
+          getAndInsertVenuesFromNetwork(
+            minLat = minLat,
+            maxLat = maxLat,
+            minLon = minLon,
+            maxLon = maxLon
+          )
         }
       }
       .flatMap { count ->

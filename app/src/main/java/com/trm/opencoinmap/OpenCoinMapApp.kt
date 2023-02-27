@@ -3,6 +3,7 @@ package com.trm.opencoinmap
 import android.app.Application
 import com.trm.opencoinmap.sync.initializer.Sync
 import dagger.hilt.android.HiltAndroidApp
+import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import org.osmdroid.config.Configuration
 import timber.log.Timber
 
@@ -13,6 +14,7 @@ class OpenCoinMapApp : Application() {
     initTimber()
     initSync()
     initOsm()
+    RxJavaPlugins.setErrorHandler { Timber.tag("RX").e(it) }
   }
 
   private fun initSync() {

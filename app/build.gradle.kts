@@ -56,6 +56,10 @@ dependencies {
   implementation(libs.google.material)
   implementation(libs.viewBinding.propertyDelegate)
 
+  implementation(libs.rx.android)
+  implementation(libs.rx.java)
+  implementation(libs.rx.kotlin)
+
   implementation(libs.osmdroid)
 
   implementation(libs.timber)

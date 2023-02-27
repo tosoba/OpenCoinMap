@@ -28,13 +28,15 @@ constructor(
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
 
-  fun onBoundingBox(boundingBox: BoundingBox) {
+  fun onBoundingBox(boundingBox: BoundingBox, latDivisor: Int, lonDivisor: Int) {
     venuesInBoundsSubjectUseCase.onNext(
       VenuesInBoundsSubjectUseCase.Args(
         minLat = boundingBox.latSouth,
         maxLat = boundingBox.latNorth,
         minLon = boundingBox.lonWest,
-        maxLon = boundingBox.lonEast
+        maxLon = boundingBox.lonEast,
+        latDivisor = latDivisor,
+        lonDivisor = lonDivisor
       )
     )
   }
