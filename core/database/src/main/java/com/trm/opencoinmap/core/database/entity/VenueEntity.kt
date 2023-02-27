@@ -2,9 +2,10 @@ package com.trm.opencoinmap.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "venue")
+@Entity(tableName = "venue", indices = [Index("lat", "lon")])
 data class VenueEntity(
   @PrimaryKey val id: Long,
   val lat: Double,
