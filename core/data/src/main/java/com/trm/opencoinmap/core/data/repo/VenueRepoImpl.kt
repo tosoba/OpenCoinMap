@@ -77,67 +77,28 @@ constructor(
           val latInc = (maxLat - minLat) / latDivisor
           val lonInc = (maxLon - minLon) / lonDivisor
           val gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor)
-
-          val gridCellBounds = ArrayList<Bounds>(latDivisor * lonDivisor)
-          repeat(latDivisor) { latMult ->
-            repeat(lonDivisor) { lonMult ->
-              val cellMinLat = minLat + latInc * latMult
-              val cellMaxLat = cellMinLat + latInc
-              val cellMinLon = minLon + lonInc * lonMult
-              val cellMaxLon = cellMinLon + lonInc
-              gridCellBounds.add(
-                Bounds(
-                  minLat = cellMinLat,
-                  maxLat = cellMaxLat,
-                  minLon = cellMinLon,
-                  maxLon = cellMaxLon
-                )
-              )
-            }
-          }
+          val gridCells =
+            divideBoundsIntoGrid(
+              latDivisor = latDivisor,
+              lonDivisor = lonDivisor,
+              minLat = minLat,
+              latInc = latInc,
+              minLon = minLon,
+              lonInc = lonInc
+            )
 
           Single.fromCallable {
-              db.runInTransaction(
-                Callable {
-                  gridCellBounds.map { (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
-                    val countInCell =
-                      venueDao.countInBounds(
-                        minLat = cellMinLat,
-                        maxLat = cellMaxLat,
-                        minLon = cellMinLon,
-                        maxLon = cellMaxLon
-                      )
-                    if (countInCell > gridCellLimit) {
-                      GridCell.Cluster(
-                        lat = (cellMaxLat + cellMinLat) / 2.0,
-                        lon = (cellMaxLon + cellMinLon) / 2.0,
-                        count = count
-                      )
-                    } else {
-                      GridCell.Markers(
-                        venueDao
-                          .selectInBounds(
-                            minLat = cellMinLat,
-                            maxLat = cellMaxLat,
-                            minLon = cellMinLon,
-                            maxLon = cellMaxLon
-                          )
-                          .map(VenueEntity::asDomainModel)
-                      )
-                    }
-                  }
-                }
-              )
+              selectCellMarkers(gridCells = gridCells, gridCellLimit = gridCellLimit, count = count)
             }
             .map { cells ->
               cells.flatMap { cell ->
                 when (cell) {
-                  is GridCell.Cluster -> {
+                  is GridCellMarkers.Cluster -> {
                     listOf(
                       MapMarker.VenuesCluster(lat = cell.lat, lon = cell.lon, count = cell.count)
                     )
                   }
-                  is GridCell.Markers -> {
+                  is GridCellMarkers.Venues -> {
                     cell.venues.map(MapMarker::SingleVenue)
                   }
                 }
@@ -146,9 +107,69 @@ constructor(
         }
       }
 
-  private sealed interface GridCell {
-    data class Markers(val venues: List<Venue>) : GridCell
-    data class Cluster(val lat: Double, val lon: Double, val count: Int) : GridCell
+  private fun selectCellMarkers(
+    gridCells: List<Bounds>,
+    gridCellLimit: Int,
+    count: Int
+  ): List<GridCellMarkers> =
+    db.runInTransaction(
+      Callable {
+        gridCells.map { (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
+          val countInCell =
+            venueDao.countInBounds(
+              minLat = cellMinLat,
+              maxLat = cellMaxLat,
+              minLon = cellMinLon,
+              maxLon = cellMaxLon
+            )
+          if (countInCell > gridCellLimit) {
+            GridCellMarkers.Cluster(
+              lat = (cellMaxLat + cellMinLat) / 2.0,
+              lon = (cellMaxLon + cellMinLon) / 2.0,
+              count = count
+            )
+          } else {
+            GridCellMarkers.Venues(
+              venueDao
+                .selectInBounds(
+                  minLat = cellMinLat,
+                  maxLat = cellMaxLat,
+                  minLon = cellMinLon,
+                  maxLon = cellMaxLon
+                )
+                .map(VenueEntity::asDomainModel)
+            )
+          }
+        }
+      }
+    )
+
+  private sealed interface GridCellMarkers {
+    data class Venues(val venues: List<Venue>) : GridCellMarkers
+    data class Cluster(val lat: Double, val lon: Double, val count: Int) : GridCellMarkers
+  }
+
+  private fun divideBoundsIntoGrid(
+    latDivisor: Int,
+    lonDivisor: Int,
+    minLat: Double,
+    latInc: Double,
+    minLon: Double,
+    lonInc: Double
+  ): List<Bounds> {
+    val gridCellBounds = ArrayList<Bounds>(latDivisor * lonDivisor)
+    repeat(latDivisor) { latMult ->
+      repeat(lonDivisor) { lonMult ->
+        val cellMinLat = minLat + latInc * latMult
+        val cellMaxLat = cellMinLat + latInc
+        val cellMinLon = minLon + lonInc * lonMult
+        val cellMaxLon = cellMinLon + lonInc
+        gridCellBounds.add(
+          Bounds(minLat = cellMinLat, maxLat = cellMaxLat, minLon = cellMinLon, maxLon = cellMaxLon)
+        )
+      }
+    }
+    return gridCellBounds
   }
 
   private data class Bounds(
