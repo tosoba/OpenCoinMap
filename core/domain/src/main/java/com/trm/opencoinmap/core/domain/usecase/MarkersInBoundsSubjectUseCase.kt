@@ -1,6 +1,6 @@
 package com.trm.opencoinmap.core.domain.usecase
 
-import com.trm.opencoinmap.core.domain.model.MapMarker
+import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import io.reactivex.rxjava3.core.Observable
@@ -28,10 +28,16 @@ class MarkersInBoundsSubjectUseCase @Inject constructor(private val repo: VenueR
     loadSubject.onNext(args)
   }
 
-  fun observable(): Observable<List<MapMarker>> =
-    loadSubject.distinctUntilChanged().debounce(1L, TimeUnit.SECONDS).switchMapSingle { args ->
-      val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args
-      repo.getVenueMarkersInLatLngBounds(
+  fun observable(): Observable<Loadable<List<MapMarker>>> =
+    loadSubject
+      .distinctUntilChanged()
+      .debounce(1L, TimeUnit.SECONDS)
+      .switchMap(::getMarkersInBounds)
+
+  private fun getMarkersInBounds(args: Args): Observable<Loadable<List<MapMarker>>> {
+    val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args
+    return repo
+      .getVenueMarkersInLatLngBounds(
         minLat = minLat,
         maxLat = maxLat,
         minLon = minLon,
@@ -39,7 +45,11 @@ class MarkersInBoundsSubjectUseCase @Inject constructor(private val repo: VenueR
         latDivisor = latDivisor,
         lonDivisor = lonDivisor,
       )
-    }
+      .map(List<MapMarker>::asLoadable)
+      .toObservable()
+      .startWithItem(LoadingFirst)
+      .onErrorReturn(::FailedFirst)
+  }
 
   data class Args(
     val minLat: Double,

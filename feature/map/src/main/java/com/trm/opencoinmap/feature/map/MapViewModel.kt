@@ -4,8 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.common.view.get
-import com.trm.opencoinmap.core.domain.model.MapMarker
+import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.MarkersInBoundsSubjectUseCase
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,21 +30,29 @@ constructor(
 
   var mapPosition: MapPosition by savedStateHandle.get(defaultValue = MapPosition())
 
+  private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
+  val isLoading: LiveData<Boolean> = _isLoading
+
   private val _markersInBounds: MutableLiveData<List<MapMarker>> = MutableLiveData(emptyList())
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
+
+  private val _error: LiveEvent<Unit> = LiveEvent()
+  val error: LiveData<Unit> = _error
 
   init {
     markersInBoundsSubjectUseCase
       .observable()
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribeBy(onNext = _markersInBounds::setValue, onError = { Timber.tag(TAG).e(it) })
+      .subscribeBy(
+        onNext = {
+          _isLoading.value = it is Loading
+          if (it is WithData) _markersInBounds.value = it.data
+          if (it is Failed) _error.value = Unit
+        },
+        onError = { Timber.tag(TAG).e(it) }
+      )
       .addTo(compositeDisposable)
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    compositeDisposable.clear()
   }
 
   fun onBoundingBox(boundingBox: BoundingBox, latDivisor: Int, lonDivisor: Int) {
@@ -57,6 +66,11 @@ constructor(
         lonDivisor = lonDivisor
       )
     )
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    compositeDisposable.clear()
   }
 
   companion object {
