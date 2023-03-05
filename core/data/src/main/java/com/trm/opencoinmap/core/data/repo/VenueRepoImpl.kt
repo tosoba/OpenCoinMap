@@ -16,8 +16,8 @@ import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
+import java.util.concurrent.Callable
 import javax.inject.Inject
 
 class VenueRepoImpl
@@ -37,11 +37,6 @@ constructor(
       }
       .flatMapCompletable(::insertVenuesInWholeBounds)
 
-  sealed interface GridCell {
-    data class Markers(val venues: List<Venue>) : GridCell
-    data class Cluster(val markerCluster: MarkerCluster) : GridCell
-  }
-
   override fun getVenueMarkersInLatLngBounds(
     minLat: Double,
     maxLat: Double,
@@ -54,7 +49,12 @@ constructor(
       .allExistInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
       .flatMap { allExist ->
         if (allExist) {
-          venueDao.countInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
+          venueDao.countInBoundsSingle(
+            minLat = minLat,
+            maxLat = maxLat,
+            minLon = minLon,
+            maxLon = maxLon
+          )
         } else {
           getAndInsertVenuesFromNetwork(
             minLat = minLat,
@@ -67,18 +67,17 @@ constructor(
       .flatMap { count ->
         if (count < BOUNDS_MARKERS_LIMIT) {
           venueDao
-            .selectInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
+            .selectInBoundsSingle(
+              minLat = minLat,
+              maxLat = maxLat,
+              minLon = minLon,
+              maxLon = maxLon
+            )
             .map { VenueMarkersInBounds(it.map(VenueEntity::asDomainModel), emptyList()) }
         } else {
           val latInc = (maxLat - minLat) / latDivisor
           val lonInc = (maxLon - minLon) / lonDivisor
           val gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor)
-          data class Bounds(
-            val minLat: Double,
-            val maxLat: Double,
-            val minLon: Double,
-            val maxLon: Double,
-          )
 
           val gridCellBounds = ArrayList<Bounds>(latDivisor * lonDivisor)
           repeat(latDivisor) { latMult ->
@@ -91,18 +90,18 @@ constructor(
             }
           }
 
-          Observable.fromIterable(gridCellBounds)
-            .flatMapSingle { (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
-              venueDao
-                .countInBounds(
-                  minLat = cellMinLat,
-                  maxLat = cellMaxLat,
-                  minLon = cellMinLon,
-                  maxLon = cellMaxLon
-                )
-                .flatMap { count ->
-                  if (count > gridCellLimit) {
-                    Single.just(
+          Single.fromCallable {
+              db.runInTransaction(
+                Callable {
+                  gridCellBounds.map { (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
+                    val countInCell =
+                      venueDao.countInBounds(
+                        minLat = cellMinLat,
+                        maxLat = cellMaxLat,
+                        minLon = cellMinLon,
+                        maxLon = cellMaxLon
+                      )
+                    if (countInCell > gridCellLimit) {
                       GridCell.Cluster(
                         MarkerCluster(
                           lat = (cellMaxLat - cellMinLat) / 2.0,
@@ -110,20 +109,22 @@ constructor(
                           count = count
                         )
                       )
-                    )
-                  } else {
-                    venueDao
-                      .selectInBounds(
-                        minLat = cellMinLat,
-                        maxLat = cellMaxLat,
-                        minLon = cellMinLon,
-                        maxLon = cellMaxLon
+                    } else {
+                      GridCell.Markers(
+                        venueDao
+                          .selectInBounds(
+                            minLat = cellMinLat,
+                            maxLat = cellMaxLat,
+                            minLon = cellMinLon,
+                            maxLon = cellMaxLon
+                          )
+                          .map(VenueEntity::asDomainModel)
                       )
-                      .map { GridCell.Markers(it.map(VenueEntity::asDomainModel)) }
+                    }
                   }
                 }
+              )
             }
-            .toList()
             .map {
               VenueMarkersInBounds(
                 it.filterIsInstance<GridCell.Markers>().flatMap(GridCell.Markers::venues),
@@ -132,6 +133,18 @@ constructor(
             }
         }
       }
+
+  private sealed interface GridCell {
+    data class Markers(val venues: List<Venue>) : GridCell
+    data class Cluster(val markerCluster: MarkerCluster) : GridCell
+  }
+
+  private data class Bounds(
+    val minLat: Double,
+    val maxLat: Double,
+    val minLon: Double,
+    val maxLon: Double,
+  )
 
   private fun getAndInsertVenuesFromNetwork(
     minLat: Double,
