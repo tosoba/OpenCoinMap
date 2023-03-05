@@ -1,7 +1,7 @@
 package com.trm.opencoinmap.feature.map.util
 
-import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.MapDefaults
+import com.trm.opencoinmap.feature.map.model.MapPosition
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -22,3 +22,11 @@ internal fun MapView.restorePosition(position: MapPosition) {
   mapOrientation = position.orientation
   setExpectedCenter(GeoPoint(position.latitude, position.longitude))
 }
+
+internal fun MapView.currentPosition(): MapPosition =
+  MapPosition(
+    latitude = mapCenter.latitude,
+    longitude = mapCenter.longitude,
+    zoom = zoomLevelDouble,
+    orientation = mapOrientation
+  )

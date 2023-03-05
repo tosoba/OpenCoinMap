@@ -10,7 +10,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
-import com.trm.opencoinmap.feature.map.model.MapPosition
+import com.trm.opencoinmap.feature.map.util.currentPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
 import com.trm.opencoinmap.feature.map.util.setDefaultConfig
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,7 +36,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     setDefaultConfig()
     restorePosition(viewModel.mapPosition)
 
-    val (latDivisor, lonDivisor) = calculateLatLonDivisors()
+    val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
     fun MapViewModel.onBoundingBox(boundingBox: BoundingBox) {
       onBoundingBox(boundingBox = boundingBox, latDivisor = latDivisor, lonDivisor = lonDivisor)
     }
@@ -47,13 +47,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
         fun onMapInteraction(): Boolean {
-          viewModel.mapPosition =
-            MapPosition(
-              latitude = mapCenter.latitude,
-              longitude = mapCenter.longitude,
-              zoom = zoomLevelDouble,
-              orientation = mapOrientation
-            )
+          viewModel.mapPosition = currentPosition()
           viewModel.onBoundingBox(boundingBox)
           return false
         }

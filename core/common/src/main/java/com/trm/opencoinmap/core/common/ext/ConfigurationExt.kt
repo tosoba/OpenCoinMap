@@ -1,13 +1,13 @@
 package com.trm.opencoinmap.core.common.ext
 
-import androidx.fragment.app.Fragment
+import android.content.res.Configuration
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-fun Fragment.calculateLatLonDivisors(): Pair<Int, Int> {
-  val widthDp = resources.configuration.screenWidthDp.toDouble()
-  val heightDp = resources.configuration.screenHeightDp.toDouble()
+fun Configuration.calculateLatLonDivisors(): Pair<Int, Int> {
+  val widthDp = screenWidthDp.toDouble()
+  val heightDp = screenHeightDp.toDouble()
   val multiplier = (max(widthDp, heightDp) / min(widthDp, heightDp)).roundToInt()
   val smallerDivisor = 3
   val largerDivisor = smallerDivisor * multiplier
