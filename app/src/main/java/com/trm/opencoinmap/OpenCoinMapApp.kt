@@ -12,8 +12,16 @@ class OpenCoinMapApp : Application() {
   override fun onCreate() {
     super.onCreate()
     initTimber()
+    initRxErrorHandler()
     initSync()
     initOsm()
+  }
+
+  private fun initTimber() {
+    if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
+  }
+
+  private fun initRxErrorHandler() {
     RxJavaPlugins.setErrorHandler { Timber.tag("RX").e(it) }
   }
 
@@ -23,9 +31,5 @@ class OpenCoinMapApp : Application() {
 
   private fun initOsm() {
     Configuration.getInstance().userAgentValue = packageName
-  }
-
-  private fun initTimber() {
-    if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
   }
 }

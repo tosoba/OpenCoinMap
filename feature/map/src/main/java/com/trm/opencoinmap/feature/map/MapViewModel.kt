@@ -4,7 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.Venue
-import com.trm.opencoinmap.core.domain.usecase.VenuesInBoundsSubjectUseCase
+import com.trm.opencoinmap.core.domain.model.VenueMarkersInBounds
+import com.trm.opencoinmap.core.domain.usecase.VenueMarkersInBoundsSubjectUseCase
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -18,19 +19,20 @@ internal class MapViewModel
 @Inject
 constructor(
   savedStateHandle: SavedStateHandle,
-  private val venuesInBoundsSubjectUseCase: VenuesInBoundsSubjectUseCase,
+  private val venueMarkersInBoundsSubjectUseCase: VenueMarkersInBoundsSubjectUseCase,
 ) : ViewModel() {
   var mapPosition: MapPosition by savedStateHandle.get(defaultValue = MapPosition())
 
   val venuesInBounds: Observable<List<Venue>> =
-    venuesInBoundsSubjectUseCase
+    venueMarkersInBoundsSubjectUseCase
       .observable()
+      .map(VenueMarkersInBounds::venues)
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
 
   fun onBoundingBox(boundingBox: BoundingBox, latDivisor: Int, lonDivisor: Int) {
-    venuesInBoundsSubjectUseCase.onNext(
-      VenuesInBoundsSubjectUseCase.Args(
+    venueMarkersInBoundsSubjectUseCase.onNext(
+      VenueMarkersInBoundsSubjectUseCase.Args(
         minLat = boundingBox.latSouth,
         maxLat = boundingBox.latNorth,
         minLon = boundingBox.lonWest,

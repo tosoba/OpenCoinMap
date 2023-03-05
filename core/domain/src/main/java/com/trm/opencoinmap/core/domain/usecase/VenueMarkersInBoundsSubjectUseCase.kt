@@ -1,6 +1,6 @@
 package com.trm.opencoinmap.core.domain.usecase
 
-import com.trm.opencoinmap.core.domain.model.Venue
+import com.trm.opencoinmap.core.domain.model.VenueMarkersInBounds
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import io.reactivex.rxjava3.core.Observable
@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class VenuesInBoundsSubjectUseCase @Inject constructor(private val repo: VenueRepo) {
+class VenueMarkersInBoundsSubjectUseCase @Inject constructor(private val repo: VenueRepo) {
   private val loadSubject = PublishSubject.create<Args>()
 
   fun onNext(args: Args) {
@@ -28,10 +28,10 @@ class VenuesInBoundsSubjectUseCase @Inject constructor(private val repo: VenueRe
     loadSubject.onNext(args)
   }
 
-  fun observable(): Observable<List<Venue>> =
+  fun observable(): Observable<VenueMarkersInBounds> =
     loadSubject.distinctUntilChanged().debounce(1L, TimeUnit.SECONDS).switchMapSingle { args ->
       val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args
-      repo.getVenuesInLatLngBounds(
+      repo.getVenueMarkersInLatLngBounds(
         minLat = minLat,
         maxLat = maxLat,
         minLon = minLon,
