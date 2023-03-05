@@ -8,9 +8,8 @@ import com.trm.opencoinmap.core.database.dao.BoundsDao
 import com.trm.opencoinmap.core.database.dao.VenueDao
 import com.trm.opencoinmap.core.database.entity.BoundsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
-import com.trm.opencoinmap.core.domain.model.MarkerCluster
+import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
-import com.trm.opencoinmap.core.domain.model.VenueMarkersInBounds
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
@@ -44,7 +43,7 @@ constructor(
     maxLon: Double,
     latDivisor: Int,
     lonDivisor: Int,
-  ): Single<VenueMarkersInBounds> =
+  ): Single<List<MapMarker>> =
     venueDao
       .allExistInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
       .flatMap { allExist ->
@@ -73,7 +72,7 @@ constructor(
               minLon = minLon,
               maxLon = maxLon
             )
-            .map { VenueMarkersInBounds(it.map(VenueEntity::asDomainModel), emptyList()) }
+            .map { it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } }
         } else {
           val latInc = (maxLat - minLat) / latDivisor
           val lonInc = (maxLon - minLon) / lonDivisor
@@ -83,10 +82,17 @@ constructor(
           repeat(latDivisor) { latMult ->
             repeat(lonDivisor) { lonMult ->
               val cellMinLat = minLat + latInc * latMult
-              val cellMaxLat = maxLat + latInc * (latMult + 1)
+              val cellMaxLat = cellMinLat + latInc
               val cellMinLon = minLon + lonInc * lonMult
-              val cellMaxLon = maxLon + lonInc * (lonMult + 1)
-              gridCellBounds.add(Bounds(cellMinLat, cellMaxLat, cellMinLon, cellMaxLon))
+              val cellMaxLon = cellMinLon + lonInc
+              gridCellBounds.add(
+                Bounds(
+                  minLat = cellMinLat,
+                  maxLat = cellMaxLat,
+                  minLon = cellMinLon,
+                  maxLon = cellMaxLon
+                )
+              )
             }
           }
 
@@ -103,11 +109,9 @@ constructor(
                       )
                     if (countInCell > gridCellLimit) {
                       GridCell.Cluster(
-                        MarkerCluster(
-                          lat = (cellMaxLat - cellMinLat) / 2.0,
-                          lon = (cellMaxLon - cellMinLon) / 2.0,
-                          count = count
-                        )
+                        lat = (cellMaxLat + cellMinLat) / 2.0,
+                        lon = (cellMaxLon + cellMinLon) / 2.0,
+                        count = count
                       )
                     } else {
                       GridCell.Markers(
@@ -125,18 +129,26 @@ constructor(
                 }
               )
             }
-            .map {
-              VenueMarkersInBounds(
-                it.filterIsInstance<GridCell.Markers>().flatMap(GridCell.Markers::venues),
-                it.filterIsInstance<GridCell.Cluster>().map(GridCell.Cluster::markerCluster)
-              )
+            .map { cells ->
+              cells.flatMap { cell ->
+                when (cell) {
+                  is GridCell.Cluster -> {
+                    listOf(
+                      MapMarker.VenuesCluster(lat = cell.lat, lon = cell.lon, count = cell.count)
+                    )
+                  }
+                  is GridCell.Markers -> {
+                    cell.venues.map(MapMarker::SingleVenue)
+                  }
+                }
+              }
             }
         }
       }
 
   private sealed interface GridCell {
     data class Markers(val venues: List<Venue>) : GridCell
-    data class Cluster(val markerCluster: MarkerCluster) : GridCell
+    data class Cluster(val lat: Double, val lon: Double, val count: Int) : GridCell
   }
 
   private data class Bounds(

@@ -7,8 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.trm.opencoinmap.core.common.ext.disposeOnDestroy
-import com.trm.opencoinmap.core.domain.model.Venue
+import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
@@ -37,21 +36,17 @@ class MapFragment : Fragment(R.layout.fragment_map) {
   private fun MapView.init() {
     setDefaultConfig()
     restorePosition(viewModel.mapPosition)
+
+    val widthDp = resources.configuration.screenWidthDp.toDouble()
+    val heightDp = resources.configuration.screenHeightDp.toDouble()
+    val multiplier = (max(widthDp, heightDp) / min(widthDp, heightDp)).roundToInt()
+    val smallerDivisor = 3
+    val largerDivisor = smallerDivisor * multiplier
+    val latDivisor = if (heightDp > widthDp) largerDivisor else smallerDivisor
+    val lonDivisor = if (widthDp > heightDp) largerDivisor else smallerDivisor
+
     addMapListener(
       object : MapListener {
-        val latDivisor: Int
-        val lonDivisor: Int
-
-        init {
-          val widthDp = resources.configuration.screenWidthDp.toDouble()
-          val heightDp = resources.configuration.screenHeightDp.toDouble()
-          val multiplier = (max(widthDp, heightDp) / min(widthDp, heightDp)).roundToInt()
-          val smallerDivisor = 2
-          val largerDivisor = smallerDivisor * multiplier
-          latDivisor = if (heightDp > widthDp) largerDivisor else smallerDivisor
-          lonDivisor = if (widthDp > heightDp) largerDivisor else smallerDivisor
-        }
-
         override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
         override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
@@ -73,19 +68,45 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       }
     )
 
+    addOnFirstLayoutListener { _, _, _, _, _ ->
+      viewModel.onBoundingBox(
+        boundingBox = boundingBox,
+        latDivisor = latDivisor,
+        lonDivisor = lonDivisor
+      )
+    }
+
     val markerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.marker)
-    viewModel.venuesInBounds
-      .subscribe { venues ->
-        overlays.clear()
-        overlays.addAll(venues.map { venue -> venueMarker(venue, markerDrawable) })
-        invalidate()
-      }
-      .disposeOnDestroy(viewLifecycleOwner.lifecycle)
+    viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
+      overlays.clear()
+      overlays.addAll(
+        markers.map { marker ->
+          when (marker) {
+            is MapMarker.SingleVenue -> venueMarker(marker, markerDrawable)
+            is MapMarker.VenuesCluster -> clusterMarker(marker, markerDrawable)
+          }
+        }
+      )
+      invalidate()
+    }
   }
 
-  private fun MapView.venueMarker(venue: Venue, markerDrawable: Drawable?): Overlay =
+  private fun MapView.venueMarker(
+    marker: MapMarker.SingleVenue,
+    markerDrawable: Drawable?
+  ): Overlay =
     Marker(this).apply {
-      position = GeoPoint(venue.lat, venue.lon)
+      position = GeoPoint(marker.venue.lat, marker.venue.lon)
+      image = markerDrawable
+      setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    }
+
+  private fun MapView.clusterMarker(
+    marker: MapMarker.VenuesCluster,
+    markerDrawable: Drawable?
+  ): Overlay =
+    Marker(this).apply {
+      position = GeoPoint(marker.lat, marker.lon)
       image = markerDrawable
       setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     }
