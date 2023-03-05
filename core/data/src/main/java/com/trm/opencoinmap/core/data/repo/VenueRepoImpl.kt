@@ -158,11 +158,11 @@ constructor(
     lonInc: Double
   ): List<Bounds> {
     val gridCellBounds = ArrayList<Bounds>(latDivisor * lonDivisor)
-    repeat(latDivisor) { latMult ->
-      repeat(lonDivisor) { lonMult ->
-        val cellMinLat = minLat + latInc * latMult
+    repeat(latDivisor) { latMultiplier ->
+      repeat(lonDivisor) { lonMultiplier ->
+        val cellMinLat = minLat + latInc * latMultiplier
         val cellMaxLat = cellMinLat + latInc
-        val cellMinLon = minLon + lonInc * lonMult
+        val cellMinLon = minLon + lonInc * lonMultiplier
         val cellMaxLon = cellMinLon + lonInc
         gridCellBounds.add(
           Bounds(minLat = cellMinLat, maxLat = cellMaxLat, minLon = cellMinLon, maxLon = cellMaxLon)

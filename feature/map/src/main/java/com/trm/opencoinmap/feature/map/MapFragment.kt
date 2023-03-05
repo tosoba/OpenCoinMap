@@ -7,18 +7,17 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
 import com.trm.opencoinmap.feature.map.util.setDefaultConfig
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -37,13 +36,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     setDefaultConfig()
     restorePosition(viewModel.mapPosition)
 
-    val widthDp = resources.configuration.screenWidthDp.toDouble()
-    val heightDp = resources.configuration.screenHeightDp.toDouble()
-    val multiplier = (max(widthDp, heightDp) / min(widthDp, heightDp)).roundToInt()
-    val smallerDivisor = 3
-    val largerDivisor = smallerDivisor * multiplier
-    val latDivisor = if (heightDp > widthDp) largerDivisor else smallerDivisor
-    val lonDivisor = if (widthDp > heightDp) largerDivisor else smallerDivisor
+    val (latDivisor, lonDivisor) = calculateLatLonDivisors()
+    fun MapViewModel.onBoundingBox(boundingBox: BoundingBox) {
+      onBoundingBox(boundingBox = boundingBox, latDivisor = latDivisor, lonDivisor = lonDivisor)
+    }
 
     addMapListener(
       object : MapListener {
@@ -58,23 +54,13 @@ class MapFragment : Fragment(R.layout.fragment_map) {
               zoom = zoomLevelDouble,
               orientation = mapOrientation
             )
-          viewModel.onBoundingBox(
-            boundingBox = boundingBox,
-            latDivisor = latDivisor,
-            lonDivisor = lonDivisor
-          )
+          viewModel.onBoundingBox(boundingBox)
           return false
         }
       }
     )
 
-    addOnFirstLayoutListener { _, _, _, _, _ ->
-      viewModel.onBoundingBox(
-        boundingBox = boundingBox,
-        latDivisor = latDivisor,
-        lonDivisor = lonDivisor
-      )
-    }
+    addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onBoundingBox(boundingBox) }
 
     val markerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.marker)
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->

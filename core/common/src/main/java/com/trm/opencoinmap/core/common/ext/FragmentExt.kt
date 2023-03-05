@@ -1,16 +1,17 @@
 package com.trm.opencoinmap.core.common.ext
 
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import io.reactivex.rxjava3.disposables.Disposable
+import androidx.fragment.app.Fragment
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
-fun Disposable.disposeOnDestroy(lifecycle: Lifecycle) {
-  lifecycle.addObserver(
-    object : DefaultLifecycleObserver {
-      override fun onDestroy(owner: LifecycleOwner) {
-        dispose()
-      }
-    }
-  )
+fun Fragment.calculateLatLonDivisors(): Pair<Int, Int> {
+  val widthDp = resources.configuration.screenWidthDp.toDouble()
+  val heightDp = resources.configuration.screenHeightDp.toDouble()
+  val multiplier = (max(widthDp, heightDp) / min(widthDp, heightDp)).roundToInt()
+  val smallerDivisor = 3
+  val largerDivisor = smallerDivisor * multiplier
+  val latDivisor = if (heightDp > widthDp) largerDivisor else smallerDivisor
+  val lonDivisor = if (widthDp > heightDp) largerDivisor else smallerDivisor
+  return latDivisor to lonDivisor
 }
