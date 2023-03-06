@@ -8,6 +8,8 @@ android { namespace = "com.trm.opencoinmap.core.common" }
 dependencies {
     implementation(project(":core:domain"))
 
+    implementation(libs.google.material)
+
     implementation(libs.osmdroid)
 
     implementation(libs.rx.android)

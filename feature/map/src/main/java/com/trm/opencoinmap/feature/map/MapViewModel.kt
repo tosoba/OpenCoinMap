@@ -4,10 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.MarkersInBoundsSubjectUseCase
+import com.trm.opencoinmap.core.domain.usecase.MessageSubjectUseCase
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -25,6 +25,7 @@ internal class MapViewModel
 constructor(
   savedStateHandle: SavedStateHandle,
   private val markersInBoundsSubjectUseCase: MarkersInBoundsSubjectUseCase,
+  private val messageSubjectUseCase: MessageSubjectUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -36,9 +37,6 @@ constructor(
   private val _markersInBounds: MutableLiveData<List<MapMarker>> = MutableLiveData(emptyList())
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
 
-  private val _error: LiveEvent<Unit> = LiveEvent()
-  val error: LiveData<Unit> = _error
-
   init {
     markersInBoundsSubjectUseCase
       .observable()
@@ -48,7 +46,11 @@ constructor(
         onNext = {
           _isLoading.value = it is Loading
           if (it is WithData) _markersInBounds.value = it.data
-          if (it is Failed) _error.value = Unit
+
+          messageSubjectUseCase.onNext(
+            if (it is Failed) Message.Shown("Error occurred", Message.Length.LONG)
+            else Message.Hidden
+          )
         },
         onError = { Timber.tag(TAG).e(it) }
       )
@@ -56,6 +58,7 @@ constructor(
   }
 
   fun onBoundingBox(boundingBox: BoundingBox, latDivisor: Int, lonDivisor: Int) {
+    messageSubjectUseCase.onNext(Message.Hidden)
     markersInBoundsSubjectUseCase.onNext(
       MarkersInBoundsSubjectUseCase.Args(
         minLat = boundingBox.latSouth,
