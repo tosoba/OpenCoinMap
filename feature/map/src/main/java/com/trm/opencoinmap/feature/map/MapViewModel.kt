@@ -8,6 +8,7 @@ import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.MarkersInBoundsSubjectUseCase
 import com.trm.opencoinmap.core.domain.usecase.MessageSubjectUseCase
+import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -16,7 +17,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
-import org.osmdroid.util.BoundingBox
 import timber.log.Timber
 
 @HiltViewModel
@@ -30,6 +30,7 @@ constructor(
   private val compositeDisposable = CompositeDisposable()
 
   var mapPosition: MapPosition by savedStateHandle.get(defaultValue = MapPosition())
+  var latestBoundingBoxArgs: BoundingBoxArgs? = null
 
   private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
@@ -46,18 +47,30 @@ constructor(
         onNext = {
           _isLoading.value = it is Loading
           if (it is WithData) _markersInBounds.value = it.data
-
-          messageSubjectUseCase.onNext(
-            if (it is Failed) Message.Shown("Error occurred", Message.Length.LONG)
-            else Message.Hidden
-          )
+          sendMessage(it)
         },
         onError = { Timber.tag(TAG).e(it) }
       )
       .addTo(compositeDisposable)
   }
 
-  fun onBoundingBox(boundingBox: BoundingBox, latDivisor: Int, lonDivisor: Int) {
+  private fun sendMessage(loadable: Loadable<List<MapMarker>>) {
+    messageSubjectUseCase.onNext(
+      if (loadable is Failed) {
+        Message.Shown(
+          text = "Error occurred",
+          length = Message.Length.LONG,
+          action = Message.Action("Retry") { latestBoundingBoxArgs?.let(::onBoundingBox) }
+        )
+      } else {
+        Message.Hidden
+      }
+    )
+  }
+
+  fun onBoundingBox(args: BoundingBoxArgs) {
+    latestBoundingBoxArgs = args
+    val (boundingBox, latDivisor, lonDivisor) = args
     messageSubjectUseCase.onNext(Message.Hidden)
     markersInBoundsSubjectUseCase.onNext(
       MarkersInBoundsSubjectUseCase.Args(

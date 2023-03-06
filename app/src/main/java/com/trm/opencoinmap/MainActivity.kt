@@ -59,6 +59,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                   }
                 }
               )
+              .run {
+                val action = message.action
+                if (action == null) this else setAction(action.label) { action() }
+              }
               .apply(Snackbar::show)
           }
         }

@@ -29,10 +29,7 @@ class MarkersInBoundsSubjectUseCase @Inject constructor(private val repo: VenueR
   }
 
   fun observable(): Observable<Loadable<List<MapMarker>>> =
-    loadSubject
-      .distinctUntilChanged()
-      .debounce(1L, TimeUnit.SECONDS)
-      .switchMap(::getMarkersInBounds)
+    loadSubject.debounce(1L, TimeUnit.SECONDS).switchMap(::getMarkersInBounds)
 
   private fun getMarkersInBounds(args: Args): Observable<Loadable<List<MapMarker>>> {
     val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args

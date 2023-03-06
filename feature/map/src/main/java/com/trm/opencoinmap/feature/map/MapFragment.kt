@@ -11,6 +11,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
+import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.util.currentPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
 import com.trm.opencoinmap.feature.map.util.setDefaultConfig
@@ -44,7 +45,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
     fun MapViewModel.onBoundingBox(boundingBox: BoundingBox) {
-      onBoundingBox(boundingBox = boundingBox, latDivisor = latDivisor, lonDivisor = lonDivisor)
+      onBoundingBox(
+        BoundingBoxArgs(boundingBox = boundingBox, latDivisor = latDivisor, lonDivisor = lonDivisor)
+      )
     }
 
     addMapListener(
