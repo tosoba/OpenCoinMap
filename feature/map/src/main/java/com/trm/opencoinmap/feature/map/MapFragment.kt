@@ -65,7 +65,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onBoundingBox(boundingBox) }
 
-    val markerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.marker)
+    val markerDrawable =
+      requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.marker))
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
       overlays.clear()
       overlays.addAll(
@@ -80,17 +81,19 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     }
   }
 
-  private fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable?): Overlay =
+  private fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable): Overlay =
     Marker(this).apply {
       position = GeoPoint(marker.venue.lat, marker.venue.lon)
-      image = drawable
+      icon = drawable
       setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+      infoWindow = null
     }
 
-  private fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable?): Overlay =
+  private fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Overlay =
     Marker(this).apply {
       position = GeoPoint(marker.lat, marker.lon)
-      image = drawable
+      icon = drawable
       setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+      infoWindow = null
     }
 }
