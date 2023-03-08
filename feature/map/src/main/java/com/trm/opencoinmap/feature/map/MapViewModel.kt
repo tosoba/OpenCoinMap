@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.MarkersInBoundsSubjectUseCase
@@ -58,9 +59,10 @@ constructor(
     messageSubjectUseCase.onNext(
       if (loadable is Failed) {
         Message.Shown(
-          text = "Error occurred",
+          textResId = commonR.string.error_occurred,
           length = Message.Length.LONG,
-          action = Message.Action("Retry") { latestBoundingBoxArgs?.let(::onBoundingBox) }
+          action =
+            Message.Action(commonR.string.retry) { latestBoundingBoxArgs?.let(::onBoundingBox) }
         )
       } else {
         Message.Hidden

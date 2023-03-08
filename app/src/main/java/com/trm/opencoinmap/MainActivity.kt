@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
           is Message.Shown -> {
             Snackbar.make(
                 binding.coordinatorLayout,
-                message.text,
+                message.textResId,
                 message.length.toSnackbarLength()
               )
               .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
               )
               .run {
                 val action = message.action
-                if (action == null) this else setAction(action.label) { action() }
+                if (action == null) this else setAction(action.labelResId) { action() }
               }
               .apply(Snackbar::show)
           }
