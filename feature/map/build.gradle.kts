@@ -17,5 +17,7 @@ dependencies {
   implementation(libs.liveEvent)
 
   implementation(libs.osmdroid)
+  implementation(libs.osmbonuspack)
+
   implementation(libs.timber)
 }

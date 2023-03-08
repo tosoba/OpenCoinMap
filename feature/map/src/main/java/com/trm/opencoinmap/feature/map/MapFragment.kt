@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -16,6 +17,7 @@ import com.trm.opencoinmap.feature.map.util.currentPosition
 import com.trm.opencoinmap.feature.map.util.restorePosition
 import com.trm.opencoinmap.feature.map.util.setDefaultConfig
 import dagger.hilt.android.AndroidEntryPoint
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -23,7 +25,6 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Overlay
 
 @AndroidEntryPoint
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -65,23 +66,26 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onBoundingBox(boundingBox) }
 
-    val markerDrawable =
-      requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.marker))
+    val venueDrawable =
+      requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
+    val clusterDrawable =
+      requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.cluster_marker))
+    val clusterer =
+      RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterDrawable.toBitmap()) }
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
       overlays.clear()
-      overlays.addAll(
-        markers.map { marker ->
-          when (marker) {
-            is MapMarker.SingleVenue -> venueMarker(marker, markerDrawable)
-            is MapMarker.VenuesCluster -> clusterMarker(marker, markerDrawable)
-          }
+      markers.map { marker ->
+        when (marker) {
+          is MapMarker.SingleVenue -> clusterer.add(venueMarker(marker, venueDrawable))
+          is MapMarker.VenuesCluster -> overlays.add(clusterMarker(marker, clusterDrawable))
         }
-      )
+      }
+      overlays.add(clusterer)
       invalidate()
     }
   }
 
-  private fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable): Overlay =
+  private fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable): Marker =
     Marker(this).apply {
       position = GeoPoint(marker.venue.lat, marker.venue.lon)
       icon = drawable
@@ -89,7 +93,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       infoWindow = null
     }
 
-  private fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Overlay =
+  private fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Marker =
     Marker(this).apply {
       position = GeoPoint(marker.lat, marker.lon)
       icon = drawable
