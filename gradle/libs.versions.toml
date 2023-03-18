@@ -117,6 +117,7 @@ room-rx = { group = "androidx.room", name = "room-rxjava3", version.ref = "room"
 rx-android = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxAndroid" }
 rx-java = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxJava" }
 rx-kotlin = { group = "io.reactivex.rxjava3", name = "rxkotlin", version.ref = "rxKotlin" }
+rx-relay = { group = "com.jakewharton.rxrelay3", name = "rxrelay", version.ref = "rxKotlin" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 viewBinding-propertyDelegate = { group = "com.github.kirich1409", name = "viewbindingpropertydelegate-noreflection", version.ref = "viewBindingPropertyDelegate" }

@@ -1,19 +1,19 @@
 package com.trm.opencoinmap.core.domain.usecase
 
+import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MarkersInBoundsSubjectUseCase @Inject constructor(private val repo: VenueRepo) {
-  private val loadSubject = PublishSubject.create<Args>()
+class MarkersInBoundsRelayUseCase @Inject constructor(private val repo: VenueRepo) {
+  private val loadRelay = PublishRelay.create<Args>()
 
-  fun onNext(args: Args) {
+  fun accept(args: Args) {
     val (minLat, maxLat, minLon, maxLon) = args
     if (
       minLat < BoundsConstants.MIN_LAT ||
@@ -25,11 +25,11 @@ class MarkersInBoundsSubjectUseCase @Inject constructor(private val repo: VenueR
     ) {
       throw IllegalArgumentException("Invalid bounds.")
     }
-    loadSubject.onNext(args)
+    loadRelay.accept(args)
   }
 
   fun observable(): Observable<Loadable<List<MapMarker>>> =
-    loadSubject.debounce(1L, TimeUnit.SECONDS).switchMap(::getMarkersInBounds)
+    loadRelay.debounce(1L, TimeUnit.SECONDS).switchMap(::getMarkersInBounds)
 
   private fun getMarkersInBounds(args: Args): Observable<Loadable<List<MapMarker>>> {
     val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args
