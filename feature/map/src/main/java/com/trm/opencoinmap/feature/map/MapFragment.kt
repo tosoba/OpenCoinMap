@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
-import com.trm.opencoinmap.core.domain.model.*
+import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
 import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.util.currentPosition
@@ -70,9 +70,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
     val clusterDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.cluster_marker))
-    val clusterer =
-      RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterDrawable.toBitmap()) }
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
+      val clusterer =
+        RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterDrawable.toBitmap()) }
       overlays.clear()
       markers.map { marker ->
         when (marker) {
