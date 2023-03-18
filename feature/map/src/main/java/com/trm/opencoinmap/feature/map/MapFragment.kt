@@ -1,5 +1,11 @@
 package com.trm.opencoinmap.feature.map
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
@@ -30,6 +36,9 @@ import org.osmdroid.views.overlay.Marker
 class MapFragment : Fragment(R.layout.fragment_map) {
   private val viewBinding by viewBinding(FragmentMapBinding::bind)
   private val viewModel by viewModels<MapViewModel>()
+
+  private val clusterSizeTextPaint: Paint by
+    lazy(LazyThreadSafetyMode.NONE) { requireContext().clusterSizeTextPaint() }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewBinding.mapView.init()
@@ -70,14 +79,18 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
     val clusterDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.cluster_marker))
+    val clusterBitmap = clusterDrawable.toBitmap()
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
-      val clusterer =
-        RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterDrawable.toBitmap()) }
+      val clusterer = RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterBitmap) }
       overlays.clear()
       markers.map { marker ->
         when (marker) {
-          is MapMarker.SingleVenue -> clusterer.add(venueMarker(marker, venueDrawable))
-          is MapMarker.VenuesCluster -> overlays.add(clusterMarker(marker, clusterDrawable))
+          is MapMarker.SingleVenue -> {
+            clusterer.add(venueMarker(marker = marker, drawable = venueDrawable))
+          }
+          is MapMarker.VenuesCluster -> {
+            overlays.add(clusterMarker(marker = marker, bitmap = clusterBitmap))
+          }
         }
       }
       overlays.add(clusterer)
@@ -93,11 +106,40 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       infoWindow = null
     }
 
-  private fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Marker =
+  private fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, bitmap: Bitmap): Marker =
     Marker(this).apply {
       position = GeoPoint(marker.lat, marker.lon)
-      icon = drawable
+      icon = buildClusterIcon(size = marker.size, bitmap = bitmap)
       setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
       infoWindow = null
     }
+
+  private fun buildClusterIcon(size: Int, bitmap: Bitmap): BitmapDrawable {
+    val densityDpi = requireContext().resources.displayMetrics.densityDpi
+    val icon =
+      Bitmap.createBitmap(
+        bitmap.getScaledWidth(densityDpi),
+        bitmap.getScaledHeight(densityDpi),
+        bitmap.config
+      )
+    val iconCanvas = Canvas(icon)
+    iconCanvas.drawBitmap(bitmap, 0f, 0f, null)
+    val textHeight = (clusterSizeTextPaint.descent() + clusterSizeTextPaint.ascent()).toInt()
+    iconCanvas.drawText(
+      size.toString(),
+      Marker.ANCHOR_CENTER * icon.width,
+      Marker.ANCHOR_CENTER * icon.height - textHeight / 2,
+      clusterSizeTextPaint
+    )
+    return BitmapDrawable(requireContext().resources, icon)
+  }
 }
+
+fun Context.clusterSizeTextPaint(): Paint =
+  Paint().apply {
+    color = Color.WHITE
+    textSize = 15 * resources.displayMetrics.density
+    isFakeBoldText = true
+    textAlign = Paint.Align.CENTER
+    isAntiAlias = true
+  }

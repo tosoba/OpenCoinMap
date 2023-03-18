@@ -90,7 +90,7 @@ constructor(
                 when (cell) {
                   is GridCellMarkers.Cluster -> {
                     listOf(
-                      MapMarker.VenuesCluster(lat = cell.lat, lon = cell.lon, count = cell.count)
+                      MapMarker.VenuesCluster(lat = cell.lat, lon = cell.lon, size = cell.count)
                     )
                   }
                   is GridCellMarkers.Venues -> {
