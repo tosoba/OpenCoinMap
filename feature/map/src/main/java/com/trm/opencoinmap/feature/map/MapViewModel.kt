@@ -15,7 +15,6 @@ import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -36,9 +35,6 @@ constructor(
   private val compositeDisposable = CompositeDisposable()
 
   private val boundsRelay = PublishRelay.create<GridMapBounds>()
-  private val filteredBounds: Observable<GridMapBounds> =
-    boundsRelay.filter(validateGridMapBoundsUseCase::invoke)
-
   private val retryRelay = PublishRelay.create<Unit>()
 
   var mapPosition by savedStateHandle.get(defaultValue = MapPosition())
@@ -50,6 +46,7 @@ constructor(
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
 
   init {
+    val filteredBounds = boundsRelay.filter(validateGridMapBoundsUseCase::invoke)
     filteredBounds
       .mergeWith(retryRelay.withLatestFrom(filteredBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
