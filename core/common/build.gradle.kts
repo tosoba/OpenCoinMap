@@ -15,4 +15,5 @@ dependencies {
     implementation(libs.rx.android)
     implementation(libs.rx.java)
     implementation(libs.rx.kotlin)
+    implementation(libs.rx.relay)
 }

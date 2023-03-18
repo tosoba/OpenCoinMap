@@ -9,7 +9,7 @@ import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
-import com.trm.opencoinmap.core.domain.usecase.MessageRelayUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.ValidateGridMapBoundsUseCase
 import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.model.MapPosition
@@ -31,7 +31,7 @@ constructor(
   savedStateHandle: SavedStateHandle,
   private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
   private val validateGridMapBoundsUseCase: ValidateGridMapBoundsUseCase,
-  private val messageRelayUseCase: MessageRelayUseCase,
+  private val sendMessageUseCase: SendMessageUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -68,7 +68,7 @@ constructor(
   }
 
   private fun sendMessage(loadable: Loadable<List<MapMarker>>) {
-    messageRelayUseCase.accept(
+    sendMessageUseCase(
       if (loadable is Failed) {
         Message.Shown(
           textResId = commonR.string.error_occurred,
@@ -82,7 +82,7 @@ constructor(
   }
 
   fun onBoundingBox(args: BoundingBoxArgs) {
-    messageRelayUseCase.accept(Message.Hidden)
+    sendMessageUseCase(Message.Hidden)
 
     val (boundingBox, latDivisor, lonDivisor) = args
     boundsRelay.accept(

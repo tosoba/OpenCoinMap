@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.domain.model.Message
-import com.trm.opencoinmap.core.domain.usecase.MessageRelayUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -12,10 +12,10 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel
+internal class MainViewModel
 @Inject
 constructor(
-  messageRelayUseCase: MessageRelayUseCase,
+  receiveMessageUseCase: ReceiveMessageUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -23,8 +23,7 @@ constructor(
   val snackbarMessage: LiveData<Message> = _snackbarMessage
 
   init {
-    messageRelayUseCase
-      .observable()
+    receiveMessageUseCase()
       .subscribeBy(onNext = _snackbarMessage::setValue)
       .addTo(compositeDisposable)
   }
