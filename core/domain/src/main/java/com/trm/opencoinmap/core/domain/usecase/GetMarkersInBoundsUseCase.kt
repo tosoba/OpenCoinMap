@@ -5,7 +5,7 @@ import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
-class MarkersInBoundsRelayUseCase @Inject constructor(private val repo: VenueRepo) {
+class GetMarkersInBoundsUseCase @Inject constructor(private val repo: VenueRepo) {
   operator fun invoke(bounds: GridMapBounds): Observable<Loadable<List<MapMarker>>> =
     repo
       .getVenueMarkersInLatLngBounds(bounds)

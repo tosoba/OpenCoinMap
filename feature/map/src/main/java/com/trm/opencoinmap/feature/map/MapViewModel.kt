@@ -8,13 +8,14 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
-import com.trm.opencoinmap.core.domain.usecase.MarkersInBoundsRelayUseCase
+import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.MessageRelayUseCase
 import com.trm.opencoinmap.core.domain.usecase.ValidateGridMapBoundsUseCase
 import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -28,28 +29,31 @@ internal class MapViewModel
 @Inject
 constructor(
   savedStateHandle: SavedStateHandle,
-  private val markersInBoundsRelayUseCase: MarkersInBoundsRelayUseCase,
+  private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
   private val validateGridMapBoundsUseCase: ValidateGridMapBoundsUseCase,
   private val messageRelayUseCase: MessageRelayUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
   private val boundsRelay = PublishRelay.create<GridMapBounds>()
+  private val filteredBounds: Observable<GridMapBounds> =
+    boundsRelay.filter(validateGridMapBoundsUseCase::invoke)
 
-  var mapPosition: MapPosition by savedStateHandle.get(defaultValue = MapPosition())
-  var latestBoundingBoxArgs: BoundingBoxArgs? = null
+  private val retryRelay = PublishRelay.create<Unit>()
 
-  private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
+  var mapPosition by savedStateHandle.get(defaultValue = MapPosition())
+
+  private val _isLoading = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
 
-  private val _markersInBounds: MutableLiveData<List<MapMarker>> = MutableLiveData(emptyList())
+  private val _markersInBounds = MutableLiveData(emptyList<MapMarker>())
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
 
   init {
-    boundsRelay
-      .filter(validateGridMapBoundsUseCase::invoke)
+    filteredBounds
+      .mergeWith(retryRelay.withLatestFrom(filteredBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
-      .switchMap(markersInBoundsRelayUseCase::invoke)
+      .switchMap(getMarkersInBoundsUseCase::invoke)
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
@@ -69,8 +73,7 @@ constructor(
         Message.Shown(
           textResId = commonR.string.error_occurred,
           length = Message.Length.LONG,
-          action =
-            Message.Action(commonR.string.retry) { latestBoundingBoxArgs?.let(::onBoundingBox) }
+          action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
         )
       } else {
         Message.Hidden
@@ -81,7 +84,6 @@ constructor(
   fun onBoundingBox(args: BoundingBoxArgs) {
     messageRelayUseCase.accept(Message.Hidden)
 
-    latestBoundingBoxArgs = args
     val (boundingBox, latDivisor, lonDivisor) = args
     boundsRelay.accept(
       GridMapBounds(
