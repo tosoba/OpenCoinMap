@@ -1,59 +1,16 @@
 package com.trm.opencoinmap.core.domain.usecase
 
-import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
-import com.trm.opencoinmap.core.domain.util.BoundsConstants
 import io.reactivex.rxjava3.core.Observable
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class MarkersInBoundsRelayUseCase @Inject constructor(private val repo: VenueRepo) {
-  private val loadRelay = PublishRelay.create<Args>()
-
-  fun accept(args: Args) {
-    val (minLat, maxLat, minLon, maxLon) = args
-    if (
-      minLat < BoundsConstants.MIN_LAT ||
-        maxLat > BoundsConstants.MAX_LAT ||
-        minLon < BoundsConstants.MIN_LON ||
-        maxLon > BoundsConstants.MAX_LON ||
-        minLat >= maxLat ||
-        minLon >= maxLon
-    ) {
-      throw IllegalArgumentException("Invalid bounds.")
-    }
-    loadRelay.accept(args)
-  }
-
-  fun observable(): Observable<Loadable<List<MapMarker>>> =
-    loadRelay.debounce(1L, TimeUnit.SECONDS).switchMap(::getMarkersInBounds)
-
-  private fun getMarkersInBounds(args: Args): Observable<Loadable<List<MapMarker>>> {
-    val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = args
-    return repo
-      .getVenueMarkersInLatLngBounds(
-        minLat = minLat,
-        maxLat = maxLat,
-        minLon = minLon,
-        maxLon = maxLon,
-        latDivisor = latDivisor,
-        lonDivisor = lonDivisor,
-      )
+  operator fun invoke(bounds: GridMapBounds): Observable<Loadable<List<MapMarker>>> =
+    repo
+      .getVenueMarkersInLatLngBounds(bounds)
       .map(List<MapMarker>::asLoadable)
       .toObservable()
       .startWithItem(LoadingFirst)
       .onErrorReturn(::FailedFirst)
-  }
-
-  data class Args(
-    val minLat: Double,
-    val maxLat: Double,
-    val minLon: Double,
-    val maxLon: Double,
-    val latDivisor: Int,
-    val lonDivisor: Int
-  )
 }

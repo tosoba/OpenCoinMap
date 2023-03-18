@@ -8,6 +8,7 @@ import com.trm.opencoinmap.core.database.dao.BoundsDao
 import com.trm.opencoinmap.core.database.dao.VenueDao
 import com.trm.opencoinmap.core.database.entity.BoundsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
+import com.trm.opencoinmap.core.domain.model.GridMapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
@@ -36,15 +37,9 @@ constructor(
       }
       .flatMapCompletable(::insertVenuesInWholeBounds)
 
-  override fun getVenueMarkersInLatLngBounds(
-    minLat: Double,
-    maxLat: Double,
-    minLon: Double,
-    maxLon: Double,
-    latDivisor: Int,
-    lonDivisor: Int,
-  ): Single<List<MapMarker>> =
-    venueDao
+  override fun getVenueMarkersInLatLngBounds(bounds: GridMapBounds): Single<List<MapMarker>> {
+    val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = bounds
+    return venueDao
       .allExistInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
       .flatMap { allExist ->
         if (allExist) {
@@ -106,6 +101,7 @@ constructor(
             }
         }
       }
+  }
 
   private fun selectCellMarkers(
     gridCells: List<Bounds>,
