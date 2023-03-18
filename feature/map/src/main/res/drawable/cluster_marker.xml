@@ -1,10 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:tint="#f00"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:width="30dp"
+    android:height="30dp"
+    android:viewportWidth="30"
+    android:viewportHeight="30">
+
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M12,2C8.13,2 5,5.13 5,9c0,5.25 7,13 7,13s7,-7.75 7,-13c0,-3.87 -3.13,-7 -7,-7zM12,11.5c-1.38,0 -2.5,-1.12 -2.5,-2.5s1.12,-2.5 2.5,-2.5 2.5,1.12 2.5,2.5 -1.12,2.5 -2.5,2.5z" />
+        android:fillColor="#FF0000"
+        android:pathData="M 15 6 C 19.9705627485 6 24 10.0294372515 24 15 C 24 19.9705627485 19.9705627485 24 15 24 C 10.0294372515 24 6 19.9705627485 6 15 C 6 10.0294372515 10.0294372515 6 15 6 Z" />
+    <path
+        android:fillAlpha="0.8"
+        android:fillColor="#FF0000"
+        android:pathData="M 15 4.5 C 20.7989898732 4.5 25.5 9.20101012678 25.5 15 C 25.5 20.7989898732 20.7989898732 25.5 15 25.5 C 9.20101012678 25.5 4.5 20.7989898732 4.5 15 C 4.5 9.20101012678 9.20101012678 4.5 15 4.5 Z" />
+    <path
+        android:fillAlpha="0.5"
+        android:fillColor="#FF0000"
+        android:pathData="M 15 3 C 21.627416998 3 27 8.37258300203 27 15 C 27 21.627416998 21.627416998 27 15 27 C 8.37258300203 27 3 21.627416998 3 15 C 3 8.37258300203 8.37258300203 3 15 3 Z" />
+    <path
+        android:fillAlpha="0.20"
+        android:fillColor="#FF0000"
+        android:pathData="M 15 1.5 C 22.4558441227 1.5 28.5 7.54415587728 28.5 15 C 28.5 22.4558441227 22.4558441227 28.5 15 28.5 C 7.54415587728 28.5 1.5 22.4558441227 1.5 15 C 1.5 7.54415587728 7.54415587728 1.5 15 1.5 Z" />
+    <path
+        android:fillAlpha="0.20"
+        android:fillColor="#FF0000"
+        android:pathData="M 15 0 C 23.2842712475 0 30 6.71572875254 30 15 C 30 23.2842712475 23.2842712475 30 15 30 C 6.71572875254 30 0 23.2842712475 0 15 C 0 6.71572875254 6.71572875254 0 15 0 Z" />
+
 </vector>
