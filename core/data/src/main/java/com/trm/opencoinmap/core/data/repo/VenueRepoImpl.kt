@@ -83,7 +83,7 @@ constructor(
             )
 
           Single.fromCallable {
-              selectCellMarkers(gridCells = gridCells, gridCellLimit = gridCellLimit, count = count)
+              selectCellMarkers(gridCells = gridCells, gridCellLimit = gridCellLimit)
             }
             .map { cells ->
               cells.flatMap { cell ->
@@ -105,8 +105,7 @@ constructor(
 
   private fun selectCellMarkers(
     gridCells: List<Bounds>,
-    gridCellLimit: Int,
-    count: Int
+    gridCellLimit: Int
   ): List<GridCellMarkers> =
     db.runInTransaction(
       Callable {
@@ -122,7 +121,7 @@ constructor(
             GridCellMarkers.Cluster(
               lat = (cellMaxLat + cellMinLat) / 2.0,
               lon = (cellMaxLon + cellMinLon) / 2.0,
-              count = count
+              count = countInCell
             )
           } else {
             GridCellMarkers.Venues(

@@ -68,7 +68,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
       val clusterer =
-        RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterMarkerIconBuilder.bitmap) }
+        RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterMarkerIconBuilder.bitmap1) }
       overlays.clear()
       markers.map { marker ->
         when (marker) {

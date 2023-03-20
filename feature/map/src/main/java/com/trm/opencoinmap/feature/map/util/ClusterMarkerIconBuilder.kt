@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
+import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -28,14 +29,25 @@ constructor(@ApplicationContext private val context: Context) {
       }
     }
 
-  val bitmap: Bitmap by
-    lazy(LazyThreadSafetyMode.NONE) {
-      requireNotNull(ContextCompat.getDrawable(context, R.drawable.cluster_marker)).toBitmap()
-    }
+  val bitmap1000: Bitmap by
+    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_1000) }
+
+  val bitmap500: Bitmap by
+    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_500) }
+
+  val bitmap250: Bitmap by
+    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_250) }
+
+  val bitmap100: Bitmap by
+    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_100) }
+
+  val bitmap1: Bitmap by
+    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_1) }
 
   @MainThread
   fun build(size: Int): BitmapDrawable {
     val densityDpi = context.resources.displayMetrics.densityDpi
+    val bitmap = getBitmapForSize(size)
     val icon =
       Bitmap.createBitmap(
         bitmap.getScaledWidth(densityDpi),
@@ -54,4 +66,16 @@ constructor(@ApplicationContext private val context: Context) {
     )
     return BitmapDrawable(context.resources, icon)
   }
+
+  fun getBitmapForSize(size: Int): Bitmap =
+    when {
+      size > 1000 -> bitmap1000
+      size > 500 -> bitmap500
+      size > 250 -> bitmap250
+      size > 100 -> bitmap100
+      else -> bitmap1
+    }
+
+  private fun bitmapResource(@DrawableRes drawableId: Int): Bitmap =
+    requireNotNull(ContextCompat.getDrawable(context, drawableId)).toBitmap()
 }
