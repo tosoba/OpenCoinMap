@@ -1,10 +1,13 @@
 package com.trm.opencoinmap.feature.map.util
 
+import android.graphics.drawable.Drawable
+import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.MapDefaults
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 internal fun MapView.setDefaultConfig() {
   setTileSource(MapDefaults.tileSource)
@@ -30,3 +33,19 @@ internal fun MapView.currentPosition(): MapPosition =
     zoom = zoomLevelDouble,
     orientation = mapOrientation
   )
+
+internal fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable): Marker =
+  Marker(this).apply {
+    position = GeoPoint(marker.venue.lat, marker.venue.lon)
+    icon = drawable
+    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    infoWindow = null
+  }
+
+internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Marker =
+  Marker(this).apply {
+    position = GeoPoint(marker.lat, marker.lon)
+    icon = drawable
+    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    infoWindow = null
+  }
