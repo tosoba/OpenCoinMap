@@ -10,9 +10,11 @@ import androidx.annotation.MainThread
 import com.trm.opencoinmap.core.common.ext.lazyBitmapResource
 import com.trm.opencoinmap.feature.map.R
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.FragmentScoped
 import javax.inject.Inject
 import org.osmdroid.views.overlay.Marker
 
+@FragmentScoped
 class ClusterMarkerIconBuilder
 @Inject
 constructor(@ApplicationContext private val context: Context) {
@@ -27,11 +29,11 @@ constructor(@ApplicationContext private val context: Context) {
       }
     }
 
-  val bitmap1000: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_1000)
-  val bitmap500: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_500)
-  val bitmap250: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_250)
-  val bitmap100: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_100)
-  val bitmap1: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_1)
+  private val bitmap1000: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_1000)
+  private val bitmap500: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_500)
+  private val bitmap250: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_250)
+  private val bitmap100: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_100)
+  private val bitmap1: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_1)
 
   @MainThread
   fun build(size: Int): BitmapDrawable {
@@ -56,7 +58,7 @@ constructor(@ApplicationContext private val context: Context) {
     return BitmapDrawable(context.resources, icon)
   }
 
-  fun getBitmapForSize(size: Int): Bitmap =
+  private fun getBitmapForSize(size: Int): Bitmap =
     when {
       size > 1000 -> bitmap1000
       size > 500 -> bitmap500

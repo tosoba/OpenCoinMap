@@ -14,7 +14,6 @@ import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.util.*
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -27,6 +26,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
   private val viewModel by viewModels<MapViewModel>()
 
   @Inject internal lateinit var clusterMarkerIconBuilder: ClusterMarkerIconBuilder
+  @Inject internal lateinit var markerClusterer: RadiusMarkerSizeClusterer
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewBinding.mapView.init()
@@ -67,13 +67,14 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
 
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
-      val clusterer =
-        RadiusMarkerClusterer(requireContext()).apply { setIcon(clusterMarkerIconBuilder.bitmap1) }
+      markerClusterer.items.clear()
+      markerClusterer.invalidate()
       overlays.clear()
+
       markers.map { marker ->
         when (marker) {
           is MapMarker.SingleVenue -> {
-            clusterer.add(venueMarker(marker = marker, drawable = venueDrawable))
+            markerClusterer.add(venueMarker(marker = marker, drawable = venueDrawable))
           }
           is MapMarker.VenuesCluster -> {
             overlays.add(
@@ -85,7 +86,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
           }
         }
       }
-      overlays.add(clusterer)
+      overlays.add(markerClusterer)
+
       invalidate()
     }
   }
