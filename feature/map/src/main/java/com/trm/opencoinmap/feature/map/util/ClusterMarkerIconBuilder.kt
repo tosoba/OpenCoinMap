@@ -6,10 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
-import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
+import com.trm.opencoinmap.core.common.ext.lazyBitmapResource
 import com.trm.opencoinmap.feature.map.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -29,20 +27,11 @@ constructor(@ApplicationContext private val context: Context) {
       }
     }
 
-  val bitmap1000: Bitmap by
-    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_1000) }
-
-  val bitmap500: Bitmap by
-    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_500) }
-
-  val bitmap250: Bitmap by
-    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_250) }
-
-  val bitmap100: Bitmap by
-    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_100) }
-
-  val bitmap1: Bitmap by
-    lazy(LazyThreadSafetyMode.NONE) { bitmapResource(R.drawable.cluster_marker_1) }
+  val bitmap1000: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_1000)
+  val bitmap500: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_500)
+  val bitmap250: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_250)
+  val bitmap100: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_100)
+  val bitmap1: Bitmap by context.lazyBitmapResource(R.drawable.cluster_marker_1)
 
   @MainThread
   fun build(size: Int): BitmapDrawable {
@@ -75,7 +64,4 @@ constructor(@ApplicationContext private val context: Context) {
       size > 100 -> bitmap100
       else -> bitmap1
     }
-
-  private fun bitmapResource(@DrawableRes drawableId: Int): Bitmap =
-    requireNotNull(ContextCompat.getDrawable(context, drawableId)).toBitmap()
 }
