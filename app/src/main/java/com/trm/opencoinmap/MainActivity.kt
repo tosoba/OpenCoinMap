@@ -6,7 +6,6 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -25,6 +24,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private var snackbar: Snackbar? = null
 
   private lateinit var appBarConfiguration: AppBarConfiguration
+  private val navHostFragment: NavHostFragment
+    get() =
+      supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+        as NavHostFragment
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -36,6 +39,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     initNavigation()
 
     viewModel.observeSnackbarMessage()
+  }
+
+  private fun initNavigation() {
+    val navController = navHostFragment.navController
+    appBarConfiguration = AppBarConfiguration(navController.graph)
+    setupActionBarWithNavController(navController, appBarConfiguration)
   }
 
   private fun MainViewModel.observeSnackbarMessage() {
@@ -70,15 +79,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
   }
 
-  private fun initNavigation() {
-    val navHostFragment =
-      supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
-        as NavHostFragment
-    val navController = navHostFragment.navController
-    appBarConfiguration = AppBarConfiguration(navController.graph)
-    setupActionBarWithNavController(navController, appBarConfiguration)
-  }
-
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     menuInflater.inflate(R.menu.menu_main, menu)
     return true
@@ -91,6 +91,5 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
   override fun onSupportNavigateUp(): Boolean =
-    findNavController(R.id.nav_host_fragment_content_main).navigateUp(appBarConfiguration) ||
-      super.onSupportNavigateUp()
+    navHostFragment.navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 }
