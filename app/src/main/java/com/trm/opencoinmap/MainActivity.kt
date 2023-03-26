@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private lateinit var appBarConfiguration: AppBarConfiguration
   private val navHostFragment: NavHostFragment
     get() =
-      supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+      supportFragmentManager.findFragmentById(R.id.nav_host_container)
         as NavHostFragment
 
   private val viewModel: MainViewModel by viewModels()
