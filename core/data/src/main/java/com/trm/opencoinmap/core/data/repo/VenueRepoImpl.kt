@@ -103,7 +103,13 @@ constructor(
                     when (cell) {
                       is GridCellMarkers.Cluster -> {
                         listOf(
-                          MapMarker.VenuesCluster(lat = cell.lat, lon = cell.lon, size = cell.count)
+                          MapMarker.VenuesCluster(
+                            minLat = cell.minLat,
+                            maxLat = cell.maxLat,
+                            minLon = cell.minLon,
+                            maxLon = cell.maxLon,
+                            size = cell.count
+                          )
                         )
                       }
                       is GridCellMarkers.Venues -> {
@@ -133,8 +139,10 @@ constructor(
             )
           if (countInCell > gridCellLimit) {
             GridCellMarkers.Cluster(
-              lat = (cellMaxLat + cellMinLat) / 2.0,
-              lon = (cellMaxLon + cellMinLon) / 2.0,
+              minLat = cellMinLat,
+              maxLat = cellMaxLat,
+              minLon = cellMinLon,
+              maxLon = cellMaxLon,
               count = countInCell
             )
           } else {
@@ -155,7 +163,13 @@ constructor(
 
   private sealed interface GridCellMarkers {
     data class Venues(val venues: List<Venue>) : GridCellMarkers
-    data class Cluster(val lat: Double, val lon: Double, val count: Int) : GridCellMarkers
+    data class Cluster(
+      val minLat: Double,
+      val maxLat: Double,
+      val minLon: Double,
+      val maxLon: Double,
+      val count: Int
+    ) : GridCellMarkers
   }
 
   private fun divideBoundsIntoGrid(
