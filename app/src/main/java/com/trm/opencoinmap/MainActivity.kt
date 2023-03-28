@@ -45,6 +45,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     viewModel.observeSnackbarMessage()
   }
 
+  override fun onDestroy() {
+    super.onDestroy()
+    snackbar = null
+  }
+
   private fun initNavigation() {
     setupActionBarWithNavController(navController, appBarConfiguration)
   }
