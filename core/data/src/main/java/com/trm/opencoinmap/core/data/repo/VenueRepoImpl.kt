@@ -33,16 +33,17 @@ constructor(
 ) : VenueRepo {
   private val syncRunning = BehaviorSubject.createDefault(false)
 
-  override fun sync(): Completable =
-    openCoinMapApi
+  override fun sync(): Completable {
+    syncRunning.onNext(true)
+    return openCoinMapApi
       .getVenues()
-      .doOnSubscribe { syncRunning.onNext(true) }
       .map { response ->
         response.venues?.filter(VenueResponseItem::isValid)?.map(VenueResponseItem::asEntity)
           ?: emptyList()
       }
       .flatMapCompletable(::insertVenuesInWholeBounds)
       .doAfterTerminate { syncRunning.onNext(false) }
+  }
 
   private fun waitUntilSyncCompleted(): Completable =
     syncRunning.filter { isRunning -> !isRunning }.firstOrError().ignoreElement()
