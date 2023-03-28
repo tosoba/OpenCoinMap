@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.MapDefaults
 import com.trm.opencoinmap.feature.map.model.MapPosition
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -48,4 +49,18 @@ internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Dr
     icon = drawable
     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     infoWindow = null
+    setOnMarkerClickListener { _, _ ->
+      val boundingBox = marker.boundingBox
+      if (
+        boundingBox.latNorth != boundingBox.latSouth || boundingBox.lonEast != boundingBox.lonWest
+      ) {
+        zoomToBoundingBox(boundingBox.increaseByScale(1.15f), true)
+      } else {
+        setExpectedCenter(boundingBox.centerWithDateLine)
+      }
+      true
+    }
   }
+
+private val MapMarker.VenuesCluster.boundingBox
+  get() = BoundingBox(maxLat, maxLon, minLat, minLon)
