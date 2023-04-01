@@ -6,12 +6,15 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.sidesheet.SideSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.trm.opencoinmap.core.common.ext.toSnackbarLength
@@ -32,6 +35,15 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
   private val appBarConfiguration: AppBarConfiguration by
     lazy(LazyThreadSafetyMode.NONE) { AppBarConfiguration(navController.graph) }
+
+  private val bottomSheetBehavior: BottomSheetBehavior<FragmentContainerView>? by
+    lazy(LazyThreadSafetyMode.NONE) {
+      binding.bottomSheetFragmentLayout?.container?.let { BottomSheetBehavior.from(it) }
+    }
+  private val sideSheetBehavior: SideSheetBehavior<FragmentContainerView>? by
+    lazy(LazyThreadSafetyMode.NONE) {
+      binding.sideSheetFragmentLayout?.container?.let { SideSheetBehavior.from(it) }
+    }
 
   private val viewModel: MainViewModel by viewModels()
 

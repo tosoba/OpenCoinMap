@@ -34,4 +34,6 @@ include(":core:ui")
 
 include(":feature:map")
 
+include(":feature:venues")
+
 include(":sync")

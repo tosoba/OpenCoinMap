@@ -45,6 +45,7 @@ dependencies {
   implementation(project(":core:ui"))
 
   implementation(project(":feature:map"))
+  implementation(project(":feature:venues"))
 
   implementation(project(":sync"))
 
