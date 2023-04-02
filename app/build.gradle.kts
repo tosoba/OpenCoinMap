@@ -56,6 +56,7 @@ dependencies {
   implementation(libs.androidx.navigation.ui)
   implementation(libs.google.material)
   implementation(libs.viewBinding.propertyDelegate)
+  implementation("com.github.OKatrych:RightSheetBehavior:1.0")
 
   implementation(libs.rx.android)
   implementation(libs.rx.java)

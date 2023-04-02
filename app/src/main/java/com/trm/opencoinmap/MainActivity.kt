@@ -3,10 +3,10 @@ package com.trm.opencoinmap
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -14,13 +14,13 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.sidesheet.SideSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.trm.opencoinmap.core.common.ext.toSnackbarLength
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import eu.okatrych.rightsheet.RightSheetBehavior
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -36,14 +36,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private val appBarConfiguration: AppBarConfiguration by
     lazy(LazyThreadSafetyMode.NONE) { AppBarConfiguration(navController.graph) }
 
-  private val bottomSheetBehavior: BottomSheetBehavior<FragmentContainerView>? by
-    lazy(LazyThreadSafetyMode.NONE) {
-      binding.bottomSheetFragmentLayout?.container?.let { BottomSheetBehavior.from(it) }
-    }
-  private val sideSheetBehavior: SideSheetBehavior<FragmentContainerView>? by
-    lazy(LazyThreadSafetyMode.NONE) {
-      binding.sideSheetFragmentLayout?.container?.let { SideSheetBehavior.from(it) }
-    }
+  private val bottomSheetBehavior: BottomSheetBehavior<FrameLayout> by
+    lazy(LazyThreadSafetyMode.NONE) { BottomSheetBehavior.from(binding.bottomSheetContainer) }
+  private val rightSheetBehavior: RightSheetBehavior<FrameLayout> by
+    lazy(LazyThreadSafetyMode.NONE) { RightSheetBehavior.from(binding.rightSheetContainer) }
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -51,6 +47,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     super.onCreate(savedInstanceState)
     setSupportActionBar(binding.toolbar)
+
+    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    rightSheetBehavior.state = RightSheetBehavior.STATE_EXPANDED
 
     initNavigation()
 
