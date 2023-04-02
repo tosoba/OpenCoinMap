@@ -29,6 +29,34 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:navGraph="@navigation/nav_graph" />
 
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:orientation="vertical">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/my_location_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/my_location"
+            app:srcCompat="@drawable/my_location" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/fab_margin" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/show_places_sheet_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/places_list"
+            app:srcCompat="@drawable/list" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
     <FrameLayout
         android:id="@+id/bottom_sheet_container"
         style="@style/Widget.Material3.BottomSheet"
@@ -43,7 +71,6 @@
         style="@style/Widget.Material3.SideSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
         app:behavior_peekHeight="50dp"
         app:layout_behavior="eu.okatrych.rightsheet.RightSheetBehavior" />
 

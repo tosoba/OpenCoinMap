@@ -1,12 +1,18 @@
 package com.trm.opencoinmap
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.commitNow
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -19,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.trm.opencoinmap.core.common.ext.toSnackbarLength
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.databinding.ActivityMainBinding
+import com.trm.opencoinmap.feature.venues.VenuesFragment
 import dagger.hilt.android.AndroidEntryPoint
 import eu.okatrych.rightsheet.RightSheetBehavior
 
@@ -41,6 +48,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private val rightSheetBehavior: RightSheetBehavior<FrameLayout> by
     lazy(LazyThreadSafetyMode.NONE) { RightSheetBehavior.from(binding.rightSheetContainer) }
 
+  private val existingSheetFragment: Fragment?
+    get() =
+      supportFragmentManager.run {
+        findFragmentById(R.id.bottom_sheet_container)
+          ?: findFragmentById(R.id.right_sheet_container)
+      }
+
   private val viewModel: MainViewModel by viewModels()
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,12 +62,76 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     super.onCreate(savedInstanceState)
     setSupportActionBar(binding.toolbar)
 
-    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    rightSheetBehavior.state = RightSheetBehavior.STATE_EXPANDED
+    binding.showPlacesSheetFab.setOnClickListener {
+      bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+      rightSheetBehavior.state = RightSheetBehavior.STATE_COLLAPSED
+    }
+
+    initSheets()
 
     initNavigation()
 
     viewModel.observeSnackbarMessage()
+  }
+
+  private fun initSheets() {
+    initSheetBehaviors()
+    initSheetsVisibility()
+    initSheetFragment()
+  }
+
+  private fun initSheetsVisibility() {
+    val orientation = resources.configuration.orientation
+    binding.rightSheetContainer.isVisible = orientation == Configuration.ORIENTATION_LANDSCAPE
+    binding.bottomSheetContainer.isVisible = orientation == Configuration.ORIENTATION_PORTRAIT
+  }
+
+  private fun initSheetBehaviors() {
+    bottomSheetBehavior.addBottomSheetCallback(
+      object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+          if (
+            newState == BottomSheetBehavior.STATE_SETTLING ||
+              newState == BottomSheetBehavior.STATE_DRAGGING
+          ) {
+            return
+          }
+          rightSheetBehavior.state = newState
+        }
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+      }
+    )
+
+    rightSheetBehavior.addRightSheetCallback(
+      object : RightSheetBehavior.RightSheetCallback() {
+        override fun onStateChanged(rightSheet: View, newState: Int) {
+          if (
+            newState == RightSheetBehavior.STATE_SETTLING ||
+              newState == RightSheetBehavior.STATE_DRAGGING
+          ) {
+            return
+          }
+          bottomSheetBehavior.state = newState
+        }
+
+        override fun onSlide(rightSheet: View, slideOffset: Float) = Unit
+      }
+    )
+  }
+
+  private fun initSheetFragment() {
+    val orientation = resources.configuration.orientation
+    val sheetFragment =
+      existingSheetFragment?.also { supportFragmentManager.commitNow { remove(it) } }
+        ?: VenuesFragment()
+    supportFragmentManager.commit {
+      replace(
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) R.id.bottom_sheet_container
+        else R.id.right_sheet_container,
+        sheetFragment
+      )
+    }
   }
 
   override fun onDestroy() {
