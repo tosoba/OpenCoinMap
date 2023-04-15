@@ -67,15 +67,39 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       rightSheetBehavior.state = RightSheetBehavior.STATE_COLLAPSED
     }
 
-    initSheets()
+    initSheets(savedInstanceState)
 
     initNavigation()
 
     viewModel.observeSnackbarMessage()
   }
 
-  private fun initSheets() {
-    initSheetBehaviors()
+  override fun onDestroy() {
+    super.onDestroy()
+    snackbar = null
+  }
+
+  override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    menuInflater.inflate(R.menu.menu_main, menu)
+    return true
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean =
+    when (item.itemId) {
+      R.id.action_settings -> true
+      else -> super.onOptionsItemSelected(item)
+    }
+
+  override fun onSupportNavigateUp(): Boolean =
+    navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putInt(SHEET_STATE, bottomSheetBehavior.state)
+  }
+
+  private fun initSheets(savedInstanceState: Bundle?) {
+    initSheetBehaviors(savedInstanceState)
     initSheetsVisibility()
     initSheetFragment()
   }
@@ -86,7 +110,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     binding.bottomSheetContainer.isVisible = orientation == Configuration.ORIENTATION_PORTRAIT
   }
 
-  private fun initSheetBehaviors() {
+  private fun initSheetBehaviors(savedInstanceState: Bundle?) {
     bottomSheetBehavior.addBottomSheetCallback(
       object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -96,10 +120,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
           ) {
             return
           }
+
           rightSheetBehavior.state = newState
         }
 
-        override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+          updateSheetContainersAlpha(slideOffset)
+        }
       }
     )
 
@@ -112,12 +139,28 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
           ) {
             return
           }
+
           bottomSheetBehavior.state = newState
         }
 
-        override fun onSlide(rightSheet: View, slideOffset: Float) = Unit
+        override fun onSlide(rightSheet: View, slideOffset: Float) {
+          updateSheetContainersAlpha(slideOffset)
+        }
       }
     )
+
+    if (savedInstanceState != null) {
+      val sheetState = savedInstanceState.getInt(SHEET_STATE)
+      bottomSheetBehavior.state = sheetState
+      rightSheetBehavior.state = sheetState
+      updateSheetContainersAlpha(if (sheetState == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f)
+    }
+  }
+
+  private fun updateSheetContainersAlpha(slideOffset: Float) {
+    val alpha = .75f + slideOffset * .25f
+    binding.bottomSheetContainer.alpha = alpha
+    binding.rightSheetContainer.alpha = alpha
   }
 
   private fun initSheetFragment() {
@@ -132,11 +175,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         sheetFragment
       )
     }
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    snackbar = null
   }
 
   private fun initNavigation() {
@@ -175,17 +213,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
   }
 
-  override fun onCreateOptionsMenu(menu: Menu): Boolean {
-    menuInflater.inflate(R.menu.menu_main, menu)
-    return true
+  companion object {
+    private const val SHEET_STATE = "SHEET_STATE"
   }
-
-  override fun onOptionsItemSelected(item: MenuItem): Boolean =
-    when (item.itemId) {
-      R.id.action_settings -> true
-      else -> super.onOptionsItemSelected(item)
-    }
-
-  override fun onSupportNavigateUp(): Boolean =
-    navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 }
