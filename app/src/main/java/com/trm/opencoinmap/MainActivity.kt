@@ -20,10 +20,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
-import com.trm.opencoinmap.core.common.ext.toSnackbarLength
-import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import com.trm.opencoinmap.feature.venues.VenuesFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +28,6 @@ import eu.okatrych.rightsheet.RightSheetBehavior
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private val binding by viewBinding(ActivityMainBinding::bind)
-  private var snackbar: Snackbar? = null
 
   private val navController: NavController
     get() {
@@ -42,6 +37,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
   private val appBarConfiguration: AppBarConfiguration by
     lazy(LazyThreadSafetyMode.NONE) { AppBarConfiguration(navController.graph) }
+
+  private val snackbarMessageObserver: SnackbarMessageObserver by
+    lazy(LazyThreadSafetyMode.NONE) { SnackbarMessageObserver(binding.coordinatorLayout) }
 
   private val bottomSheetBehavior: BottomSheetBehavior<FrameLayout> by
     lazy(LazyThreadSafetyMode.NONE) { BottomSheetBehavior.from(binding.bottomSheetContainer) }
@@ -71,12 +69,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     initNavigation()
 
+    lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observeSnackbarMessage()
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    snackbar = null
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -182,35 +176,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   }
 
   private fun MainViewModel.observeSnackbarMessage() {
-    snackbarMessage.observe(this@MainActivity) { message ->
-      snackbar =
-        when (message) {
-          is Message.Hidden -> {
-            snackbar?.dismiss()
-            null
-          }
-          is Message.Shown -> {
-            Snackbar.make(
-                binding.coordinatorLayout,
-                message.textResId,
-                message.length.toSnackbarLength()
-              )
-              .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
-              .addCallback(
-                object : Snackbar.Callback() {
-                  override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    snackbar = null
-                  }
-                }
-              )
-              .run {
-                val action = message.action
-                if (action == null) this else setAction(action.labelResId) { action() }
-              }
-              .apply(Snackbar::show)
-          }
-        }
-    }
+    snackbarMessage.observe(this@MainActivity, snackbarMessageObserver)
   }
 
   companion object {
