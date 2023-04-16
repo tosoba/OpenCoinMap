@@ -2,6 +2,7 @@ package com.trm.opencoinmap
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,6 +21,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import com.trm.opencoinmap.feature.venues.VenuesFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -152,7 +154,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   }
 
   private fun updateSheetContainersAlpha(slideOffset: Float) {
-    val alpha = .75f + slideOffset * .25f
+    val collapsedAlpha =
+      TypedValue().run {
+        resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
+        float
+      }
+    val alpha = collapsedAlpha + slideOffset * (1 - collapsedAlpha)
     binding.bottomSheetContainer.alpha = alpha
     binding.rightSheetContainer.alpha = alpha
   }

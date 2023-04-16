@@ -1,4 +1,4 @@
-package com.trm.opencoinmap
+package com.trm.opencoinmap.core.common.view
 
 import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
