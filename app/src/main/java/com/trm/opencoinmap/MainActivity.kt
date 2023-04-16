@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
         float
       }
-    val alpha = collapsedAlpha + slideOffset * (1 - collapsedAlpha)
+    val alpha = collapsedAlpha + slideOffset * (1f - collapsedAlpha)
     binding.bottomSheetContainer.alpha = alpha
     binding.rightSheetContainer.alpha = alpha
   }
