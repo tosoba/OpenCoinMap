@@ -68,17 +68,10 @@
         app:behavior_peekHeight="200dp"
         app:layout_behavior="eu.okatrych.rightsheet.RightSheetBehavior" />
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.search.SearchBar
+        android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_scrollFlags="scroll|enterAlways">
-
-        <com.google.android.material.search.SearchBar
-            android:id="@+id/search_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/search" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:hint="@string/search" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
