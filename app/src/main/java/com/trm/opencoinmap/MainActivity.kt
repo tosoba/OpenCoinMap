@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -20,12 +18,12 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.trm.opencoinmap.core.common.view.SheetController
+import com.trm.opencoinmap.core.common.view.SheetState
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import com.trm.opencoinmap.feature.venues.VenuesFragment
 import dagger.hilt.android.AndroidEntryPoint
-import eu.okatrych.rightsheet.RightSheetBehavior
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -37,16 +35,24 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         supportFragmentManager.findFragmentById(R.id.nav_host_container) as NavHostFragment
       return navHost.navController
     }
-  private val appBarConfiguration: AppBarConfiguration by
+  private val appBarConfiguration by
     lazy(LazyThreadSafetyMode.NONE) { AppBarConfiguration(navController.graph) }
 
-  private val snackbarMessageObserver: SnackbarMessageObserver by
+  private val snackbarMessageObserver by
     lazy(LazyThreadSafetyMode.NONE) { SnackbarMessageObserver(binding.coordinatorLayout) }
 
-  private val bottomSheetBehavior: BottomSheetBehavior<FrameLayout> by
-    lazy(LazyThreadSafetyMode.NONE) { BottomSheetBehavior.from(binding.bottomSheetContainer) }
-  private val rightSheetBehavior: RightSheetBehavior<FrameLayout> by
-    lazy(LazyThreadSafetyMode.NONE) { RightSheetBehavior.from(binding.rightSheetContainer) }
+  private val sheetController by
+    lazy(LazyThreadSafetyMode.NONE) {
+      SheetController(
+        bottomSheetView = binding.bottomSheetContainer,
+        rightSheetView = binding.rightSheetContainer,
+        collapsedAlpha =
+          TypedValue().run {
+            resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
+            float
+          }
+      )
+    }
 
   private val existingSheetFragment: Fragment?
     get() =
@@ -63,8 +69,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     setSupportActionBar(binding.searchBar)
 
     binding.showPlacesSheetFab.setOnClickListener {
-      bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-      rightSheetBehavior.state = RightSheetBehavior.STATE_COLLAPSED
+      sheetController.setState(SheetState.STATE_COLLAPSED)
     }
 
     initSheets(savedInstanceState)
@@ -91,11 +96,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    outState.putInt(SHEET_STATE, bottomSheetBehavior.state)
+    sheetController.saveState(outState)
   }
 
   private fun initSheets(savedInstanceState: Bundle?) {
-    initSheetBehaviors(savedInstanceState)
+    sheetController.initFrom(savedInstanceState)
     initSheetsVisibility()
     initSheetFragment()
   }
@@ -104,64 +109,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     val orientation = resources.configuration.orientation
     binding.rightSheetContainer.isVisible = orientation == Configuration.ORIENTATION_LANDSCAPE
     binding.bottomSheetContainer.isVisible = orientation == Configuration.ORIENTATION_PORTRAIT
-  }
-
-  private fun initSheetBehaviors(savedInstanceState: Bundle?) {
-    bottomSheetBehavior.addBottomSheetCallback(
-      object : BottomSheetBehavior.BottomSheetCallback() {
-        override fun onStateChanged(bottomSheet: View, newState: Int) {
-          if (
-            newState == BottomSheetBehavior.STATE_SETTLING ||
-              newState == BottomSheetBehavior.STATE_DRAGGING
-          ) {
-            return
-          }
-
-          rightSheetBehavior.state = newState
-        }
-
-        override fun onSlide(bottomSheet: View, slideOffset: Float) {
-          updateSheetContainersAlpha(slideOffset)
-        }
-      }
-    )
-
-    rightSheetBehavior.addRightSheetCallback(
-      object : RightSheetBehavior.RightSheetCallback() {
-        override fun onStateChanged(rightSheet: View, newState: Int) {
-          if (
-            newState == RightSheetBehavior.STATE_SETTLING ||
-              newState == RightSheetBehavior.STATE_DRAGGING
-          ) {
-            return
-          }
-
-          bottomSheetBehavior.state = newState
-        }
-
-        override fun onSlide(rightSheet: View, slideOffset: Float) {
-          updateSheetContainersAlpha(slideOffset)
-        }
-      }
-    )
-
-    if (savedInstanceState != null) {
-      val sheetState = savedInstanceState.getInt(SHEET_STATE)
-      bottomSheetBehavior.state = sheetState
-      rightSheetBehavior.state = sheetState
-      updateSheetContainersAlpha(if (sheetState == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f)
-    }
-  }
-
-  private fun updateSheetContainersAlpha(slideOffset: Float) {
-    val collapsedAlpha =
-      TypedValue().run {
-        resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
-        float
-      }
-    val alpha = collapsedAlpha + slideOffset * (1f - collapsedAlpha)
-    binding.bottomSheetContainer.alpha = alpha
-    binding.rightSheetContainer.alpha = alpha
   }
 
   private fun initSheetFragment() {
@@ -184,9 +131,5 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
   private fun MainViewModel.observeSnackbarMessage() {
     snackbarMessage.observe(this@MainActivity, snackbarMessageObserver)
-  }
-
-  companion object {
-    private const val SHEET_STATE = "SHEET_STATE"
   }
 }

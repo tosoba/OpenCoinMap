@@ -1,30 +1,30 @@
 plugins {
-    id("opencoinmap.android.library")
-    id("opencoinmap.android.hilt")
-    id("kotlinx-serialization")
-    alias(libs.plugins.ksp)
+  id("opencoinmap.android.library")
+  id("opencoinmap.android.hilt")
+  id("kotlinx-serialization")
+  alias(libs.plugins.ksp)
 }
 
 android {
-    android { namespace = "com.trm.opencoinmap.core.data" }
+  namespace = "com.trm.opencoinmap.core.data"
 
-    testOptions { unitTests { isIncludeAndroidResources = true } }
+  testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":core:database"))
-    implementation(project(":core:domain"))
-    implementation(project(":core:network"))
+  implementation(project(":core:common"))
+  implementation(project(":core:database"))
+  implementation(project(":core:domain"))
+  implementation(project(":core:network"))
 
-    implementation(libs.rx.java)
-    implementation(libs.rx.kotlin)
+  implementation(libs.rx.java)
+  implementation(libs.rx.kotlin)
 
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    implementation(libs.room.rx)
-    ksp(libs.room.compiler)
+  implementation(libs.room.runtime)
+  implementation(libs.room.ktx)
+  implementation(libs.room.rx)
+  ksp(libs.room.compiler)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.work.ktx)
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.work.ktx)
 }

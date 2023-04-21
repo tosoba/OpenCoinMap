@@ -1,22 +1,20 @@
-plugins {
-    id("opencoinmap.android.library")
-}
+plugins { id("opencoinmap.android.library") }
 
 android {
-    android { namespace = "com.trm.opencoinmap.core.ui" }
+  namespace = "com.trm.opencoinmap.core.ui"
 
-    defaultConfig { testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
+  defaultConfig { testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
 }
 
 dependencies {
-    implementation(project(":core:domain"))
+  implementation(project(":core:domain"))
 
-    implementation(libs.androidx.browser)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.coil.kt)
+  implementation(libs.androidx.browser)
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.coil.kt)
 
-    api(libs.androidx.metrics)
-    api(libs.androidx.tracing.ktx)
+  api(libs.androidx.metrics)
+  api(libs.androidx.tracing.ktx)
 
-    implementation(libs.osmdroid)
+  implementation(libs.osmdroid)
 }
