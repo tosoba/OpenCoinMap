@@ -10,7 +10,8 @@ class SheetController(
   private val bottomSheetView: View,
   private val rightSheetView: View,
   private val collapsedAlpha: Float,
-  private val initialState: SheetState = SheetState.STATE_COLLAPSED
+  private val initialState: SheetState = SheetState.STATE_COLLAPSED,
+  private val onStateChanged: (SheetState) -> Unit = {}
 ) {
   private val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
   private val rightSheetBehavior = RightSheetBehavior.from(rightSheetView)
@@ -38,6 +39,7 @@ class SheetController(
 
           state = SheetState.fromBottom(newState)
           rightSheetBehavior.state = state.rightSheetState
+          onStateChanged(state)
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -58,6 +60,7 @@ class SheetController(
 
           state = SheetState.fromRight(newState)
           bottomSheetBehavior.state = state.bottomSheetState
+          onStateChanged(state)
         }
 
         override fun onSlide(rightSheet: View, slideOffset: Float) {
@@ -73,6 +76,7 @@ class SheetController(
         initialState
       }
     )
+    onStateChanged(state)
     updateSheetContainersAlpha(if (state == SheetState.STATE_EXPANDED) 1f else 0f)
   }
 

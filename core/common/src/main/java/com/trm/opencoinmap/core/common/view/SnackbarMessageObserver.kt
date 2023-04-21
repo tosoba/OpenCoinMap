@@ -11,6 +11,8 @@ import com.trm.opencoinmap.core.domain.model.Message
 
 class SnackbarMessageObserver(
   private val view: View,
+  private val onShown: () -> Unit = {},
+  private val onDismissed: () -> Unit = {},
 ) : DefaultLifecycleObserver, Observer<Message> {
   private var snackbar: Snackbar? = null
 
@@ -34,6 +36,11 @@ class SnackbarMessageObserver(
               object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                   snackbar = null
+                  onDismissed()
+                }
+
+                override fun onShown(sb: Snackbar?) {
+                  onShown()
                 }
               }
             )

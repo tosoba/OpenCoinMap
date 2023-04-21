@@ -39,7 +39,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     lazy(LazyThreadSafetyMode.NONE) { AppBarConfiguration(navController.graph) }
 
   private val snackbarMessageObserver by
-    lazy(LazyThreadSafetyMode.NONE) { SnackbarMessageObserver(binding.coordinatorLayout) }
+    lazy(LazyThreadSafetyMode.NONE) {
+      SnackbarMessageObserver(
+        view = binding.coordinatorLayout,
+        onShown = { binding.fabsLayout.isVisible = false },
+        onDismissed = { binding.fabsLayout.isVisible = true }
+      )
+    }
 
   private val sheetController by
     lazy(LazyThreadSafetyMode.NONE) {
@@ -50,7 +56,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
           TypedValue().run {
             resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
             float
-          }
+          },
+        onStateChanged = { state ->
+          binding.showPlacesSheetFab.isVisible = state == SheetState.STATE_HIDDEN
+        }
       )
     }
 
