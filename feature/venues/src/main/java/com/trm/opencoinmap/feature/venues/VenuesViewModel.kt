@@ -3,7 +3,9 @@ package com.trm.opencoinmap.feature.venues
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.rxjava3.cachedIn
 import com.trm.opencoinmap.core.common.di.IoScheduler
 import com.trm.opencoinmap.core.common.di.MainScheduler
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
@@ -19,7 +21,9 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 internal class VenuesViewModel
 @Inject
@@ -44,7 +48,7 @@ constructor(
   init {
     receiveMapBoundsUseCase()
       .toFlowable(BackpressureStrategy.LATEST)
-      .switchMap(getVenuesPagingUseCase::invoke)
+      .switchMap { getVenuesPagingUseCase.invoke(it).cachedIn(viewModelScope) }
       .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
       .subscribeOn(ioScheduler)
       .observeOn(mainScheduler)
