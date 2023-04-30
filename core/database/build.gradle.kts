@@ -13,5 +13,7 @@ dependencies {
   implementation(libs.room.runtime)
   implementation(libs.room.ktx)
   implementation(libs.room.rx)
+  implementation(libs.room.paging)
+  implementation(libs.room.paging.rx)
   ksp(libs.room.compiler)
 }

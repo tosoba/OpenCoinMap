@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.core.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
@@ -10,7 +11,7 @@ import io.reactivex.rxjava3.core.Single
 interface VenueDao {
   @Upsert fun upsert(entities: List<VenueEntity>)
 
-  @Query(SELECT_IN_BOUNDS)
+  @Query(SELECT_IN_EXISTING_BOUNDS)
   fun selectInBoundsSingle(
     minLat: Double,
     maxLat: Double,
@@ -26,13 +27,21 @@ interface VenueDao {
     maxLon: Double
   ): Single<Int>
 
-  @Query(SELECT_IN_BOUNDS)
+  @Query(SELECT_IN_EXISTING_BOUNDS)
   fun selectInBounds(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
     maxLon: Double
   ): List<VenueEntity>
+
+  @Query(SELECT_IN_BOUNDS)
+  fun selectPageInBounds(
+    minLat: Double,
+    maxLat: Double,
+    minLon: Double,
+    maxLon: Double
+  ): PagingSource<Int, VenueEntity>
 
   @Query(COUNT_IN_BOUNDS)
   fun countInBounds(minLat: Double, maxLat: Double, minLon: Double, maxLon: Double): Int
@@ -53,6 +62,10 @@ interface VenueDao {
 
   companion object {
     private const val SELECT_IN_BOUNDS =
+      "SELECT * FROM venue " +
+        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon"
+
+    private const val SELECT_IN_EXISTING_BOUNDS =
       "SELECT * FROM venue " +
         "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
         "AND EXISTS (" +
