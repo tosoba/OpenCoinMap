@@ -19,6 +19,11 @@ dependencies {
 
   implementation(libs.rx.java)
   implementation(libs.rx.kotlin)
+  implementation(libs.rx.relay)
+
+  implementation(libs.paging.common)
+  implementation(libs.paging.runtime)
+  implementation(libs.paging.rx)
 
   implementation(libs.room.runtime)
   implementation(libs.room.ktx)

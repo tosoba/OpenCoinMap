@@ -39,6 +39,7 @@ material = "1.8.0"
 okhttp = "4.10.0"
 osmdroid = "6.1.14"
 osmbonuspack = "6.9.0"
+paging = "3.1.1"
 protobuf = "3.21.12"
 protobufPlugin = "0.8.19"
 retrofit = "2.9.0"
@@ -106,6 +107,9 @@ liveEvent = { group = "com.github.hadilq", name = "live-event", version.ref = "l
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
+paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
+paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+paging-rx = { group = "androidx.paging", name = "paging-rxjava3", version.ref = "paging" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

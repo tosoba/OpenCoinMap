@@ -6,6 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.common.R as commonR
+import com.trm.opencoinmap.core.common.di.IoScheduler
+import com.trm.opencoinmap.core.common.di.MainScheduler
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
@@ -15,11 +17,10 @@ import com.trm.opencoinmap.core.domain.usecase.ValidateGridMapBoundsUseCase
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import org.osmdroid.util.BoundingBox
@@ -34,6 +35,8 @@ constructor(
   private val validateGridMapBoundsUseCase: ValidateGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
+  @IoScheduler private val ioScheduler: Scheduler,
+  @MainScheduler private val mainScheduler: Scheduler
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -54,8 +57,8 @@ constructor(
       .mergeWith(retryRelay.withLatestFrom(filteredBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
       .switchMap(getMarkersInBoundsUseCase::invoke)
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeOn(ioScheduler)
+      .observeOn(mainScheduler)
       .subscribeBy(
         onNext = {
           _isLoading.value = it is Loading

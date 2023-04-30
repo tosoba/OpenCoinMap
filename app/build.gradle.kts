@@ -62,8 +62,10 @@ dependencies {
   implementation(libs.rx.relay)
   implementation(libs.liveEvent)
 
-  implementation(libs.osmdroid)
+  implementation(libs.paging.runtime)
+  implementation(libs.paging.rx)
 
+  implementation(libs.osmdroid)
   implementation(libs.timber)
 
   testImplementation(libs.junit4)
