@@ -10,7 +10,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
-import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.util.*
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -44,7 +43,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
     fun MapViewModel.onBoundingBoxChanged(boundingBox: BoundingBox) {
       onBoundingBoxChanged(
-        BoundingBoxArgs(boundingBox = boundingBox, latDivisor = latDivisor, lonDivisor = lonDivisor)
+        boundingBox = boundingBox,
+        latDivisor = latDivisor,
+        lonDivisor = lonDivisor
       )
     }
 

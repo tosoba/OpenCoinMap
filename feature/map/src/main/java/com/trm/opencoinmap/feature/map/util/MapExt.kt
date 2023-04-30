@@ -3,7 +3,6 @@ package com.trm.opencoinmap.feature.map.util
 import android.graphics.drawable.Drawable
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
-import com.trm.opencoinmap.feature.map.MapDefaults
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint

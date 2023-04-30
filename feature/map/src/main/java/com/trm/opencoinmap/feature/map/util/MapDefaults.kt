@@ -1,4 +1,4 @@
-package com.trm.opencoinmap.feature.map
+package com.trm.opencoinmap.feature.map.util
 
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.tileprovider.tilesource.XYTileSource

@@ -1,7 +1,7 @@
 package com.trm.opencoinmap.feature.map.model
 
 import android.os.Parcelable
-import com.trm.opencoinmap.feature.map.MapDefaults
+import com.trm.opencoinmap.feature.map.util.MapDefaults
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
