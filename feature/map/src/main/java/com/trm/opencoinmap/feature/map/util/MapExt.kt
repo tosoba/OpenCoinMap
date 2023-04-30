@@ -1,6 +1,7 @@
 package com.trm.opencoinmap.feature.map.util
 
 import android.graphics.drawable.Drawable
+import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.MapDefaults
 import com.trm.opencoinmap.feature.map.model.MapPosition
@@ -50,7 +51,7 @@ internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Dr
     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     infoWindow = null
     setOnMarkerClickListener { _, _ ->
-      val boundingBox = marker.boundingBox
+      val boundingBox = marker.getBoundingBox()
       if (
         boundingBox.latNorth != boundingBox.latSouth || boundingBox.lonEast != boundingBox.lonWest
       ) {
@@ -62,5 +63,8 @@ internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Dr
     }
   }
 
-private val MapMarker.VenuesCluster.boundingBox
-  get() = BoundingBox(maxLat, maxLon, minLat, minLon)
+private fun MapMarker.VenuesCluster.getBoundingBox(): BoundingBox =
+  BoundingBox(maxLat, maxLon, minLat, minLon)
+
+internal fun BoundingBox.toBounds(): MapBounds =
+  MapBounds(minLat = latSouth, maxLat = latNorth, minLon = lonWest, maxLon = lonEast)

@@ -8,5 +8,5 @@ import io.reactivex.rxjava3.core.Single
 interface VenueRepo {
   fun sync(): Completable
 
-  fun getVenueMarkersInLatLngBounds(bounds: GridMapBounds): Single<List<MapMarker>>
+  fun getVenueMarkersInLatLngBounds(gridMapBounds: GridMapBounds): Single<List<MapMarker>>
 }

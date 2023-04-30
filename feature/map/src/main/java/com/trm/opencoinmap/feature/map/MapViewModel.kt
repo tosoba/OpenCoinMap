@@ -9,10 +9,12 @@ import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.ValidateGridMapBoundsUseCase
 import com.trm.opencoinmap.feature.map.model.BoundingBoxArgs
 import com.trm.opencoinmap.feature.map.model.MapPosition
+import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -31,6 +33,7 @@ constructor(
   private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
   private val validateGridMapBoundsUseCase: ValidateGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
+  private val sendMapBoundsUseCase: SendMapBoundsUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -78,20 +81,15 @@ constructor(
     )
   }
 
-  fun onBoundingBox(args: BoundingBoxArgs) {
+  fun onBoundingBoxChanged(args: BoundingBoxArgs) {
     sendMessageUseCase(Message.Hidden)
 
     val (boundingBox, latDivisor, lonDivisor) = args
+    val bounds = boundingBox.toBounds()
     boundsRelay.accept(
-      GridMapBounds(
-        minLat = boundingBox.latSouth,
-        maxLat = boundingBox.latNorth,
-        minLon = boundingBox.lonWest,
-        maxLon = boundingBox.lonEast,
-        latDivisor = latDivisor,
-        lonDivisor = lonDivisor
-      )
+      GridMapBounds(bounds = bounds, latDivisor = latDivisor, lonDivisor = lonDivisor)
     )
+    sendMapBoundsUseCase(bounds)
   }
 
   override fun onCleared() {

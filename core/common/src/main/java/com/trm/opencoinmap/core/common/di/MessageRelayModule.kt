@@ -12,8 +12,8 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object MessageRelayModule {
-  private val messageSubject = PublishRelay.create<Message>()
+  private val relay = PublishRelay.create<Message>()
 
-  @Provides fun sendMessageUseCase() = SendMessageUseCase(messageSubject::accept)
-  @Provides fun receiveMessageUseCase() = ReceiveMessageUseCase { messageSubject }
+  @Provides fun sendMessageUseCase() = SendMessageUseCase(relay::accept)
+  @Provides fun receiveMessageUseCase() = ReceiveMessageUseCase { relay }
 }

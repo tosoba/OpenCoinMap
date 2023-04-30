@@ -12,7 +12,7 @@ import com.trm.opencoinmap.core.domain.model.GridMapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
-import com.trm.opencoinmap.core.domain.util.BoundsConstants
+import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
 import io.reactivex.rxjava3.core.Completable
@@ -48,8 +48,11 @@ constructor(
   private fun waitUntilSyncCompleted(): Completable =
     syncRunning.filter { isRunning -> !isRunning }.firstOrError().ignoreElement()
 
-  override fun getVenueMarkersInLatLngBounds(bounds: GridMapBounds): Single<List<MapMarker>> {
-    val (minLat, maxLat, minLon, maxLon, latDivisor, lonDivisor) = bounds
+  override fun getVenueMarkersInLatLngBounds(
+    gridMapBounds: GridMapBounds
+  ): Single<List<MapMarker>> {
+    val (bounds, latDivisor, lonDivisor) = gridMapBounds
+    val (minLat, maxLat, minLon, maxLon) = bounds
     return waitUntilSyncCompleted()
       .andThen(
         venueDao
@@ -251,10 +254,10 @@ constructor(
         boundsDao.deleteNonWhole()
         boundsDao.upsert(
           BoundsEntity(
-            minLat = BoundsConstants.MIN_LAT,
-            maxLat = BoundsConstants.MAX_LAT,
-            minLon = BoundsConstants.MIN_LON,
-            maxLon = BoundsConstants.MAX_LON,
+            minLat = MapBoundsLimit.MIN_LAT,
+            maxLat = MapBoundsLimit.MAX_LAT,
+            minLon = MapBoundsLimit.MIN_LON,
+            maxLon = MapBoundsLimit.MAX_LON,
             whole = true
           )
         )

@@ -30,11 +30,11 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewBinding.mapView.init()
-    observeLoading()
+    viewModel.observeLoading()
   }
 
-  private fun observeLoading() {
-    viewModel.isLoading.observe(viewLifecycleOwner, viewBinding.loadingIndicator::isVisible::set)
+  private fun MapViewModel.observeLoading() {
+    isLoading.observe(viewLifecycleOwner, viewBinding.loadingIndicator::isVisible::set)
   }
 
   private fun MapView.init() {
@@ -42,8 +42,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     restorePosition(viewModel.mapPosition)
 
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
-    fun MapViewModel.onBoundingBox(boundingBox: BoundingBox) {
-      onBoundingBox(
+    fun MapViewModel.onBoundingBoxChanged(boundingBox: BoundingBox) {
+      onBoundingBoxChanged(
         BoundingBoxArgs(boundingBox = boundingBox, latDivisor = latDivisor, lonDivisor = lonDivisor)
       )
     }
@@ -55,13 +55,13 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
         fun onMapInteraction(): Boolean {
           viewModel.mapPosition = currentPosition()
-          viewModel.onBoundingBox(boundingBox)
+          viewModel.onBoundingBoxChanged(boundingBox)
           return false
         }
       }
     )
 
-    addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onBoundingBox(boundingBox) }
+    addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onBoundingBoxChanged(boundingBox) }
 
     val venueDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
