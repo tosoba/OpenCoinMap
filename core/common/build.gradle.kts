@@ -9,7 +9,6 @@ dependencies {
   implementation(project(":core:domain"))
 
   implementation(libs.google.material)
-  implementation(libs.rightSheetBehavior)
 
   implementation(libs.osmdroid)
 

@@ -1,6 +1,5 @@
 package com.trm.opencoinmap
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
@@ -9,20 +8,16 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.fragment.app.commitNow
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.view.SheetController
-import com.trm.opencoinmap.core.common.view.SheetState
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
-import com.trm.opencoinmap.feature.venues.VenuesFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -51,24 +46,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     lazy(LazyThreadSafetyMode.NONE) {
       SheetController(
         bottomSheetView = binding.bottomSheetContainer,
-        rightSheetView = binding.rightSheetContainer,
         collapsedAlpha =
           TypedValue().run {
             resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
             float
           },
         onStateChanged = { state ->
-          binding.showPlacesSheetFab.isVisible = state == SheetState.STATE_HIDDEN
+          binding.showPlacesSheetFab.isVisible = state == BottomSheetBehavior.STATE_HIDDEN
         }
       )
     }
-
-  private val existingSheetFragment: Fragment?
-    get() =
-      supportFragmentManager.run {
-        findFragmentById(R.id.bottom_sheet_container)
-          ?: findFragmentById(R.id.right_sheet_container)
-      }
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -78,10 +65,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     setSupportActionBar(binding.searchBar)
 
     binding.showPlacesSheetFab.setOnClickListener {
-      sheetController.setState(SheetState.STATE_COLLAPSED)
+      sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
     }
 
-    initSheets(savedInstanceState)
+    sheetController.initFrom(savedInstanceState)
 
     initNavigation()
 
@@ -106,32 +93,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     sheetController.saveState(outState)
-  }
-
-  private fun initSheets(savedInstanceState: Bundle?) {
-    sheetController.initFrom(savedInstanceState)
-    initSheetsVisibility()
-    initSheetFragment()
-  }
-
-  private fun initSheetsVisibility() {
-    val orientation = resources.configuration.orientation
-    binding.rightSheetContainer.isVisible = orientation == Configuration.ORIENTATION_LANDSCAPE
-    binding.bottomSheetContainer.isVisible = orientation == Configuration.ORIENTATION_PORTRAIT
-  }
-
-  private fun initSheetFragment() {
-    val orientation = resources.configuration.orientation
-    val sheetFragment =
-      existingSheetFragment?.also { supportFragmentManager.commitNow { remove(it) } }
-        ?: VenuesFragment()
-    supportFragmentManager.commit {
-      replace(
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) R.id.bottom_sheet_container
-        else R.id.right_sheet_container,
-        sheetFragment
-      )
-    }
   }
 
   private fun initNavigation() {
