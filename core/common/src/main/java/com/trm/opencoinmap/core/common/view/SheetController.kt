@@ -2,6 +2,7 @@ package com.trm.opencoinmap.core.common.view
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.MainThread
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
@@ -12,7 +13,10 @@ class SheetController(
   private val onStateChanged: (Int) -> Unit = {},
   private val onSlide: (Float) -> Unit = {}
 ) {
-  private val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
+  private val bottomSheetBehavior =
+    BottomSheetBehavior.from(bottomSheetView).apply {
+      setMaxWidth(ViewGroup.LayoutParams.MATCH_PARENT)
+    }
 
   var state: Int = initialState
     private set
