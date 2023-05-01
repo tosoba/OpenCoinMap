@@ -48,7 +48,7 @@ constructor(private val coinMapApi: CoinMapApi, private val db: OpenCoinMapDatab
       .doAfterTerminate { syncRunning.accept(false) }
   }
 
-  override fun getVenuesPaging(mapBounds: MapBounds): Flowable<PagingData<Venue>> {
+  override fun getVenuesPagingInBounds(mapBounds: MapBounds): Flowable<PagingData<Venue>> {
     val (minLat, maxLat, minLon, maxLon) = mapBounds
     return Pager(
         config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50)

@@ -15,7 +15,7 @@ import javax.inject.Inject
 import org.osmdroid.views.overlay.Marker
 
 @FragmentScoped
-class ClusterMarkerIconBuilder
+internal class ClusterMarkerIconBuilder
 @Inject
 constructor(@ApplicationContext private val context: Context) {
   private val whiteClusterSizeTextPaint: Paint by

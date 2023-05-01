@@ -3,7 +3,7 @@ package com.trm.opencoinmap.feature.map.util
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 
-object MapDefaults {
+internal object MapDefaults {
   val tileSource: XYTileSource
     get() =
       XYTileSource(

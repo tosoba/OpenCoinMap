@@ -7,7 +7,7 @@ import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import io.reactivex.rxjava3.core.Flowable
 import javax.inject.Inject
 
-class GetVenuesPagingUseCase @Inject constructor(private val repo: VenueRepo) {
+class GetVenuesPagingInBoundsUseCase @Inject constructor(private val repo: VenueRepo) {
   operator fun invoke(mapBounds: MapBounds): Flowable<PagingData<Venue>> =
-    repo.getVenuesPaging(mapBounds)
+    repo.getVenuesPagingInBounds(mapBounds)
 }

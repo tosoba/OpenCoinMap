@@ -8,7 +8,7 @@ import org.osmdroid.bonuspack.clustering.StaticCluster
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
-class RadiusMarkerSizeClusterer
+internal class RadiusMarkerSizeClusterer
 @Inject
 constructor(
   @ApplicationContext context: Context,
