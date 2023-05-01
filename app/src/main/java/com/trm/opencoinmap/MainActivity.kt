@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -68,8 +69,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
     }
 
-    sheetController.initFrom(savedInstanceState)
-
+    initBottomSheet(savedInstanceState)
     initNavigation()
 
     lifecycle.addObserver(snackbarMessageObserver)
@@ -93,6 +93,17 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     sheetController.saveState(outState)
+  }
+
+  private fun initBottomSheet(savedInstanceState: Bundle?) {
+    sheetController.initFrom(savedInstanceState)
+    onBackPressedDispatcher.addCallback {
+      if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) {
+        sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+      } else {
+        finish()
+      }
+    }
   }
 
   private fun initNavigation() {
