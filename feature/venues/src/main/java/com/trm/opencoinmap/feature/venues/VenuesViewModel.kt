@@ -7,8 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.rxjava3.cachedIn
-import com.trm.opencoinmap.core.common.di.IoScheduler
-import com.trm.opencoinmap.core.common.di.MainScheduler
+import com.trm.opencoinmap.core.common.di.RxSchedulers
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
@@ -16,7 +15,6 @@ import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
-import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
@@ -32,8 +30,7 @@ constructor(
   receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,
   private val getVenuesPagingInBoundsUseCase: GetVenuesPagingInBoundsUseCase,
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
-  @IoScheduler private val ioScheduler: Scheduler,
-  @MainScheduler private val mainScheduler: Scheduler
+  schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -56,10 +53,10 @@ constructor(
   init {
     receiveMapBoundsUseCase()
       .toFlowable(BackpressureStrategy.LATEST)
-      .switchMap { getVenuesPagingInBoundsUseCase(mapBounds = it).cachedIn(viewModelScope) }
+      .switchMap { bounds -> getVenuesPagingInBoundsUseCase(bounds).cachedIn(viewModelScope) }
       .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
-      .subscribeOn(ioScheduler)
-      .observeOn(mainScheduler)
+      .subscribeOn(schedulers.io)
+      .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
         _isLoadingForNewBounds.value = status == MarkersLoadingStatus.IN_PROGRESS
         _loadingForNewBoundsFailed.value = status == MarkersLoadingStatus.ERROR
