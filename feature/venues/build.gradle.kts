@@ -7,6 +7,7 @@ android { namespace = "com.trm.opencoinmap.feature.venues" }
 
 dependencies {
   implementation(libs.google.material)
+  implementation(libs.materialLetterIcon)
 
   implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.ktx)

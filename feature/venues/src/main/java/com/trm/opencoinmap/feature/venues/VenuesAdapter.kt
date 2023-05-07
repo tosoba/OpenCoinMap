@@ -31,7 +31,9 @@ internal class VenuesAdapter(private val onItemClick: (Venue) -> Unit) :
   ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(venue: Venue) {
       with(binding) {
-        venueName.text = venue.name
+        venueLetterIcon.letter = venue.name.first().toString()
+        venueNameTextView.text = venue.name
+        venueCategoryTextView.text = venue.category
         root.setOnClickListener { onItemClick(venue) }
       }
     }
