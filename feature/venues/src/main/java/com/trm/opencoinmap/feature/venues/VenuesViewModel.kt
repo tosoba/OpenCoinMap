@@ -19,6 +19,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -55,6 +56,7 @@ constructor(
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { bounds -> getVenuesPagingInBoundsUseCase(bounds).cachedIn(viewModelScope) }
       .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
+      .debounce(250L, TimeUnit.MILLISECONDS)
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
