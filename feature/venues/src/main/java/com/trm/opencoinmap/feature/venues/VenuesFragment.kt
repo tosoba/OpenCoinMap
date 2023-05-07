@@ -16,26 +16,32 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private val binding by viewBinding(FragmentVenuesBinding::bind)
-  private val adapter by lazy(LazyThreadSafetyMode.NONE) { VenuesAdapter(onItemClick = {}) }
+  private val venuesAdapter by lazy(LazyThreadSafetyMode.NONE) { VenuesAdapter(onItemClick = {}) }
 
   private val viewModel by viewModels<VenuesViewModel>()
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    binding.venuesRecyclerView.layoutManager =
+    binding.venuesRecyclerView.init()
+    viewModel.observeState()
+  }
+
+  private fun RecyclerView.init() {
+    layoutManager =
       if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
         LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
       } else {
         GridLayoutManager(requireContext(), 2, RecyclerView.VERTICAL, false)
       }
-    binding.venuesRecyclerView.adapter = adapter
-    viewModel.isLoadingForNewBounds.observe(viewLifecycleOwner) {
+    adapter = venuesAdapter
+  }
+
+  private fun VenuesViewModel.observeState() {
+    isLoadingForNewBounds.observe(viewLifecycleOwner) {
       binding.loadingProgressIndicator.isVisible = it
     }
-    viewModel.isVenuesListVisible.observe(viewLifecycleOwner) {
-      binding.venuesRecyclerView.isVisible = it
-    }
-    viewModel.pagingData.observe(viewLifecycleOwner) {
-      adapter.submitData(viewLifecycleOwner.lifecycle, it)
+    isVenuesListVisible.observe(viewLifecycleOwner) { binding.venuesRecyclerView.isVisible = it }
+    pagingData.observe(viewLifecycleOwner) {
+      venuesAdapter.submitData(viewLifecycleOwner.lifecycle, it)
     }
   }
 }
