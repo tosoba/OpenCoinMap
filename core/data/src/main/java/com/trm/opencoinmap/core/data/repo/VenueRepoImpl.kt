@@ -64,6 +64,16 @@ constructor(private val coinMapApi: CoinMapApi, private val db: OpenCoinMapDatab
       .map { it.map(VenueEntity::asDomainModel) }
   }
 
+  override fun getCategoriesInBounds(mapBounds: MapBounds): Flowable<List<String>> {
+    val (minLat, maxLat, minLon, maxLon) = mapBounds
+    return venueDao.selectDistinctCategoriesInBounds(
+      minLat = minLat,
+      maxLat = maxLat,
+      minLon = minLon,
+      maxLon = maxLon
+    )
+  }
+
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds
   ): Single<List<MapMarker>> {

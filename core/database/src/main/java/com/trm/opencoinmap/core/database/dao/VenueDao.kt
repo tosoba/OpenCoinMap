@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.trm.opencoinmap.core.database.entity.VenueEntity
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 
 @Dao
@@ -59,6 +60,18 @@ interface VenueDao {
     minLon: Double,
     maxLon: Double
   ): Single<Boolean>
+
+  @Query(
+    "SELECT DISTINCT category FROM venue " +
+      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "ORDER BY category"
+  )
+  fun selectDistinctCategoriesInBounds(
+    minLat: Double,
+    maxLat: Double,
+    minLon: Double,
+    maxLon: Double
+  ): Flowable<List<String>>
 
   companion object {
     private const val SELECT_IN_BOUNDS =
