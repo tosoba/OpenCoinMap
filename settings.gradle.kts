@@ -32,6 +32,8 @@ include(":core:network")
 
 include(":core:ui")
 
+include(":feature:categories")
+
 include(":feature:map")
 
 include(":feature:venues")
