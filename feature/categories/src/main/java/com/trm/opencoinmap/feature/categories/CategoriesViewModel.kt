@@ -9,14 +9,19 @@ import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class CategoriesViewModel(
+@HiltViewModel
+class CategoriesViewModel
+@Inject
+constructor(
   receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
   private val getCategoriesInBoundsUseCase: GetCategoriesInBoundsUseCase,
