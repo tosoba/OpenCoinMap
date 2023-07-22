@@ -70,8 +70,7 @@ class SheetController(
   }
 
   private fun updateSheetContainersAlpha(slideOffset: Float) {
-    val alpha = collapsedAlpha + slideOffset * (1f - collapsedAlpha)
-    bottomSheetView.alpha = alpha
+    bottomSheetView.alpha = collapsedAlpha + slideOffset * (1f - collapsedAlpha)
   }
 
   companion object {

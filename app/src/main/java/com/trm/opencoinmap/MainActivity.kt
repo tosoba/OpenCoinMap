@@ -26,15 +26,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private val binding by viewBinding(ActivityMainBinding::bind)
 
   private val navController: NavController
-    get() {
-      val navHost =
-        supportFragmentManager.findFragmentById(R.id.nav_host_container) as NavHostFragment
-      return navHost.navController
-    }
-  private val appBarConfiguration by
+    get() =
+      (supportFragmentManager.findFragmentById(R.id.nav_host_container) as NavHostFragment)
+        .navController
+
+  private val appBarConfiguration: AppBarConfiguration by
     lazy(LazyThreadSafetyMode.NONE) { AppBarConfiguration(navController.graph) }
 
-  private val snackbarMessageObserver by
+  private val snackbarMessageObserver: SnackbarMessageObserver by
     lazy(LazyThreadSafetyMode.NONE) {
       SnackbarMessageObserver(
         view = binding.coordinatorLayout,
@@ -43,17 +42,24 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       )
     }
 
-  private val sheetController by
+  private val collapsedSheetAlpha: Float by
+    lazy(LazyThreadSafetyMode.NONE) {
+      TypedValue().run {
+        resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
+        float
+      }
+    }
+
+  private val sheetController: SheetController by
     lazy(LazyThreadSafetyMode.NONE) {
       SheetController(
         bottomSheetView = binding.bottomSheetContainer,
-        collapsedAlpha =
-          TypedValue().run {
-            resources.getValue(R.dimen.collapsed_sheet_alpha, this, true)
-            float
-          },
+        collapsedAlpha = collapsedSheetAlpha,
         onStateChanged = { state ->
           binding.showPlacesSheetFab.isVisible = state == BottomSheetBehavior.STATE_HIDDEN
+        },
+        onSlide = { slideOffset ->
+          binding.searchBar.alpha = collapsedSheetAlpha + slideOffset * (1f - collapsedSheetAlpha)
         }
       )
     }
@@ -71,6 +77,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     initBottomSheet(savedInstanceState)
     initNavigation()
+    initSearchBar()
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observeSnackbarMessage()
@@ -108,6 +115,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
   private fun initNavigation() {
     setupActionBarWithNavController(navController, appBarConfiguration)
+  }
+
+  private fun initSearchBar() {
+    binding.searchBar.alpha =
+      if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else collapsedSheetAlpha
   }
 
   private fun MainViewModel.observeSnackbarMessage() {

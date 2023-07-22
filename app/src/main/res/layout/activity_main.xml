@@ -65,6 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/search"
+        android:alpha="@dimen/collapsed_sheet_alpha"
         android:outlineAmbientShadowColor="@color/black"
         android:outlineSpotShadowColor="@color/black"
         app:contentInsetStart="16dp" />
