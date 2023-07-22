@@ -1,7 +1,7 @@
 package com.trm.opencoinmap.feature.venues
 
-import android.content.res.Configuration
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -27,10 +27,15 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
   private fun RecyclerView.init() {
     layoutManager =
-      if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-        LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-      } else {
-        GridLayoutManager(requireContext(), 2, RecyclerView.VERTICAL, false)
+      when (
+        val columnCount =
+          TypedValue().run {
+            resources.getValue(R.dimen.venues_column_count, this, true)
+            data
+          }
+      ) {
+        1 -> LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+        else -> GridLayoutManager(requireContext(), columnCount, RecyclerView.VERTICAL, false)
       }
     adapter = venuesAdapter
   }

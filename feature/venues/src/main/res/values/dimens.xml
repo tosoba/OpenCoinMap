@@ -1,0 +1,3 @@
+<resources>
+    <item name="venues_column_count" format="integer" type="dimen">1</item>
+</resources>
