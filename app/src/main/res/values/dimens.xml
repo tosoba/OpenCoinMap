@@ -1,4 +1,5 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <item name="collapsed_sheet_alpha" format="float" type="dimen">0.9</item>
+    <dimen name="sheet_peek_height">75dp</dimen>
 </resources>
