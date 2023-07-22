@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class CategoriesViewModel
+internal class CategoriesViewModel
 @Inject
 constructor(
   receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,

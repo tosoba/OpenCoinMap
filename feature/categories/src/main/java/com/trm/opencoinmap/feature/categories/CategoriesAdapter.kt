@@ -16,7 +16,6 @@ class CategoriesAdapter :
         oldItem == newItem
     }
   ) {
-
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
     ViewHolder(ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
