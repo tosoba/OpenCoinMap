@@ -9,10 +9,10 @@ import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.di.RxSchedulers
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
+import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
-import com.trm.opencoinmap.core.domain.usecase.ValidateGridMapBoundsUseCase
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +30,7 @@ internal class MapViewModel
 constructor(
   savedStateHandle: SavedStateHandle,
   private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
-  private val validateGridMapBoundsUseCase: ValidateGridMapBoundsUseCase,
+  private val coalesceGridMapBoundsUseCase: CoalesceGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
   schedulers: RxSchedulers
@@ -49,9 +49,9 @@ constructor(
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
 
   init {
-    val filteredBounds = boundsRelay.filter(validateGridMapBoundsUseCase::invoke)
-    filteredBounds
-      .mergeWith(retryRelay.withLatestFrom(filteredBounds) { _, bounds -> bounds })
+    val coalescedBounds = boundsRelay.map(coalesceGridMapBoundsUseCase::invoke)
+    coalescedBounds
+      .mergeWith(retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
       .switchMap(getMarkersInBoundsUseCase::invoke)
       .subscribeOn(schedulers.io)

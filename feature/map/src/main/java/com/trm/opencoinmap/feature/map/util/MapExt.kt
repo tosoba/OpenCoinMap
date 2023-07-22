@@ -15,6 +15,8 @@ internal fun MapView.setDefaultConfig() {
   isTilesScaledToDpi = true
   setMultiTouchControls(true)
   zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+  isHorizontalMapRepetitionEnabled = false
+  isVerticalMapRepetitionEnabled = false
   val tileSystem = MapView.getTileSystem()
   setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
   setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
