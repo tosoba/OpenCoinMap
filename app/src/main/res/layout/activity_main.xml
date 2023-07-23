@@ -66,8 +66,8 @@
         android:layout_height="wrap_content"
         android:alpha="@dimen/collapsed_sheet_alpha"
         android:hint="@string/search"
-        android:outlineAmbientShadowColor="@color/black"
-        android:outlineSpotShadowColor="@color/black"
+        android:outlineAmbientShadowColor="@android:color/black"
+        android:outlineSpotShadowColor="@android:color/black"
         app:contentInsetStart="16dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
