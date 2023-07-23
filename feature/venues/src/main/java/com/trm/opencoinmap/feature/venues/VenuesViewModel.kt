@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.rxjava3.cachedIn
+import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.common.di.RxSchedulers
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -31,6 +33,7 @@ constructor(
   receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,
   private val getVenuesPagingInBoundsUseCase: GetVenuesPagingInBoundsUseCase,
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
+  receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -51,6 +54,9 @@ constructor(
     }
   val isVenuesListVisible: LiveData<Boolean> = _isVenuesListVisible
 
+  private val _sheetSlideOffset = LiveEvent<Float>()
+  val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
+
   init {
     receiveMapBoundsUseCase()
       .toFlowable(BackpressureStrategy.LATEST)
@@ -64,6 +70,11 @@ constructor(
         _loadingForNewBoundsFailed.value = status == MarkersLoadingStatus.ERROR
         _pagingData.value = pagingData
       }
+      .addTo(compositeDisposable)
+
+    receiveSheetSlideOffsetUseCase()
+      .filter { offset -> offset >= 0f }
+      .subscribeBy(onNext = _sheetSlideOffset::setValue)
       .addTo(compositeDisposable)
   }
 

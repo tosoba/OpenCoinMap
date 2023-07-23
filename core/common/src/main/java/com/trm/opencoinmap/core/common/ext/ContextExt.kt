@@ -10,3 +10,7 @@ fun Context.lazyBitmapResource(@DrawableRes drawableId: Int): Lazy<Bitmap> =
   lazy(LazyThreadSafetyMode.NONE) {
     requireNotNull(ContextCompat.getDrawable(this, drawableId)).toBitmap()
   }
+
+fun Float.toPx(context: Context): Float = this * context.resources.displayMetrics.density
+
+fun Float.toDp(context: Context): Float = this / context.resources.displayMetrics.density

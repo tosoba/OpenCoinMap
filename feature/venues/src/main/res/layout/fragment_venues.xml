@@ -2,11 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/venues_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
-        android:id="@+id/drag_handle_view"
+        android:id="@+id/venues_drag_handle_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,7 +24,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/drag_handle_view"
+        app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_view"
         tools:listitem="@layout/item_venue"
         tools:visibility="visible" />
 
@@ -34,6 +35,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/drag_handle_view" />
+        app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

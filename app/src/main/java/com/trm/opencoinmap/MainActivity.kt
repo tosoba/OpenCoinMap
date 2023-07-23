@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewTreeObserver
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,13 +19,15 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.search.SearchBar
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
+import com.trm.opencoinmap.feature.venues.VenuesSearchBarController
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
+class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarController {
   private val binding by viewBinding(ActivityMainBinding::bind)
 
   private val navController: NavController
@@ -60,9 +65,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         },
         onSlide = { slideOffset ->
           binding.searchBar.alpha = collapsedSheetAlpha + slideOffset * (1f - collapsedSheetAlpha)
+          viewModel.onSheetSlide(slideOffset)
         }
       )
     }
+
+  override var searchBarHeightPx: Int? = null
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -77,7 +85,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     initBottomSheet(savedInstanceState)
     initNavigation()
-    initSearchBar()
+    binding.searchBar.init()
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observeSnackbarMessage()
@@ -117,9 +125,19 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     setupActionBarWithNavController(navController, appBarConfiguration)
   }
 
-  private fun initSearchBar() {
-    binding.searchBar.alpha =
+  private fun SearchBar.init() {
+    alpha =
       if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else collapsedSheetAlpha
+
+    viewTreeObserver.addOnGlobalLayoutListener(
+      object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+          viewTreeObserver.removeOnGlobalLayoutListener(this)
+          searchBarHeightPx = (measuredHeight + marginTop + marginBottom)
+          viewModel.onGlobalLayout(sheetState = sheetController.state)
+        }
+      }
+    )
   }
 
   private fun MainViewModel.observeSnackbarMessage() {
