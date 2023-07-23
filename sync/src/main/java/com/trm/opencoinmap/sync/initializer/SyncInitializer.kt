@@ -16,13 +16,12 @@ object Sync {
 
 class SyncInitializer : Initializer<Sync> {
   override fun create(context: Context): Sync {
-    WorkManager.getInstance(context).apply {
-      enqueueUniquePeriodicWork(
+    WorkManager.getInstance(context)
+      .enqueueUniquePeriodicWork(
         SyncWorker.WORK_NAME,
         ExistingPeriodicWorkPolicy.KEEP,
         SyncWorker.workRequest(),
       )
-    }
     return Sync
   }
 
