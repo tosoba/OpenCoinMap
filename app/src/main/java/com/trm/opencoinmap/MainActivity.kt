@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -20,11 +21,13 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.search.SearchBar
+import com.trm.opencoinmap.core.common.R as coreR
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
 import com.trm.opencoinmap.feature.venues.VenuesSearchBarController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarController {
@@ -55,6 +58,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarC
       }
     }
 
+  private val fabMarginPx: Float by
+    lazy(LazyThreadSafetyMode.NONE) { resources.getDimension(coreR.dimen.fab_margin) }
+
+  private val sheetPeekHeightPx: Float by
+    lazy(LazyThreadSafetyMode.NONE) { resources.getDimension(R.dimen.sheet_peek_height) }
+
   private val sheetController: SheetController by
     lazy(LazyThreadSafetyMode.NONE) {
       SheetController(
@@ -62,6 +71,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarC
         collapsedAlpha = collapsedSheetAlpha,
         onStateChanged = { state ->
           binding.showPlacesSheetFab.isVisible = state == BottomSheetBehavior.STATE_HIDDEN
+
+          val params = binding.fabsLayout.layoutParams as ViewGroup.MarginLayoutParams
+          params.bottomMargin =
+            if (state == BottomSheetBehavior.STATE_HIDDEN) {
+                fabMarginPx
+              } else {
+                fabMarginPx + sheetPeekHeightPx
+              }
+              .roundToInt()
+          binding.fabsLayout.layoutParams = params
         },
         onSlide = { slideOffset ->
           binding.searchBar.alpha = collapsedSheetAlpha + slideOffset * (1f - collapsedSheetAlpha)
