@@ -5,15 +5,21 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.feature.categories.databinding.ItemCategoryBinding
 
 class CategoriesAdapter :
-  ListAdapter<String, CategoriesAdapter.ViewHolder>(
-    object : DiffUtil.ItemCallback<String>() {
-      override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+  ListAdapter<VenueCategoryCount, CategoriesAdapter.ViewHolder>(
+    object : DiffUtil.ItemCallback<VenueCategoryCount>() {
+      override fun areItemsTheSame(
+        oldItem: VenueCategoryCount,
+        newItem: VenueCategoryCount
+      ): Boolean = oldItem == newItem
 
-      override fun areContentsTheSame(oldItem: String, newItem: String): Boolean =
-        oldItem == newItem
+      override fun areContentsTheSame(
+        oldItem: VenueCategoryCount,
+        newItem: VenueCategoryCount
+      ): Boolean = oldItem == newItem
     }
   ) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -26,9 +32,9 @@ class CategoriesAdapter :
   inner class ViewHolder(
     private val binding: ItemCategoryBinding,
   ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: String) {
-      binding.categoryLetterIcon.letter = item.first().uppercase()
-      binding.categoryNameTextView.text = item
+    fun bind(item: VenueCategoryCount) {
+      binding.categoryLetterIcon.letter = item.category.first().uppercase()
+      binding.categoryNameTextView.text = item.category
     }
   }
 }

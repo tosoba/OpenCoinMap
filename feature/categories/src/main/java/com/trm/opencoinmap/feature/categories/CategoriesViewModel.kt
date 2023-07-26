@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.trm.opencoinmap.core.common.di.RxSchedulers
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
+import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
@@ -29,8 +30,8 @@ constructor(
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  private val _categories = MutableLiveData(emptyList<String>())
-  val categories: LiveData<List<String>> = _categories
+  private val _categories = MutableLiveData(emptyList<VenueCategoryCount>())
+  val categories: LiveData<List<VenueCategoryCount>> = _categories
 
   private val _isLoadingForNewBounds = MutableLiveData(false)
   val isLoadingForNewBounds: LiveData<Boolean> = _isLoadingForNewBounds

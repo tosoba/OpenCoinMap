@@ -16,6 +16,7 @@ import com.trm.opencoinmap.core.domain.model.GridMapBounds
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
+import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
@@ -64,14 +65,16 @@ constructor(private val coinMapApi: CoinMapApi, private val db: OpenCoinMapDatab
       .map { it.map(VenueEntity::asDomainModel) }
   }
 
-  override fun getCategoriesInBounds(mapBounds: MapBounds): Flowable<List<String>> {
+  override fun getCategoriesInBounds(mapBounds: MapBounds): Flowable<List<VenueCategoryCount>> {
     val (minLat, maxLat, minLon, maxLon) = mapBounds
-    return venueDao.selectDistinctCategoriesInBounds(
-      minLat = minLat,
-      maxLat = maxLat,
-      minLon = minLon,
-      maxLon = maxLon
-    )
+    return venueDao
+      .selectDistinctCategoriesInBounds(
+        minLat = minLat,
+        maxLat = maxLat,
+        minLon = minLon,
+        maxLon = maxLon
+      )
+      .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
   }
 
   override fun getVenueMarkersInLatLngBounds(

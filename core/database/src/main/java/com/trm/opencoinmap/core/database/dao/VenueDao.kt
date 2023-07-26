@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.trm.opencoinmap.core.database.entity.VenueCategoryCountResult
 import com.trm.opencoinmap.core.database.entity.VenueEntity
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -62,8 +63,9 @@ interface VenueDao {
   ): Single<Boolean>
 
   @Query(
-    "SELECT DISTINCT category FROM venue " +
+    "SELECT category, COUNT(*) AS count FROM venue " +
       "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "GROUP BY category " +
       "ORDER BY category"
   )
   fun selectDistinctCategoriesInBounds(
@@ -71,7 +73,7 @@ interface VenueDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double
-  ): Flowable<List<String>>
+  ): Flowable<List<VenueCategoryCountResult>>
 
   companion object {
     private const val SELECT_IN_BOUNDS =
