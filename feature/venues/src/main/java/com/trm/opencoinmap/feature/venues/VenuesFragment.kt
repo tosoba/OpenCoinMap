@@ -27,9 +27,14 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private val viewModel by viewModels<VenuesViewModel>()
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    binding.venuesRecyclerView.init()
+    binding.initViews()
     viewModel.observeState()
     viewModel.observeEvents()
+  }
+
+  private fun FragmentVenuesBinding.initViews() {
+    venuesRecyclerView.init()
+    scrollUpButton.setOnClickListener { venuesRecyclerView.smoothScrollToPosition(0) }
   }
 
   private fun RecyclerView.init() {
@@ -45,6 +50,13 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
         else -> GridLayoutManager(requireContext(), columnCount, RecyclerView.VERTICAL, false)
       }
     adapter = venuesAdapter
+    addOnScrollListener(
+      object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+          binding.scrollUpButton.isVisible = recyclerView.canScrollVertically(-1)
+        }
+      }
+    )
   }
 
   private fun VenuesViewModel.observeState() {
