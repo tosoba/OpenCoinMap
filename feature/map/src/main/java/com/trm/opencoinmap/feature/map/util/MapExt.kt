@@ -1,5 +1,7 @@
 package com.trm.opencoinmap.feature.map.util
 
+import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
@@ -8,19 +10,44 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.CopyrightOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.TilesOverlay
 
-internal fun MapView.setDefaultConfig() {
+internal fun MapView.setDefaultConfig(
+  darkMode: Boolean =
+    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+      Configuration.UI_MODE_NIGHT_YES
+) {
   setTileSource(MapDefaults.tileSource)
+
   isTilesScaledToDpi = true
   setMultiTouchControls(true)
   zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+
   isHorizontalMapRepetitionEnabled = false
   isVerticalMapRepetitionEnabled = false
+
   val tileSystem = MapView.getTileSystem()
   setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
   setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
   minZoomLevel = MapDefaults.MIN_ZOOM
+
+  if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
+  addCopyrightOverlay(darkMode)
+}
+
+internal fun MapView.addCopyrightOverlay(
+  darkMode: Boolean =
+    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+      Configuration.UI_MODE_NIGHT_YES
+) {
+  overlays.add(
+    CopyrightOverlay(context).apply {
+      setTextColor(if (darkMode) Color.WHITE else Color.BLACK)
+      setCopyrightNotice(tileProvider.tileSource.copyrightNotice)
+    }
+  )
 }
 
 internal fun MapView.restorePosition(position: MapPosition) {

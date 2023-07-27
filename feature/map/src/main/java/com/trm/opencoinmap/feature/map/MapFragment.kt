@@ -70,8 +70,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
       markerClusterer.items.clear()
       markerClusterer.invalidate()
-      overlays.clear()
 
+      overlays.clear()
       markers.map { marker ->
         when (marker) {
           is MapMarker.SingleVenue -> {
@@ -88,6 +88,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         }
       }
       overlays.add(markerClusterer)
+      addCopyrightOverlay()
 
       invalidate()
     }
