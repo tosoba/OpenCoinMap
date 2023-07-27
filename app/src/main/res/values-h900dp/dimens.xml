@@ -1,3 +1,4 @@
 <resources>
     <dimen name="sheet_peek_height">250dp</dimen>
+    <dimen name="collapsed_sheet_fabs_bottom_margin">266dp</dimen>
 </resources>

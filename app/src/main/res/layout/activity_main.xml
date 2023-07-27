@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/collapsed_sheet_fabs_bottom_margin"
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
