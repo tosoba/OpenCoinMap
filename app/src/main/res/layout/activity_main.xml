@@ -60,14 +60,30 @@
         app:behavior_peekHeight="@dimen/sheet_peek_height"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
-    <com.google.android.material.search.SearchBar
-        android:id="@+id/search_bar"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/search_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:alpha="@dimen/collapsed_sheet_alpha"
-        android:hint="@string/search"
-        android:outlineAmbientShadowColor="@android:color/black"
-        android:outlineSpotShadowColor="@android:color/black"
-        app:contentInsetStart="16dp" />
+        android:layout_gravity="top|start"
+        android:orientation="vertical">
+
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="@dimen/collapsed_sheet_alpha"
+            android:hint="@string/search"
+            android:outlineAmbientShadowColor="@android:color/black"
+            android:outlineSpotShadowColor="@android:color/black"
+            app:contentInsetStart="16dp" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/categories_container"
+            android:name="com.trm.opencoinmap.feature.categories.CategoriesFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="@dimen/collapsed_sheet_alpha" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

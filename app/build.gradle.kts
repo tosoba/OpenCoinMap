@@ -42,6 +42,7 @@ dependencies {
   implementation(project(":core:network"))
   implementation(project(":core:ui"))
 
+  implementation(project(":feature:categories"))
   implementation(project(":feature:map"))
   implementation(project(":feature:venues"))
 
