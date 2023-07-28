@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.trm.opencoinmap.core.common.ext.hideAnimated
+import com.trm.opencoinmap.core.common.ext.showAnimated
 import com.trm.opencoinmap.core.common.ext.takeIfInstance
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.feature.venues.databinding.FragmentVenuesBinding
@@ -50,10 +52,14 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
         else -> GridLayoutManager(requireContext(), columnCount, RecyclerView.VERTICAL, false)
       }
     adapter = venuesAdapter
+
     addOnScrollListener(
       object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-          binding.scrollUpButton.isVisible = recyclerView.canScrollVertically(-1)
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+          if (newState != RecyclerView.SCROLL_STATE_IDLE) return
+          binding.scrollUpButton.apply {
+            if (recyclerView.canScrollVertically(-1)) showAnimated() else hideAnimated()
+          }
         }
       }
     )
@@ -68,6 +74,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
     pagingData.observe(viewLifecycleOwner) {
       venuesAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+      binding.scrollUpButton.isVisible = binding.venuesRecyclerView.canScrollVertically(-1)
     }
   }
 
