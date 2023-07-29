@@ -33,8 +33,7 @@ class CategoriesAdapter :
     private val binding: ItemCategoryBinding,
   ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(item: VenueCategoryCount) {
-      binding.categoryLetterIcon.letter = item.category.first().uppercase()
-      binding.categoryNameTextView.text = item.category
+      binding.categoryChip.text = item.category
     }
   }
 }
