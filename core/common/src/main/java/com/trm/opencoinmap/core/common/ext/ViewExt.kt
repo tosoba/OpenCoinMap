@@ -6,6 +6,7 @@ import android.view.animation.AnimationUtils
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.trm.opencoinmap.core.common.R
 import com.trm.opencoinmap.core.domain.model.Message
 
 fun Message.Length.toSnackbarLength(): Int =
@@ -18,7 +19,7 @@ fun Message.Length.toSnackbarLength(): Int =
 fun View.hideAnimated() {
   if (isGone) return
   startAnimation(
-    AnimationUtils.loadAnimation(context, android.R.anim.fade_out).apply {
+    AnimationUtils.loadAnimation(context, R.anim.fade_out).apply {
       setAnimationListener(
         object : Animation.AnimationListener {
           override fun onAnimationStart(animation: Animation) = Unit
@@ -36,7 +37,7 @@ fun View.hideAnimated() {
 fun View.showAnimated() {
   if (isVisible) return
   startAnimation(
-    AnimationUtils.loadAnimation(context, android.R.anim.fade_in).apply {
+    AnimationUtils.loadAnimation(context, R.anim.fade_in).apply {
       setAnimationListener(
         object : Animation.AnimationListener {
           override fun onAnimationStart(animation: Animation) {
