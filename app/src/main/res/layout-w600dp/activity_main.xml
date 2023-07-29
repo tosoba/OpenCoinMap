@@ -65,12 +65,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:weightSum="1">
 
         <com.google.android.material.search.SearchBar
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight=".5"
             android:alpha="@dimen/collapsed_sheet_alpha"
             android:hint="@string/search"
             android:outlineAmbientShadowColor="@android:color/black"
@@ -82,7 +85,9 @@
             android:name="com.trm.opencoinmap.feature.categories.CategoriesFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="-10dp"
+            android:layout_weight=".5"
             android:alpha="@dimen/collapsed_sheet_alpha" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

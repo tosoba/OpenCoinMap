@@ -81,7 +81,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun VenuesViewModel.observeEvents() {
     sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       val searchBarHeightPx =
-        requireActivity().takeIfInstance<VenuesSearchBarController>()?.searchBarHeightPx
+        requireActivity().takeIfInstance<VenuesSearchController>()?.searchViewsHeightPx
           ?: return@observe
       val params = binding.venuesContainer.layoutParams as ViewGroup.MarginLayoutParams
       params.topMargin =

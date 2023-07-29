@@ -20,17 +20,16 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.search.SearchBar
 import com.trm.opencoinmap.core.common.R as coreR
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
-import com.trm.opencoinmap.feature.venues.VenuesSearchBarController
+import com.trm.opencoinmap.feature.venues.VenuesSearchController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarController {
+class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchController {
   private val binding by viewBinding(ActivityMainBinding::bind)
 
   private val navController: NavController
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarC
       )
     }
 
-  override var searchBarHeightPx: Int? = null
+  override var searchViewsHeightPx: Int? = null
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -104,7 +103,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarC
 
     initBottomSheet(savedInstanceState)
     initNavigation()
-    binding.searchBar.init()
+    initSearchViews()
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observeSnackbarMessage()
@@ -144,19 +143,21 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchBarC
     setupActionBarWithNavController(navController, appBarConfiguration)
   }
 
-  private fun SearchBar.init() {
-    alpha =
-      if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else collapsedSheetAlpha
+  private fun initSearchViews() {
+    with(binding.searchLayout) {
+      alpha =
+        if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else collapsedSheetAlpha
 
-    viewTreeObserver.addOnGlobalLayoutListener(
-      object : ViewTreeObserver.OnGlobalLayoutListener {
-        override fun onGlobalLayout() {
-          viewTreeObserver.removeOnGlobalLayoutListener(this)
-          searchBarHeightPx = (measuredHeight + marginTop + marginBottom)
-          viewModel.onGlobalLayout(sheetState = sheetController.state)
+      viewTreeObserver.addOnGlobalLayoutListener(
+        object : ViewTreeObserver.OnGlobalLayoutListener {
+          override fun onGlobalLayout() {
+            viewTreeObserver.removeOnGlobalLayoutListener(this)
+            searchViewsHeightPx = (measuredHeight + marginTop + marginBottom)
+            viewModel.onGlobalLayout(sheetState = sheetController.state)
+          }
         }
-      }
-    )
+      )
+    }
   }
 
   private fun MainViewModel.observeSnackbarMessage() {
