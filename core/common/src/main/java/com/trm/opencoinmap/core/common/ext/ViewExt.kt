@@ -19,7 +19,7 @@ fun Message.Length.toSnackbarLength(): Int =
 fun View.hideAnimated() {
   if (isGone) return
   startAnimation(
-    AnimationUtils.loadAnimation(context, R.anim.fade_out).apply {
+    AnimationUtils.loadAnimation(context, R.anim.custom_shrink_fade_out).apply {
       setAnimationListener(
         object : Animation.AnimationListener {
           override fun onAnimationStart(animation: Animation) = Unit
@@ -37,7 +37,7 @@ fun View.hideAnimated() {
 fun View.showAnimated() {
   if (isVisible) return
   startAnimation(
-    AnimationUtils.loadAnimation(context, R.anim.fade_in).apply {
+    AnimationUtils.loadAnimation(context, R.anim.custom_grow_fade_in).apply {
       setAnimationListener(
         object : Animation.AnimationListener {
           override fun onAnimationStart(animation: Animation) {
