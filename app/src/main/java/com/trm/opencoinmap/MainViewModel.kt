@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.domain.model.Message
+import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendSheetSlideOffsetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,20 +19,28 @@ internal class MainViewModel
 @Inject
 constructor(
   receiveMessageUseCase: ReceiveMessageUseCase,
-  private val sendSheetSlideOffsetUseCase: SendSheetSlideOffsetUseCase
+  private val sendSheetSlideOffsetUseCase: SendSheetSlideOffsetUseCase,
+  receiveCategoriesListLayoutEventUseCase: ReceiveCategoriesListLayoutEventUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  private val _snackbarMessage: LiveEvent<Message> = LiveEvent()
+  private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage
+
+  private val _categoriesUpdatedEvent = LiveEvent<Unit>()
+  val categoriesUpdatedEvent: LiveData<Unit> = _categoriesUpdatedEvent
 
   init {
     receiveMessageUseCase()
       .subscribeBy(onNext = _snackbarMessage::setValue)
       .addTo(compositeDisposable)
+
+    receiveCategoriesListLayoutEventUseCase()
+      .subscribeBy(onNext = _categoriesUpdatedEvent::setValue)
+      .addTo(compositeDisposable)
   }
 
-  fun onGlobalLayout(@BottomSheetBehavior.State sheetState: Int) {
+  fun onSearchViewsSizeMeasure(@BottomSheetBehavior.State sheetState: Int) {
     sendSheetSlideOffsetUseCase(if (sheetState == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f)
   }
 

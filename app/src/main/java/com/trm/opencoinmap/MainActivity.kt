@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
     initSearchViews()
 
     lifecycle.addObserver(snackbarMessageObserver)
-    viewModel.observeSnackbarMessage()
+    viewModel.observe()
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -152,15 +152,23 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
         object : ViewTreeObserver.OnGlobalLayoutListener {
           override fun onGlobalLayout() {
             viewTreeObserver.removeOnGlobalLayoutListener(this)
-            searchViewsHeightPx = (measuredHeight + marginTop + marginBottom)
-            viewModel.onGlobalLayout(sheetState = sheetController.state)
+            searchViewsHeightPx = measuredHeight + marginTop + marginBottom
+            viewModel.onSearchViewsSizeMeasure(sheetState = sheetController.state)
           }
         }
       )
     }
   }
 
-  private fun MainViewModel.observeSnackbarMessage() {
+  private fun MainViewModel.observe() {
     snackbarMessage.observe(this@MainActivity, snackbarMessageObserver)
+    categoriesUpdatedEvent.observe(this@MainActivity) {
+      with(binding.searchLayout) { measuredHeight + marginTop + marginBottom }
+        .also {
+          if (it == searchViewsHeightPx) return@also
+          searchViewsHeightPx = it
+          viewModel.onSearchViewsSizeMeasure(sheetState = sheetController.state)
+        }
+    }
   }
 }

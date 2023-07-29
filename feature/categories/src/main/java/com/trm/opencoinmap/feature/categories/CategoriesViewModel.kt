@@ -10,6 +10,7 @@ import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -26,6 +27,7 @@ constructor(
   receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
   private val getCategoriesInBoundsUseCase: GetCategoriesInBoundsUseCase,
+  private val sendCategoriesListLayoutEventUseCase: SendCategoriesListLayoutEventUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -60,6 +62,10 @@ constructor(
         _categories.value = categories
       }
       .addTo(compositeDisposable)
+  }
+
+  fun onCategoriesListLayout() {
+    sendCategoriesListLayoutEventUseCase()
   }
 
   override fun onCleared() {

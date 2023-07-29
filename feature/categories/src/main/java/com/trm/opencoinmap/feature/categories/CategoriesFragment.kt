@@ -17,6 +17,9 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     binding.categoriesRecyclerView.adapter = adapter
+    binding.categoriesRecyclerView.viewTreeObserver.addOnGlobalLayoutListener {
+      viewModel.onCategoriesListLayout()
+    }
     viewModel.categories.observe(viewLifecycleOwner, adapter::submitList)
   }
 }
