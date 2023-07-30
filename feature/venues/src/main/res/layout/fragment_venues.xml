@@ -14,6 +14,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/venues_drag_handle_bottom_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:barrierMargin="-15dp"
+        app:constraint_referenced_ids="venues_drag_handle_view" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/venues_recycler_view"
         android:layout_width="0dp"
@@ -24,7 +32,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_view"
+        app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_bottom_barrier"
         tools:listitem="@layout/item_venue"
         tools:visibility="visible" />
 
