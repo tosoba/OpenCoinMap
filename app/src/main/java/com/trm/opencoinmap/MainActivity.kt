@@ -10,6 +10,7 @@ import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -69,17 +70,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
         bottomSheetView = binding.bottomSheetContainer,
         collapsedAlpha = collapsedSheetAlpha,
         onStateChanged = { state ->
-          binding.showPlacesSheetFab.isVisible = state == BottomSheetBehavior.STATE_HIDDEN
-
-          val params = binding.fabsLayout.layoutParams as ViewGroup.MarginLayoutParams
-          params.bottomMargin =
-            if (state == BottomSheetBehavior.STATE_HIDDEN) {
-                fabMarginPx
-              } else {
-                fabMarginPx + sheetPeekHeightPx
-              }
-              .roundToInt()
-          binding.fabsLayout.layoutParams = params
+          updateShowPlacesFabVisibility(sheetState = state)
+          updateFabsLayoutParams(sheetState = state)
         },
         onSlide = { slideOffset ->
           binding.searchBar.alpha = collapsedSheetAlpha + slideOffset * (1f - collapsedSheetAlpha)
@@ -161,7 +153,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
   }
 
   private fun MainViewModel.observe() {
+    bottomSheetVisible.observe(this@MainActivity) {
+      binding.bottomSheetContainer.isVisible = it
+      if (it) {
+        updateShowPlacesFabVisibility(sheetState = sheetController.state)
+        updateFabsLayoutParams(sheetState = sheetController.state)
+      }
+    }
+
     snackbarMessage.observe(this@MainActivity, snackbarMessageObserver)
+
     categoriesUpdatedEvent.observe(this@MainActivity) {
       with(binding.searchLayout) { measuredHeight + marginTop + marginBottom }
         .also {
@@ -170,5 +171,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
           viewModel.onSearchViewsSizeMeasure(sheetState = sheetController.state)
         }
     }
+  }
+
+  private fun updateShowPlacesFabVisibility(sheetState: Int) {
+    binding.showPlacesSheetFab.isVisible =
+      binding.bottomSheetContainer.isVisible && sheetState == BottomSheetBehavior.STATE_HIDDEN
+  }
+
+  private fun updateFabsLayoutParams(@BottomSheetBehavior.State sheetState: Int) {
+    val params = binding.fabsLayout.layoutParams as ViewGroup.MarginLayoutParams
+    params.bottomMargin =
+      if (binding.bottomSheetContainer.isGone || sheetState == BottomSheetBehavior.STATE_HIDDEN) {
+          fabMarginPx
+        } else {
+          fabMarginPx + sheetPeekHeightPx
+        }
+        .roundToInt()
+    binding.fabsLayout.layoutParams = params
   }
 }

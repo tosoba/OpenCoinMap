@@ -18,4 +18,6 @@ interface VenueRepo {
   fun getVenueMarkersInLatLngBounds(gridMapBounds: GridMapBounds): Single<List<MapMarker>>
 
   fun getCategoriesInBounds(mapBounds: MapBounds): Flowable<List<VenueCategoryCount>>
+
+  fun getVenuesCount(): Flowable<Int>
 }

@@ -75,6 +75,8 @@ interface VenueDao {
     maxLon: Double
   ): Flowable<List<VenueCategoryCountResult>>
 
+  @Query("SELECT COUNT(*) FROM venue") fun selectVenuesCount(): Flowable<Int>
+
   companion object {
     private const val SELECT_IN_BOUNDS =
       "SELECT * FROM venue " +
