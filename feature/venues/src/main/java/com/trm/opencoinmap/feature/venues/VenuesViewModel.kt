@@ -41,7 +41,7 @@ constructor(
   private val _pagingData = MutableLiveData(PagingData.empty<Venue>())
   val pagingData: LiveData<PagingData<Venue>> = _pagingData
 
-  private val _isLoadingForNewBounds = MutableLiveData(false)
+  private val _isLoadingForNewBounds = MutableLiveData(true)
   val isLoadingForNewBounds: LiveData<Boolean> = _isLoadingForNewBounds
 
   private val _loadingForNewBoundsFailed = MutableLiveData(false)

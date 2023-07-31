@@ -67,7 +67,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
   private fun VenuesViewModel.observeState() {
     isLoadingForNewBounds.observe(viewLifecycleOwner) {
-      binding.loadingProgressIndicator.isVisible = it
+      binding.loadingProgressLayout.isVisible = it
     }
 
     isVenuesListVisible.observe(viewLifecycleOwner) { binding.venuesRecyclerView.isVisible = it }
