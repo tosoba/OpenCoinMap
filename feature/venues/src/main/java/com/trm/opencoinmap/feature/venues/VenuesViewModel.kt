@@ -12,11 +12,13 @@ import com.trm.opencoinmap.core.common.di.RxSchedulers
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
@@ -34,6 +36,7 @@ constructor(
   private val getVenuesPagingInBoundsUseCase: GetVenuesPagingInBoundsUseCase,
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
   receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
+  isVenuesSyncRunningUseCase: IsVenuesSyncRunningUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -62,11 +65,21 @@ constructor(
   val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
 
   init {
-    receiveMapBoundsUseCase()
+    isVenuesSyncRunningUseCase()
       .toFlowable(BackpressureStrategy.LATEST)
-      .switchMap { bounds -> getVenuesPagingInBoundsUseCase(bounds).cachedIn(viewModelScope) }
-      .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
-      .debounce(250L, TimeUnit.MILLISECONDS)
+      .switchMap { isRunning ->
+        if (isRunning) {
+          Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.IN_PROGRESS)
+        } else {
+          receiveMapBoundsUseCase()
+            .toFlowable(BackpressureStrategy.LATEST)
+            .switchMap { bounds -> getVenuesPagingInBoundsUseCase(bounds).cachedIn(viewModelScope) }
+            .combineLatest(
+              receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST)
+            )
+            .debounce(250L, TimeUnit.MILLISECONDS)
+        }
+      }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
