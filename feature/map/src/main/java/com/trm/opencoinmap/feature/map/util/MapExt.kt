@@ -3,9 +3,12 @@ package com.trm.opencoinmap.feature.map.util
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
+import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.feature.map.model.MapPosition
+import kotlin.math.max
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
@@ -31,8 +34,20 @@ internal fun MapView.setDefaultConfig(
   val tileSystem = MapView.getTileSystem()
   setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
   setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
-  minZoomLevel = MapDefaults.MIN_ZOOM
 
+  minZoomLevel =
+    max(
+      tileSystem.getLongitudeZoom(
+        MapBoundsLimit.MAX_LON,
+        MapBoundsLimit.MIN_LON,
+        resources.configuration.screenWidthDp.toFloat().toPx(context).toInt()
+      ),
+      tileSystem.getLatitudeZoom(
+        MapBoundsLimit.MAX_LAT,
+        MapBoundsLimit.MIN_LAT,
+        resources.configuration.screenHeightDp.toFloat().toPx(context).toInt()
+      )
+    )
   if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
   addCopyrightOverlay(darkMode)
 }
