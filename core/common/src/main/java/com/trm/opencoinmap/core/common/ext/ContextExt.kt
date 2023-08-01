@@ -5,12 +5,12 @@ import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import kotlin.math.max
 
 fun Context.lazyBitmapResource(@DrawableRes drawableId: Int): Lazy<Bitmap> =
   lazy(LazyThreadSafetyMode.NONE) {
     requireNotNull(ContextCompat.getDrawable(this, drawableId)).toBitmap()
   }
 
-fun Float.toPx(context: Context): Float = this * context.resources.displayMetrics.density
-
-fun Float.toDp(context: Context): Float = this / context.resources.displayMetrics.density
+fun Context.maxHorizontalSpanCount(minItemWidthDp: Int): Int =
+  max((resources.displayMetrics.widthPixels.toFloat().toDp(this) / minItemWidthDp).toInt(), 1)

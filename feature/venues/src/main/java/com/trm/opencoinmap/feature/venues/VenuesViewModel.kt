@@ -41,16 +41,20 @@ constructor(
   private val _pagingData = MutableLiveData(PagingData.empty<Venue>())
   val pagingData: LiveData<PagingData<Venue>> = _pagingData
 
-  private val _isLoadingForNewBounds = MutableLiveData(true)
-  val isLoadingForNewBounds: LiveData<Boolean> = _isLoadingForNewBounds
+  private val _isLoadingProgressLayoutVisible = MutableLiveData(true)
+  val isLoadingProgressLayoutVisible: LiveData<Boolean> = _isLoadingProgressLayoutVisible
 
   private val _loadingForNewBoundsFailed = MutableLiveData(false)
   val loadingForNewBoundsFailed: LiveData<Boolean> = _loadingForNewBoundsFailed
 
   private val _isVenuesListVisible =
     MediatorLiveData<Boolean>().apply {
-      addSource(_isLoadingForNewBounds) { value = !it && _loadingForNewBoundsFailed.value == false }
-      addSource(_loadingForNewBoundsFailed) { value = !it && _isLoadingForNewBounds.value == false }
+      addSource(_isLoadingProgressLayoutVisible) {
+        value = !it && _loadingForNewBoundsFailed.value == false
+      }
+      addSource(_loadingForNewBoundsFailed) {
+        value = !it && _isLoadingProgressLayoutVisible.value == false
+      }
     }
   val isVenuesListVisible: LiveData<Boolean> = _isVenuesListVisible
 
@@ -66,7 +70,7 @@ constructor(
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
-        _isLoadingForNewBounds.value = status == MarkersLoadingStatus.IN_PROGRESS
+        _isLoadingProgressLayoutVisible.value = status == MarkersLoadingStatus.IN_PROGRESS
         _loadingForNewBoundsFailed.value = status == MarkersLoadingStatus.ERROR
         _pagingData.value = pagingData
       }
