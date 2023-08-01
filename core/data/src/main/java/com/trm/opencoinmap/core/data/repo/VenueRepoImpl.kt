@@ -5,7 +5,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.rxjava3.flowable
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.trm.opencoinmap.core.data.ext.isValid
 import com.trm.opencoinmap.core.data.mapper.asDomainModel
 import com.trm.opencoinmap.core.data.mapper.asEntity
@@ -18,6 +17,7 @@ import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
+import com.trm.opencoinmap.core.domain.sync.SyncDataSource
 import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
@@ -26,19 +26,19 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class VenueRepoImpl
 @Inject
-constructor(private val coinMapApi: CoinMapApi, private val db: OpenCoinMapDatabase) : VenueRepo {
+constructor(
+  private val coinMapApi: CoinMapApi,
+  private val db: OpenCoinMapDatabase,
+  private val syncDataSource: SyncDataSource
+) : VenueRepo {
   private val venueDao = db.venueDao()
   private val boundsDao = db.boundsDao()
 
-  private val syncRunning = BehaviorRelay.createDefault(false)
-
   override fun sync(): Completable {
-    syncRunning.accept(true)
+    syncDataSource.isRunning = true
     return coinMapApi
       .getVenues()
       .map { response ->
@@ -46,7 +46,7 @@ constructor(private val coinMapApi: CoinMapApi, private val db: OpenCoinMapDatab
           ?: emptyList()
       }
       .flatMapCompletable(::insertVenuesInWholeBounds)
-      .doAfterTerminate { syncRunning.accept(false) }
+      .doAfterTerminate { syncDataSource.isRunning = false }
   }
 
   override fun getVenuesPagingInBounds(mapBounds: MapBounds): Flowable<PagingData<Venue>> {
@@ -158,7 +158,11 @@ constructor(private val coinMapApi: CoinMapApi, private val db: OpenCoinMapDatab
   }
 
   private fun waitUntilSyncCompleted(): Completable =
-    syncRunning.filter { isRunning -> !isRunning }.firstOrError().ignoreElement()
+    syncDataSource
+      .isRunningObservable()
+      .filter { isRunning -> !isRunning }
+      .firstOrError()
+      .ignoreElement()
 
   private fun selectCellMarkers(
     gridCells: List<Bounds>,
