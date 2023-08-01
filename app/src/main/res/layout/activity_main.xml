@@ -57,10 +57,8 @@
         android:layout_height="match_parent"
         android:alpha="@dimen/collapsed_sheet_alpha"
         android:elevation="0dp"
-        android:visibility="gone"
         app:behavior_peekHeight="@dimen/sheet_peek_height"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        tools:visibility="visible" />
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/search_layout"

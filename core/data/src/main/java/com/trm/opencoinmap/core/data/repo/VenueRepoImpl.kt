@@ -77,8 +77,6 @@ constructor(
       .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
   }
 
-  override fun getVenuesCount(): Flowable<Int> = venueDao.selectVenuesCount()
-
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds
   ): Single<List<MapMarker>> {
