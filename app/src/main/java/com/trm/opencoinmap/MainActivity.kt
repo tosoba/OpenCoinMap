@@ -9,6 +9,7 @@ import android.view.ViewTreeObserver
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
@@ -22,6 +23,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.R as coreR
 import com.trm.opencoinmap.core.common.ext.requireAs
+import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.ActivityMainBinding
@@ -130,6 +132,18 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
   }
 
   private fun initBottomSheet(savedInstanceState: Bundle?) {
+    if (resources.configuration.screenWidthDp >= 600) {
+      binding.bottomSheetContainer.layoutParams =
+        binding.bottomSheetContainer.layoutParams
+          .requireAs<CoordinatorLayout.LayoutParams>()
+          .apply {
+            width =
+              (resources.configuration.screenWidthDp / 2)
+                .toFloat()
+                .toPx(this@MainActivity)
+                .roundToInt()
+          }
+    }
     sheetController.initFrom(savedInstanceState)
     onBackPressedDispatcher.addCallback {
       if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) {
