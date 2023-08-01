@@ -1,8 +1,10 @@
 package com.trm.opencoinmap.feature.venues
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,8 +26,10 @@ import kotlin.math.roundToInt
 class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private val binding by viewBinding(FragmentVenuesBinding::bind)
   private val venuesAdapter by lazy(LazyThreadSafetyMode.NONE) { VenuesAdapter(onItemClick = {}) }
-  private val expandedSheetContainerExtraTopMarginPx by
+  private val expandedSheetContainerExtraTopMarginPx: Float by
     lazy(LazyThreadSafetyMode.NONE) { 10f.toPx(requireContext()) }
+  private val venueColumnsCount: Int by
+    lazy(LazyThreadSafetyMode.NONE) { requireContext().maxHorizontalSpanCount(220) }
 
   private val viewModel by viewModels<VenuesViewModel>()
 
@@ -36,13 +40,39 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   }
 
   private fun FragmentVenuesBinding.initViews() {
+    loadingProgressItemsLayout.root.init()
     venuesRecyclerView.init()
     scrollUpButton.setOnClickListener { venuesRecyclerView.smoothScrollToPosition(0) }
   }
 
+  private fun GridLayout.init() {
+    columnCount = venueColumnsCount
+    repeat(venueColumnsCount * 3) {
+      addView(loadingProgressItem(row = it / venueColumnsCount, column = it % venueColumnsCount))
+    }
+  }
+
+  private fun GridLayout.loadingProgressItem(row: Int, column: Int): View =
+    layoutInflater.inflate(R.layout.item_venue, this, false).apply {
+      layoutParams =
+        GridLayout.LayoutParams().apply {
+          width = 0
+          height = GridLayout.LayoutParams.WRAP_CONTENT
+          setGravity(Gravity.FILL)
+          rowSpec = GridLayout.spec(row)
+          columnSpec = GridLayout.spec(column, 1, 1f)
+          setMargins(
+            resources.getDimensionPixelSize(R.dimen.item_venue_margin_horizontal),
+            0,
+            resources.getDimensionPixelSize(R.dimen.item_venue_margin_horizontal),
+            resources.getDimensionPixelSize(R.dimen.item_venue_margin_bottom)
+          )
+        }
+    }
+
   private fun RecyclerView.init() {
     layoutManager =
-      GridLayoutManager(context, context.maxHorizontalSpanCount(220), RecyclerView.VERTICAL, false)
+      GridLayoutManager(requireContext(), venueColumnsCount, RecyclerView.VERTICAL, false)
     adapter = venuesAdapter
 
     addOnScrollIdleListener { binding.toggleScrollUpButtonVisibility() }

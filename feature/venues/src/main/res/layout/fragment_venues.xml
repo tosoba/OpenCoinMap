@@ -47,7 +47,9 @@
         app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_bottom_barrier"
         app:shimmer_auto_start="true">
 
-        <include layout="@layout/view_loading_venues" />
+        <include
+            android:id="@+id/loading_progress_items_layout"
+            layout="@layout/view_loading_venues" />
 
     </com.facebook.shimmer.ShimmerFrameLayout>
 
