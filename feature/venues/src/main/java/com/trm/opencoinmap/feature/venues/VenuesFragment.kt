@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.GridLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -13,13 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.addOnScrollIdleListener
 import com.trm.opencoinmap.core.common.ext.hideAnimated
-import com.trm.opencoinmap.core.common.ext.maxHorizontalSpanCount
 import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.common.ext.showAnimated
+import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.feature.venues.databinding.FragmentVenuesBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -28,8 +30,6 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private val venuesAdapter by lazy(LazyThreadSafetyMode.NONE) { VenuesAdapter(onItemClick = {}) }
   private val expandedSheetContainerExtraTopMarginPx: Float by
     lazy(LazyThreadSafetyMode.NONE) { 10f.toPx(requireContext()) }
-  private val venueColumnsCount: Int by
-    lazy(LazyThreadSafetyMode.NONE) { requireContext().maxHorizontalSpanCount(220) }
 
   private val viewModel by viewModels<VenuesViewModel>()
 
@@ -40,15 +40,25 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   }
 
   private fun FragmentVenuesBinding.initViews() {
-    loadingProgressItemsLayout.root.init()
-    venuesRecyclerView.init()
+    binding.root.viewTreeObserver.addOnGlobalLayoutListener(
+      object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+          binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
+          val columnsCount =
+            max((binding.root.width.toFloat().toDp(requireContext()) / 220).toInt(), 1)
+          loadingProgressItemsLayout.root.init(columnsCount)
+          venuesRecyclerView.init(columnsCount)
+        }
+      }
+    )
+
     scrollUpButton.setOnClickListener { venuesRecyclerView.smoothScrollToPosition(0) }
   }
 
-  private fun GridLayout.init() {
-    columnCount = venueColumnsCount
-    repeat(venueColumnsCount * 3) {
-      addView(loadingProgressItem(row = it / venueColumnsCount, column = it % venueColumnsCount))
+  private fun GridLayout.init(columnsCount: Int) {
+    columnCount = columnsCount
+    repeat(columnsCount * 3) {
+      addView(loadingProgressItem(row = it / columnsCount, column = it % columnsCount))
     }
   }
 
@@ -70,9 +80,8 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
         }
     }
 
-  private fun RecyclerView.init() {
-    layoutManager =
-      GridLayoutManager(requireContext(), venueColumnsCount, RecyclerView.VERTICAL, false)
+  private fun RecyclerView.init(columnsCount: Int) {
+    layoutManager = GridLayoutManager(requireContext(), columnsCount, RecyclerView.VERTICAL, false)
     adapter = venuesAdapter
 
     addOnScrollIdleListener { binding.toggleScrollUpButtonVisibility() }
