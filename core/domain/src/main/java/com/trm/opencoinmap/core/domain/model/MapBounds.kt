@@ -1,8 +1,8 @@
 package com.trm.opencoinmap.core.domain.model
 
 data class MapBounds(
-  val minLat: Double,
-  val maxLat: Double,
-  val minLon: Double,
-  val maxLon: Double
+    val latSouth: Double,
+    val latNorth: Double,
+    val lonWest: Double,
+    val lonEast: Double
 )

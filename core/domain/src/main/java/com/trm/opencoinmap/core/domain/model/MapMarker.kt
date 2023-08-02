@@ -3,16 +3,16 @@ package com.trm.opencoinmap.core.domain.model
 sealed interface MapMarker {
   data class SingleVenue(val venue: Venue) : MapMarker
   data class VenuesCluster(
-    val minLat: Double,
-    val maxLat: Double,
-    val minLon: Double,
-    val maxLon: Double,
+    val latSouth: Double,
+    val latNorth: Double,
+    val lonEast: Double,
+    val lonWest: Double,
     val size: Int
   ) : MapMarker {
     val lat: Double
-      get() = (minLat + maxLat) / 2.0
+      get() = (latSouth + latNorth) / 2.0
 
     val lon: Double
-      get() = (minLon + maxLon) / 2.0
+      get() = (lonEast + lonWest) / 2.0
   }
 }

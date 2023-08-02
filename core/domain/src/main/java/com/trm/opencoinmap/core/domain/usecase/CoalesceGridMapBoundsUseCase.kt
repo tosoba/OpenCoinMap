@@ -13,10 +13,10 @@ class CoalesceGridMapBoundsUseCase @Inject constructor() {
     return GridMapBounds(
       bounds =
         MapBounds(
-          minLat = max(minLat, MapBoundsLimit.MIN_LAT),
-          maxLat = min(maxLat, MapBoundsLimit.MAX_LAT),
-          minLon = max(minLon, MapBoundsLimit.MIN_LON),
-          maxLon = min(maxLon, MapBoundsLimit.MAX_LON)
+          latSouth = max(minLat, MapBoundsLimit.MIN_LAT),
+          latNorth = min(maxLat, MapBoundsLimit.MAX_LAT),
+          lonWest = max(minLon, MapBoundsLimit.MIN_LON),
+          lonEast = min(maxLon, MapBoundsLimit.MAX_LON)
         ),
       latDivisor = gridMapBounds.latDivisor,
       lonDivisor = gridMapBounds.lonDivisor

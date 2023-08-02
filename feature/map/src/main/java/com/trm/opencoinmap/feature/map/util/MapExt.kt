@@ -28,26 +28,22 @@ internal fun MapView.setDefaultConfig(
   setMultiTouchControls(true)
   zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
-  isHorizontalMapRepetitionEnabled = false
-  isVerticalMapRepetitionEnabled = false
-
-  val tileSystem = MapView.getTileSystem()
-  setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
-  setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
-
   minZoomLevel =
     max(
-      tileSystem.getLongitudeZoom(
-        MapBoundsLimit.MAX_LON,
-        MapBoundsLimit.MIN_LON,
-        resources.configuration.screenWidthDp.toFloat().toPx(context).toInt()
-      ),
-      tileSystem.getLatitudeZoom(
-        MapBoundsLimit.MAX_LAT,
-        MapBoundsLimit.MIN_LAT,
-        resources.configuration.screenHeightDp.toFloat().toPx(context).toInt()
-      )
+      MapView.getTileSystem()
+        .getLongitudeZoom(
+          MapBoundsLimit.MAX_LON,
+          MapBoundsLimit.MIN_LON,
+          resources.configuration.screenWidthDp.toFloat().toPx(context).toInt()
+        ),
+      MapView.getTileSystem()
+        .getLatitudeZoom(
+          MapBoundsLimit.MAX_LAT,
+          MapBoundsLimit.MIN_LAT,
+          resources.configuration.screenHeightDp.toFloat().toPx(context).toInt()
+        )
     )
+
   if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
   addCopyrightOverlay(darkMode)
 }
@@ -107,7 +103,7 @@ internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Dr
   }
 
 private fun MapMarker.VenuesCluster.getBoundingBox(): BoundingBox =
-  BoundingBox(maxLat, maxLon, minLat, minLon)
+  BoundingBox(latNorth, lonWest, latSouth, lonEast)
 
 internal fun BoundingBox.toBounds(): MapBounds =
-  MapBounds(minLat = latSouth, maxLat = latNorth, minLon = lonWest, maxLon = lonEast)
+  MapBounds(latSouth = latSouth, latNorth = latNorth, lonWest = lonWest, lonEast = lonEast)

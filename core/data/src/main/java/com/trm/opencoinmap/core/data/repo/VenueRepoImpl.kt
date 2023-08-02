@@ -136,10 +136,10 @@ constructor(
                       is GridCellMarkers.Cluster -> {
                         listOf(
                           MapMarker.VenuesCluster(
-                            minLat = cell.minLat,
-                            maxLat = cell.maxLat,
-                            minLon = cell.minLon,
-                            maxLon = cell.maxLon,
+                            latSouth = cell.minLat,
+                            latNorth = cell.maxLat,
+                            lonEast = cell.minLon,
+                            lonWest = cell.maxLon,
                             size = cell.count
                           )
                         )
