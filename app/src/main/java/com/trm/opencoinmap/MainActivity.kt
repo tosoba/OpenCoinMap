@@ -23,6 +23,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.R as coreR
 import com.trm.opencoinmap.core.common.ext.requireAs
+import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
@@ -66,6 +67,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
   private val sheetPeekHeightPx: Float by
     lazy(LazyThreadSafetyMode.NONE) { resources.getDimension(R.dimen.sheet_peek_height) }
 
+  private val usingHalfScreenSheetWidth: Boolean by
+    lazy(LazyThreadSafetyMode.NONE) {
+      resources.configuration.screenWidthDp >=
+        resources.getDimension(R.dimen.half_bottom_sheet_min_screen_width).toDp(this)
+    }
+
   private val sheetController: SheetController by
     lazy(LazyThreadSafetyMode.NONE) {
       SheetController(
@@ -73,6 +80,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
         collapsedAlpha = collapsedSheetAlpha,
         onStateChanged = { state ->
           binding.showPlacesSheetFab.isVisible = state == BottomSheetBehavior.STATE_HIDDEN
+
+          if (usingHalfScreenSheetWidth) return@SheetController
+
           binding.fabsLayout.layoutParams =
             binding.fabsLayout.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
               bottomMargin =
@@ -132,7 +142,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
   }
 
   private fun initBottomSheet(savedInstanceState: Bundle?) {
-    if (resources.configuration.screenWidthDp >= 600) {
+    if (usingHalfScreenSheetWidth) {
       binding.bottomSheetContainer.layoutParams =
         binding.bottomSheetContainer.layoutParams
           .requireAs<CoordinatorLayout.LayoutParams>()
@@ -144,7 +154,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), VenuesSearchCont
                 .roundToInt()
           }
     }
+
     sheetController.initFrom(savedInstanceState)
+
     onBackPressedDispatcher.addCallback {
       if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) {
         sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
