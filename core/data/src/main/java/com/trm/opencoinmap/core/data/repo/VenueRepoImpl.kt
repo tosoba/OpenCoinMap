@@ -50,15 +50,15 @@ constructor(
   }
 
   override fun getVenuesPagingInBounds(mapBounds: MapBounds): Flowable<PagingData<Venue>> {
-    val (minLat, maxLat, minLon, maxLon) = mapBounds
+    val (latSouth, latNorth, lonWest, lonEast) = mapBounds
     return Pager(
         config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50)
       ) {
         venueDao.selectPageInBounds(
-          minLat = minLat,
-          maxLat = maxLat,
-          minLon = minLon,
-          maxLon = maxLon
+          minLat = latSouth,
+          maxLat = latNorth,
+          minLon = lonWest,
+          maxLon = lonEast
         )
       }
       .flowable
@@ -66,13 +66,13 @@ constructor(
   }
 
   override fun getCategoriesInBounds(mapBounds: MapBounds): Flowable<List<VenueCategoryCount>> {
-    val (minLat, maxLat, minLon, maxLon) = mapBounds
+    val (latSouth, latNorth, lonWest, lonEast) = mapBounds
     return venueDao
       .selectDistinctCategoriesInBounds(
-        minLat = minLat,
-        maxLat = maxLat,
-        minLon = minLon,
-        maxLon = maxLon
+        minLat = latSouth,
+        maxLat = latNorth,
+        minLon = lonWest,
+        maxLon = lonEast
       )
       .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
   }
@@ -81,25 +81,30 @@ constructor(
     gridMapBounds: GridMapBounds
   ): Single<List<MapMarker>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
-    val (minLat, maxLat, minLon, maxLon) = bounds
+    val (latSouth, latNorth, lonWest, lonEast) = bounds
     return waitUntilSyncCompleted()
       .andThen(
         venueDao
-          .allExistInBounds(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
+          .allExistInBounds(
+            minLat = latSouth,
+            maxLat = latNorth,
+            minLon = lonWest,
+            maxLon = lonEast
+          )
           .flatMap { allExist ->
             if (allExist) {
               venueDao.countInBoundsSingle(
-                minLat = minLat,
-                maxLat = maxLat,
-                minLon = minLon,
-                maxLon = maxLon
+                minLat = latSouth,
+                maxLat = latNorth,
+                minLon = lonWest,
+                maxLon = lonEast
               )
             } else {
               getAndInsertVenuesFromNetwork(
-                minLat = minLat,
-                maxLat = maxLat,
-                minLon = minLon,
-                maxLon = maxLon
+                minLat = latSouth,
+                maxLat = latNorth,
+                minLon = lonWest,
+                maxLon = lonEast
               )
             }
           }
@@ -107,23 +112,23 @@ constructor(
             if (count < BOUNDS_MARKERS_LIMIT) {
               venueDao
                 .selectInBoundsSingle(
-                  minLat = minLat,
-                  maxLat = maxLat,
-                  minLon = minLon,
-                  maxLon = maxLon
+                  minLat = latSouth,
+                  maxLat = latNorth,
+                  minLon = lonWest,
+                  maxLon = lonEast
                 )
                 .map { it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } }
             } else {
-              val latInc = (maxLat - minLat) / latDivisor
-              val lonInc = (maxLon - minLon) / lonDivisor
+              val latInc = (latNorth - latSouth) / latDivisor
+              val lonInc = (lonEast - lonWest) / lonDivisor
               val gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor)
               val gridCells =
                 divideBoundsIntoGrid(
                   latDivisor = latDivisor,
                   lonDivisor = lonDivisor,
-                  minLat = minLat,
+                  minLat = latSouth,
                   latInc = latInc,
-                  minLon = minLon,
+                  minLon = lonWest,
                   lonInc = lonInc
                 )
 
@@ -163,7 +168,7 @@ constructor(
       .ignoreElement()
 
   private fun selectCellMarkers(
-    gridCells: List<Bounds>,
+    gridCells: List<MapBounds>,
     gridCellLimit: Int
   ): List<GridCellMarkers> =
     db.runInTransaction(
@@ -218,8 +223,8 @@ constructor(
     latInc: Double,
     minLon: Double,
     lonInc: Double
-  ): List<Bounds> {
-    val gridCellBounds = ArrayList<Bounds>(latDivisor * lonDivisor)
+  ): List<MapBounds> {
+    val gridCellBounds = ArrayList<MapBounds>(latDivisor * lonDivisor)
     repeat(latDivisor) { latMultiplier ->
       repeat(lonDivisor) { lonMultiplier ->
         val cellMinLat = minLat + latInc * latMultiplier
@@ -227,19 +232,17 @@ constructor(
         val cellMinLon = minLon + lonInc * lonMultiplier
         val cellMaxLon = cellMinLon + lonInc
         gridCellBounds.add(
-          Bounds(minLat = cellMinLat, maxLat = cellMaxLat, minLon = cellMinLon, maxLon = cellMaxLon)
+          MapBounds(
+            latSouth = cellMinLat,
+            latNorth = cellMaxLat,
+            lonWest = cellMinLon,
+            lonEast = cellMaxLon
+          )
         )
       }
     }
     return gridCellBounds
   }
-
-  private data class Bounds(
-    val minLat: Double,
-    val maxLat: Double,
-    val minLon: Double,
-    val maxLon: Double,
-  )
 
   private fun getAndInsertVenuesFromNetwork(
     minLat: Double,

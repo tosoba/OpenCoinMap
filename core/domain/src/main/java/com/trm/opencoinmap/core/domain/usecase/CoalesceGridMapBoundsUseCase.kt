@@ -9,14 +9,14 @@ import kotlin.math.min
 
 class CoalesceGridMapBoundsUseCase @Inject constructor() {
   operator fun invoke(gridMapBounds: GridMapBounds): GridMapBounds {
-    val (minLat, maxLat, minLon, maxLon) = gridMapBounds.bounds
+    val (latSouth, latNorth, lonWest, lonEast) = gridMapBounds.bounds
     return GridMapBounds(
       bounds =
         MapBounds(
-          latSouth = max(minLat, MapBoundsLimit.MIN_LAT),
-          latNorth = min(maxLat, MapBoundsLimit.MAX_LAT),
-          lonWest = max(minLon, MapBoundsLimit.MIN_LON),
-          lonEast = min(maxLon, MapBoundsLimit.MAX_LON)
+          latSouth = max(latSouth, MapBoundsLimit.MIN_LAT),
+          latNorth = min(latNorth, MapBoundsLimit.MAX_LAT),
+          lonWest = max(lonWest, MapBoundsLimit.MIN_LON),
+          lonEast = min(lonEast, MapBoundsLimit.MAX_LON)
         ),
       latDivisor = gridMapBounds.latDivisor,
       lonDivisor = gridMapBounds.lonDivisor
