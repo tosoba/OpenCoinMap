@@ -28,6 +28,13 @@ internal fun MapView.setDefaultConfig(
   setMultiTouchControls(true)
   zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
+  isVerticalMapRepetitionEnabled = false
+  setScrollableAreaLimitLatitude(
+    MapView.getTileSystem().maxLatitude,
+    MapView.getTileSystem().minLatitude,
+    0
+  )
+
   minZoomLevel =
     max(
       MapView.getTileSystem()
