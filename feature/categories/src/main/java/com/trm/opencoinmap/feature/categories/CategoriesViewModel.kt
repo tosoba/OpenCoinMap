@@ -57,8 +57,8 @@ constructor(
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (categories, status) ->
-        _isLoadingForNewBounds.value = status == MarkersLoadingStatus.IN_PROGRESS
-        _loadingForNewBoundsFailed.value = status == MarkersLoadingStatus.ERROR
+        _isLoadingForNewBounds.value = status is MarkersLoadingStatus.InProgress
+        _loadingForNewBoundsFailed.value = status is MarkersLoadingStatus.Error
         _categories.value = categories
       }
       .addTo(compositeDisposable)

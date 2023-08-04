@@ -21,6 +21,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.BoundingBox
 import timber.log.Timber
 
@@ -37,7 +38,7 @@ constructor(
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  private val boundsRelay = PublishRelay.create<GridMapBounds>()
+  private val boundsRelay = PublishRelay.create<CenteredGridBounds>()
   private val retryRelay = PublishRelay.create<Unit>()
 
   var mapPosition by savedStateHandle.get(defaultValue = MapPosition())
@@ -49,20 +50,24 @@ constructor(
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
 
   init {
-    val coalescedBounds = boundsRelay.map(coalesceGridMapBoundsUseCase::invoke)
+    val coalescedBounds =
+      boundsRelay.map { (bounds, _, centerLon) ->
+        coalesceGridMapBoundsUseCase(gridMapBounds = bounds, centerLon = centerLon)
+      }
     coalescedBounds
       .mergeWith(retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
       .switchMap(getMarkersInBoundsUseCase::invoke)
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
+      .doOnNext { if (it is Failed) Timber.e(it.throwable) }
       .subscribeBy(
         onNext = {
           _isLoading.value = it is Loading
           if (it is WithData) _markersInBounds.value = it.data
           sendMessage(it)
         },
-        onError = { Timber.tag(TAG).e(it) }
+        onError = Timber.Forest::e
       )
       .addTo(compositeDisposable)
   }
@@ -81,12 +86,21 @@ constructor(
     )
   }
 
-  fun onBoundingBoxChanged(boundingBox: BoundingBox, latDivisor: Int, lonDivisor: Int) {
+  fun onBoundingBoxChanged(
+    boundingBox: BoundingBox,
+    center: IGeoPoint,
+    latDivisor: Int,
+    lonDivisor: Int
+  ) {
     sendMessageUseCase(Message.Hidden)
 
     val bounds = boundingBox.toBounds()
     boundsRelay.accept(
-      GridMapBounds(bounds = bounds, latDivisor = latDivisor, lonDivisor = lonDivisor)
+      CenteredGridBounds(
+        bounds = GridMapBounds(bounds = bounds, latDivisor = latDivisor, lonDivisor = lonDivisor),
+        centerLat = center.latitude,
+        centerLon = center.longitude
+      )
     )
     sendMapBoundsUseCase(bounds)
   }
@@ -96,7 +110,9 @@ constructor(
     compositeDisposable.clear()
   }
 
-  companion object {
-    private const val TAG = "MAP_VM"
-  }
+  private data class CenteredGridBounds(
+    val bounds: GridMapBounds,
+    val centerLat: Double,
+    val centerLon: Double
+  )
 }

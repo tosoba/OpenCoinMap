@@ -26,6 +26,7 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -69,7 +70,7 @@ constructor(
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { isRunning ->
         if (isRunning) {
-          Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.IN_PROGRESS)
+          Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.InProgress)
         } else {
           receiveMapBoundsUseCase()
             .toFlowable(BackpressureStrategy.LATEST)
@@ -83,8 +84,11 @@ constructor(
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
-        _isLoadingProgressLayoutVisible.value = status == MarkersLoadingStatus.IN_PROGRESS
-        _loadingForNewBoundsFailed.value = status == MarkersLoadingStatus.ERROR
+        _isLoadingProgressLayoutVisible.value = status is MarkersLoadingStatus.InProgress
+
+        _loadingForNewBoundsFailed.value = status is MarkersLoadingStatus.Error
+        if (status is MarkersLoadingStatus.Error) Timber.e(status.throwable)
+
         _pagingData.value = pagingData
       }
       .addTo(compositeDisposable)
