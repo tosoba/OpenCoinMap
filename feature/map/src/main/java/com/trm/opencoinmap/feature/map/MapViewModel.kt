@@ -57,6 +57,7 @@ constructor(
     coalescedBounds
       .mergeWith(retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
+      .doOnNext { sendMapBoundsUseCase(it.map(GridMapBounds::bounds)) }
       .switchMap(getMarkersInBoundsUseCase::invoke)
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
@@ -102,7 +103,6 @@ constructor(
         centerLon = center.longitude
       )
     )
-    sendMapBoundsUseCase(bounds)
   }
 
   override fun onCleared() {

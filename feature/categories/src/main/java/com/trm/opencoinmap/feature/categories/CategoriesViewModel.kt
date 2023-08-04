@@ -1,32 +1,23 @@
 package com.trm.opencoinmap.feature.categories
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.trm.opencoinmap.core.common.di.RxSchedulers
-import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
-import com.trm.opencoinmap.core.domain.usecase.GetCategoriesInBoundsUseCase
-import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
-import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
+import com.trm.opencoinmap.core.domain.usecase.GetCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 internal class CategoriesViewModel
 @Inject
 constructor(
-  receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,
-  receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
-  private val getCategoriesInBoundsUseCase: GetCategoriesInBoundsUseCase,
+  getCategoriesUseCase: GetCategoriesUseCase,
   private val sendCategoriesListLayoutEventUseCase: SendCategoriesListLayoutEventUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
@@ -35,32 +26,11 @@ constructor(
   private val _categories = MutableLiveData(emptyList<VenueCategoryCount>())
   val categories: LiveData<List<VenueCategoryCount>> = _categories
 
-  private val _isLoadingForNewBounds = MutableLiveData(false)
-  val isLoadingForNewBounds: LiveData<Boolean> = _isLoadingForNewBounds
-
-  private val _loadingForNewBoundsFailed = MutableLiveData(false)
-  val loadingForNewBoundsFailed: LiveData<Boolean> = _loadingForNewBoundsFailed
-
-  private val _isCategoriesListVisible =
-    MediatorLiveData<Boolean>().apply {
-      addSource(_isLoadingForNewBounds) { value = !it && _loadingForNewBoundsFailed.value == false }
-      addSource(_loadingForNewBoundsFailed) { value = !it && _isLoadingForNewBounds.value == false }
-    }
-  val isCategoriesListVisible: LiveData<Boolean> = _isCategoriesListVisible
-
   init {
-    receiveMapBoundsUseCase()
-      .toFlowable(BackpressureStrategy.LATEST)
-      .switchMap(getCategoriesInBoundsUseCase::invoke)
-      .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
-      .debounce(250L, TimeUnit.MILLISECONDS)
+    getCategoriesUseCase()
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy { (categories, status) ->
-        _isLoadingForNewBounds.value = status is MarkersLoadingStatus.InProgress
-        _loadingForNewBoundsFailed.value = status is MarkersLoadingStatus.Error
-        _categories.value = categories
-      }
+      .subscribeBy(onNext = _categories::setValue)
       .addTo(compositeDisposable)
   }
 

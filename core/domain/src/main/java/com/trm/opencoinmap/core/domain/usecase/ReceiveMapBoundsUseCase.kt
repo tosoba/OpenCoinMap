@@ -4,5 +4,5 @@ import com.trm.opencoinmap.core.domain.model.MapBounds
 import io.reactivex.rxjava3.core.Observable
 
 fun interface ReceiveMapBoundsUseCase {
-  operator fun invoke(): Observable<MapBounds>
+  operator fun invoke(): Observable<List<MapBounds>>
 }

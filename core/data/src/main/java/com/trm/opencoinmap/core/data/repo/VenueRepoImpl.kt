@@ -49,33 +49,42 @@ constructor(
       .doAfterTerminate { syncDataSource.isRunning = false }
   }
 
-  override fun getVenuesPagingInBounds(mapBounds: MapBounds): Flowable<PagingData<Venue>> {
-    val (latSouth, latNorth, lonWest, lonEast) = mapBounds
-    return Pager(
-        config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50)
-      ) {
-        venueDao.selectPageInBounds(
-          minLat = latSouth,
-          maxLat = latNorth,
-          minLon = lonWest,
-          maxLon = lonEast
-        )
+  override fun getVenuesPagingInBounds(mapBounds: List<MapBounds>): Flowable<PagingData<Venue>> =
+    Pager(config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50)) {
+        when (mapBounds.size) {
+          1 -> {
+            val (latSouth, latNorth, lonWest, lonEast) = mapBounds.first()
+            venueDao.selectPageInBounds(
+              minLat = latSouth,
+              maxLat = latNorth,
+              minLon = lonWest,
+              maxLon = lonEast
+            )
+          }
+          2 -> {
+            val (latSouth1, latNorth1, lonWest1, lonEast1) = mapBounds.first()
+            val (latSouth2, latNorth2, lonWest2, lonEast2) = mapBounds.last()
+            venueDao.selectPageIn2Bounds(
+              minLat1 = latSouth1,
+              maxLat1 = latNorth1,
+              minLon1 = lonWest1,
+              maxLon1 = lonEast1,
+              minLat2 = latSouth2,
+              maxLat2 = latNorth2,
+              minLon2 = lonWest2,
+              maxLon2 = lonEast2
+            )
+          }
+          else -> throw IllegalArgumentException("Invalid map bounds.")
+        }
       }
       .flowable
       .map { it.map(VenueEntity::asDomainModel) }
-  }
 
-  override fun getCategoriesInBounds(mapBounds: MapBounds): Flowable<List<VenueCategoryCount>> {
-    val (latSouth, latNorth, lonWest, lonEast) = mapBounds
-    return venueDao
-      .selectDistinctCategoriesInBounds(
-        minLat = latSouth,
-        maxLat = latNorth,
-        minLon = lonWest,
-        maxLon = lonEast
-      )
-      .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
-  }
+  override fun getCategories(): Flowable<List<VenueCategoryCount>> =
+    venueDao.selectDistinctCategories().map {
+      it.map { (category, count) -> VenueCategoryCount(category, count) }
+    }
 
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds

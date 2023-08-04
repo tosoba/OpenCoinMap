@@ -12,7 +12,7 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object MapBoundsRelayModule {
-  private val relay = BehaviorRelay.create<MapBounds>()
+  private val relay = BehaviorRelay.create<List<MapBounds>>()
 
   @Provides fun sendMapBoundsUseCase() = SendMapBoundsUseCase(relay::accept)
   @Provides fun receiveMapBoundsUseCase() = ReceiveMapBoundsUseCase { relay }

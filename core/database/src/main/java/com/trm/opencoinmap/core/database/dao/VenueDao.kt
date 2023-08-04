@@ -45,6 +45,22 @@ interface VenueDao {
     maxLon: Double
   ): PagingSource<Int, VenueEntity>
 
+  @Query(
+    "SELECT * FROM venue " +
+      "WHERE (lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
+      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)"
+  )
+  fun selectPageIn2Bounds(
+    minLat1: Double,
+    maxLat1: Double,
+    minLon1: Double,
+    maxLon1: Double,
+    minLat2: Double,
+    maxLat2: Double,
+    minLon2: Double,
+    maxLon2: Double
+  ): PagingSource<Int, VenueEntity>
+
   @Query(COUNT_IN_BOUNDS)
   fun countInBounds(minLat: Double, maxLat: Double, minLon: Double, maxLon: Double): Int
 
@@ -62,18 +78,8 @@ interface VenueDao {
     maxLon: Double
   ): Single<Boolean>
 
-  @Query(
-    "SELECT category, COUNT(*) AS count FROM venue " +
-      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
-      "GROUP BY category " +
-      "ORDER BY category"
-  )
-  fun selectDistinctCategoriesInBounds(
-    minLat: Double,
-    maxLat: Double,
-    minLon: Double,
-    maxLon: Double
-  ): Flowable<List<VenueCategoryCountResult>>
+  @Query("SELECT category, COUNT(*) AS count FROM venue GROUP BY category ORDER BY category")
+  fun selectDistinctCategories(): Flowable<List<VenueCategoryCountResult>>
 
   companion object {
     private const val SELECT_IN_BOUNDS =
