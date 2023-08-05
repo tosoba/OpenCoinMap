@@ -27,8 +27,6 @@ internal object MapDefaults {
         )
       )
 
-  const val INITIAL_LOCATION_ZOOM = 12.0
-  const val MAX_ZOOM = 20.0
   const val MIN_ZOOM = 2.0
   const val LATITUDE = 0.0
   const val LONGITUDE = 0.0

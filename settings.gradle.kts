@@ -22,6 +22,8 @@ include(":app")
 
 include(":core:common")
 
+include(":core:datastore")
+
 include(":core:domain")
 
 include(":core:data")

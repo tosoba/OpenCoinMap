@@ -17,10 +17,6 @@ dependencies {
   implementation(project(":core:domain"))
   implementation(project(":core:network"))
 
-  implementation(libs.rx.java)
-  implementation(libs.rx.kotlin)
-  implementation(libs.rx.relay)
-
   implementation(libs.paging.common)
   implementation(libs.paging.runtime)
   implementation(libs.paging.rx)

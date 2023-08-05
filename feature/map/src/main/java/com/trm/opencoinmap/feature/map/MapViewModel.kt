@@ -4,24 +4,27 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.hadilq.liveevent.LiveEvent
 import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.di.RxSchedulers
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.GetInitialMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.SaveMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.BoundingBox
 import timber.log.Timber
 
@@ -30,6 +33,8 @@ internal class MapViewModel
 @Inject
 constructor(
   savedStateHandle: SavedStateHandle,
+  getInitialMapCenterUseCase: GetInitialMapCenterUseCase,
+  saveMapCenterUseCase: SaveMapCenterUseCase,
   private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
   private val coalesceGridMapBoundsUseCase: CoalesceGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
@@ -42,6 +47,7 @@ constructor(
   private val retryRelay = PublishRelay.create<Unit>()
 
   var mapPosition by savedStateHandle.get(defaultValue = MapPosition())
+    private set
 
   private val _isLoading = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
@@ -49,11 +55,30 @@ constructor(
   private val _markersInBounds = MutableLiveData(emptyList<MapMarker>())
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
 
+  private val _initialMapPositionLoaded = LiveEvent<MapPosition>()
+  val initialMapPositionLoaded: LiveData<MapPosition> = _initialMapPositionLoaded
+
   init {
-    val coalescedBounds =
-      boundsRelay.map { (bounds, _, centerLon) ->
-        coalesceGridMapBoundsUseCase(gridMapBounds = bounds, centerLon = centerLon)
+    getInitialMapCenterUseCase()
+      .map { (latitude, longitude, zoom) ->
+        MapPosition(latitude = latitude, longitude = longitude, zoom = zoom)
       }
+      .subscribeOn(schedulers.io)
+      .observeOn(schedulers.main)
+      .subscribeBy(onSuccess = _initialMapPositionLoaded::setValue)
+      .addTo(compositeDisposable)
+
+    val coalescedBounds =
+      boundsRelay
+        .flatMap {
+          saveMapCenterUseCase(
+              MapCenter(latitude = it.centerLat, longitude = it.centerLon, zoom = it.zoom)
+            )
+            .andThen(Observable.just(it))
+        }
+        .map { (bounds, _, centerLon) ->
+          coalesceGridMapBoundsUseCase(gridMapBounds = bounds, centerLon = centerLon)
+        }
     coalescedBounds
       .mergeWith(retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds })
       .debounce(1L, TimeUnit.SECONDS)
@@ -87,20 +112,27 @@ constructor(
     )
   }
 
-  fun onBoundingBoxChanged(
+  fun onMapUpdated(
     boundingBox: BoundingBox,
-    center: IGeoPoint,
+    position: MapPosition,
     latDivisor: Int,
     lonDivisor: Int
   ) {
     sendMessageUseCase(Message.Hidden)
 
-    val bounds = boundingBox.toBounds()
+    mapPosition = position
+
     boundsRelay.accept(
       CenteredGridBounds(
-        bounds = GridMapBounds(bounds = bounds, latDivisor = latDivisor, lonDivisor = lonDivisor),
-        centerLat = center.latitude,
-        centerLon = center.longitude
+        bounds =
+          GridMapBounds(
+            bounds = boundingBox.toBounds(),
+            latDivisor = latDivisor,
+            lonDivisor = lonDivisor
+          ),
+        centerLat = position.latitude,
+        centerLon = position.longitude,
+        zoom = position.zoom
       )
     )
   }
@@ -113,6 +145,7 @@ constructor(
   private data class CenteredGridBounds(
     val bounds: GridMapBounds,
     val centerLat: Double,
-    val centerLon: Double
+    val centerLon: Double,
+    val zoom: Double
   )
 }

@@ -20,10 +20,6 @@ dependencies {
   implementation(libs.retrofit.kotlin.serialization)
   implementation(libs.retrofit.rxjava.adapter)
 
-  implementation(libs.rx.android)
-  implementation(libs.rx.java)
-  implementation(libs.rx.kotlin)
-
   api(libs.junit4)
 
   testImplementation(libs.dagger.dagger)

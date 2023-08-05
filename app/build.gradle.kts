@@ -38,6 +38,7 @@ dependencies {
   implementation(project(":core:common"))
   implementation(project(":core:data"))
   implementation(project(":core:database"))
+  implementation(project(":core:datastore"))
   implementation(project(":core:domain"))
   implementation(project(":core:network"))
   implementation(project(":core:ui"))
@@ -56,10 +57,6 @@ dependencies {
   implementation(libs.google.material)
   implementation(libs.viewBinding.propertyDelegate)
 
-  implementation(libs.rx.android)
-  implementation(libs.rx.java)
-  implementation(libs.rx.kotlin)
-  implementation(libs.rx.relay)
   implementation(libs.liveEvent)
 
   implementation(libs.paging.runtime)

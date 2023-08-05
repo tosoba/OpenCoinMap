@@ -13,11 +13,9 @@ import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
 import com.trm.opencoinmap.feature.map.util.*
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import org.osmdroid.api.IGeoPoint
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.util.BoundingBox
 import org.osmdroid.views.MapView
 
 @AndroidEntryPoint
@@ -30,11 +28,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewBinding.mapView.init()
-    viewModel.observeLoading()
+    viewModel.observe()
   }
 
-  private fun MapViewModel.observeLoading() {
+  private fun MapViewModel.observe() {
     isLoading.observe(viewLifecycleOwner, viewBinding.loadingIndicator::isVisible::set)
+    initialMapPositionLoaded.observe(viewLifecycleOwner, viewBinding.mapView::restorePosition)
   }
 
   private fun MapView.init() {
@@ -42,10 +41,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     restorePosition(viewModel.mapPosition)
 
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
-    fun MapViewModel.onBoundingBoxChanged(boundingBox: BoundingBox, center: IGeoPoint) {
-      onBoundingBoxChanged(
+    fun MapViewModel.onMapUpdated() {
+      onMapUpdated(
         boundingBox = boundingBox,
-        center = center,
+        position = currentPosition(),
         latDivisor = latDivisor,
         lonDivisor = lonDivisor
       )
@@ -57,16 +56,13 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
         fun onMapInteraction(): Boolean {
-          viewModel.mapPosition = currentPosition()
-          viewModel.onBoundingBoxChanged(boundingBox, mapCenter)
+          viewModel.onMapUpdated()
           return false
         }
       }
     )
 
-    addOnFirstLayoutListener { _, _, _, _, _ ->
-      viewModel.onBoundingBoxChanged(boundingBox, mapCenter)
-    }
+    addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
 
     val venueDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
