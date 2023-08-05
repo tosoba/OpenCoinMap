@@ -129,7 +129,10 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     sheetController.initFrom(savedInstanceState)
 
     requireActivity().onBackPressedDispatcher.addCallback {
-      if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) {
+      if (
+        sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
+          sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED
+      ) {
         sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
       } else {
         requireActivity().finish()
