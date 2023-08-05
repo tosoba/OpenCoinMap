@@ -38,6 +38,8 @@ include(":feature:categories")
 
 include(":feature:map")
 
+include(":feature:venue-details")
+
 include(":feature:venues")
 
 include(":sync")

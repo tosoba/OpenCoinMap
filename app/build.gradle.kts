@@ -45,6 +45,7 @@ dependencies {
 
   implementation(project(":feature:categories"))
   implementation(project(":feature:map"))
+  implementation(project(":feature:venue-details"))
   implementation(project(":feature:venues"))
 
   implementation(project(":sync"))

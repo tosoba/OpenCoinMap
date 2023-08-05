@@ -3,7 +3,7 @@ plugins {
   id("kotlin-parcelize")
 }
 
-android { namespace = "com.trm.opencoinmap.feature.categories" }
+android { namespace = "com.trm.opencoinmap.feature.venue.details" }
 
 dependencies {
   implementation(libs.google.material)
