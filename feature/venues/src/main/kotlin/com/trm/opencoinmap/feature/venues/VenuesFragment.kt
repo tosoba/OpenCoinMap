@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.feature.venues
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -18,7 +19,6 @@ import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.common.ext.showAnimated
 import com.trm.opencoinmap.core.common.ext.toDp
-import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.feature.venues.databinding.FragmentVenuesBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.max
@@ -28,8 +28,6 @@ import kotlin.math.roundToInt
 class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private val binding by viewBinding(FragmentVenuesBinding::bind)
   private val venuesAdapter by lazy(LazyThreadSafetyMode.NONE) { VenuesAdapter(onItemClick = {}) }
-  private val expandedSheetContainerExtraTopMarginPx: Float by
-    lazy(LazyThreadSafetyMode.NONE) { 10f.toPx(requireContext()) }
 
   private val viewModel by viewModels<VenuesViewModel>()
 
@@ -40,6 +38,8 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   }
 
   private fun FragmentVenuesBinding.initViews() {
+    with(binding.venuesDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
+
     binding.root.viewTreeObserver.addOnGlobalLayoutListener(
       object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
@@ -114,8 +114,12 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
           ?: return@observe
       binding.venuesContainer.layoutParams =
         binding.venuesContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
-          topMargin =
-            ((searchBarHeightPx + expandedSheetContainerExtraTopMarginPx) * offset).roundToInt()
+          @SuppressLint("InternalInsetResource", "DiscouragedApi")
+          val statusBarHeightPx =
+            resources.getDimensionPixelSize(
+              resources.getIdentifier("status_bar_height", "dimen", "android")
+            )
+          topMargin = ((statusBarHeightPx + searchBarHeightPx) * offset).roundToInt()
         }
     }
   }

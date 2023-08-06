@@ -1,5 +1,5 @@
 <resources>
-    <item name="collapsed_sheet_alpha" format="float" type="dimen">0.9</item>
+    <item name="collapsed_sheet_alpha" format="float" type="dimen">0.95</item>
     <dimen name="sheet_peek_height">75dp</dimen>
     <dimen name="collapsed_sheet_fabs_bottom_margin">91dp</dimen>
     <dimen name="half_bottom_sheet_min_screen_width">600dp</dimen>
