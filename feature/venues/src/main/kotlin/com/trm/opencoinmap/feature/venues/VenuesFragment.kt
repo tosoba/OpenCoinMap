@@ -1,11 +1,12 @@
 package com.trm.opencoinmap.feature.venues
 
-import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.WindowInsets
 import android.widget.GridLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -31,6 +32,8 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
   private val viewModel by viewModels<VenuesViewModel>()
 
+  private var systemWindowTopInsetPx: Int? = null
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     binding.initViews()
     viewModel.observeState()
@@ -38,6 +41,18 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   }
 
   private fun FragmentVenuesBinding.initViews() {
+    requireView().setOnApplyWindowInsetsListener { _, insets ->
+      systemWindowTopInsetPx =
+        insets.run {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getInsets(WindowInsets.Type.systemBars()).top
+          } else {
+            systemWindowInsetTop
+          }
+        }
+      insets
+    }
+
     with(binding.venuesDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
 
     binding.root.viewTreeObserver.addOnGlobalLayoutListener(
@@ -114,12 +129,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
           ?: return@observe
       binding.venuesContainer.layoutParams =
         binding.venuesContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
-          @SuppressLint("InternalInsetResource", "DiscouragedApi")
-          val statusBarHeightPx =
-            resources.getDimensionPixelSize(
-              resources.getIdentifier("status_bar_height", "dimen", "android")
-            )
-          topMargin = ((statusBarHeightPx + searchBarHeightPx) * offset).roundToInt()
+          topMargin = (((systemWindowTopInsetPx ?: 0) + searchBarHeightPx) * offset).roundToInt()
         }
     }
   }
