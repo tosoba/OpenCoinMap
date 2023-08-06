@@ -2,12 +2,17 @@ package com.trm.opencoinmap
 
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -16,6 +21,7 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.ext.requireAs
+import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
@@ -89,6 +95,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
   override var searchViewsHeightPx: Int? = null
+  private var searchMenuItem: MenuItem? = null
+  private val searchView: SearchView?
+    get() = searchMenuItem?.actionView?.safeAs<SearchView>()
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -105,6 +114,11 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observe()
+  }
+
+  override fun onDestroyView() {
+    searchMenuItem = null
+    super.onDestroyView()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -129,7 +143,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     sheetController.initFrom(savedInstanceState)
 
     requireActivity().onBackPressedDispatcher.addCallback {
-      if (
+      if (searchView?.isIconified == false) {
+        searchView?.isIconified = true
+      } else if (
         sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
           sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED
       ) {
@@ -155,6 +171,40 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         }
       )
     }
+
+    requireActivity()
+      .addMenuProvider(
+        object : MenuProvider {
+          override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.menu_main, menu)
+            searchMenuItem = menu.findItem(R.id.action_search)
+            searchMenuItem?.actionView?.safeAs<SearchView>()?.apply {
+              maxWidth = Int.MAX_VALUE
+              setOnQueryTextListener(
+                object : SearchView.OnQueryTextListener {
+                  override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                  override fun onQueryTextChange(newText: String?): Boolean {
+                    binding.searchBar.text = newText
+                    viewModel.searchQuery = newText.orEmpty()
+                    return true
+                  }
+                }
+              )
+              setQuery(viewModel.searchQuery, true)
+              if (viewModel.searchQuery.isNotBlank()) {
+                searchView?.isIconified = false
+                searchView?.clearFocus()
+              }
+            }
+          }
+
+          override fun onMenuItemSelected(menuItem: MenuItem): Boolean = true
+        }
+      )
+
+    binding.searchBar.navigationIcon = null
+    binding.searchBar.setOnClickListener { searchView?.isIconified = false }
   }
 
   private fun MainViewModel.observe() {

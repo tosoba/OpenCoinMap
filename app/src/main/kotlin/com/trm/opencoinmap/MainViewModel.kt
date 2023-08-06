@@ -1,9 +1,11 @@
 package com.trm.opencoinmap
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
@@ -18,11 +20,14 @@ import javax.inject.Inject
 internal class MainViewModel
 @Inject
 constructor(
+  savedStateHandle: SavedStateHandle,
   receiveMessageUseCase: ReceiveMessageUseCase,
   private val sendSheetSlideOffsetUseCase: SendSheetSlideOffsetUseCase,
   receiveCategoriesListLayoutEventUseCase: ReceiveCategoriesListLayoutEventUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
+
+  var searchQuery by savedStateHandle.get(defaultValue = "")
 
   private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage
