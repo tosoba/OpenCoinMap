@@ -27,6 +27,7 @@ import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
+import com.trm.opencoinmap.feature.venues.VenuesFragment
 import com.trm.opencoinmap.feature.venues.VenuesSearchController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
@@ -94,6 +95,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       )
     }
 
+  private val sheetFragment: Fragment?
+    get() = childFragmentManager.findFragmentById(R.id.bottom_sheet_container)
+
   override var searchViewsHeightPx: Int? = null
   private var searchMenuItem: MenuItem? = null
   private val searchView: SearchView?
@@ -145,6 +149,8 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     requireActivity().onBackPressedDispatcher.addCallback {
       if (searchView?.isIconified == false) {
         searchView?.isIconified = true
+      } else if (sheetFragment !is VenuesFragment) {
+        childFragmentManager.popBackStack()
       } else if (
         sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
           sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED
@@ -180,6 +186,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
             searchMenuItem = menu.findItem(R.id.action_search)
             searchMenuItem?.actionView?.safeAs<SearchView>()?.apply {
               maxWidth = Int.MAX_VALUE
+
               setOnQueryTextListener(
                 object : SearchView.OnQueryTextListener {
                   override fun onQueryTextSubmit(query: String?): Boolean = true
@@ -191,6 +198,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
                   }
                 }
               )
+
               setQuery(viewModel.searchQuery, true)
               if (viewModel.searchQuery.isNotBlank()) {
                 searchView?.isIconified = false
