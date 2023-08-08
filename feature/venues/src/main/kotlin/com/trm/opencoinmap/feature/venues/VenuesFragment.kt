@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.addOnScrollIdleListener
+import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.hideAnimated
 import com.trm.opencoinmap.core.common.ext.requireAs
-import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.common.ext.showAnimated
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.feature.venues.databinding.FragmentVenuesBinding
@@ -125,8 +125,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun VenuesViewModel.observeEvents() {
     sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       val searchBarHeightPx =
-        requireParentFragment().safeAs<VenuesSearchController>()?.searchViewsHeightPx
-          ?: return@observe
+        findParentFragmentOfType<VenuesSearchController>()?.searchViewsHeightPx ?: return@observe
       binding.venuesContainer.layoutParams =
         binding.venuesContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
           topMargin = (((systemWindowTopInsetPx ?: 0) + searchBarHeightPx) * offset).roundToInt()

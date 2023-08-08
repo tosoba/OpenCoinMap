@@ -27,7 +27,6 @@ import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
-import com.trm.opencoinmap.feature.venues.VenuesFragment
 import com.trm.opencoinmap.feature.venues.VenuesSearchController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
@@ -95,9 +94,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       )
     }
 
-  private val sheetFragment: Fragment?
-    get() = childFragmentManager.findFragmentById(R.id.bottom_sheet_container)
-
   override var searchViewsHeightPx: Int? = null
   private var searchMenuItem: MenuItem? = null
   private val searchView: SearchView?
@@ -147,17 +143,17 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     sheetController.initFrom(savedInstanceState)
 
     requireActivity().onBackPressedDispatcher.addCallback {
-      if (searchView?.isIconified == false) {
-        searchView?.isIconified = true
-      } else if (sheetFragment !is VenuesFragment) {
-        childFragmentManager.popBackStack()
-      } else if (
+      when {
+        searchView?.isIconified == false -> {
+          searchView?.isIconified = true
+        }
         sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
-          sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED
-      ) {
-        sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
-      } else {
-        requireActivity().finish()
+          sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+          sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        }
+        else -> {
+          requireActivity().finish()
+        }
       }
     }
   }

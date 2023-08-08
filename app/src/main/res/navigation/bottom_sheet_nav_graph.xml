@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_sheet_nav_graph"
+    app:startDestination="@id/venues_fragment">
+
+    <fragment
+        android:id="@+id/venues_fragment"
+        android:name="com.trm.opencoinmap.feature.venues.VenuesFragment"
+        tools:layout="@layout/fragment_venues" />
+
+    <fragment
+        android:id="@+id/venue_details_fragment"
+        android:name="com.trm.opencoinmap.feature.venue.details.VenueDetailsFragment"
+        tools:layout="@layout/fragment_venue_details" />
+
+</navigation>
