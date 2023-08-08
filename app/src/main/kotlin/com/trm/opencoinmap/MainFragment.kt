@@ -18,6 +18,8 @@ import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.ext.requireAs
@@ -93,6 +95,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         }
       )
     }
+
+  private val bottomSheetFragmentNavController: NavController
+    get() = Navigation.findNavController(binding.bottomSheetContainer)
 
   override var searchViewsHeightPx: Int? = null
   private var searchMenuItem: MenuItem? = null
