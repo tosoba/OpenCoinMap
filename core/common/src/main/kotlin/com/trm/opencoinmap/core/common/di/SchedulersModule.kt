@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.core.common.di
 
+import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,11 +14,6 @@ import javax.inject.Inject
 @InstallIn(SingletonComponent::class)
 interface SchedulersModule {
   @Binds fun AppRxSchedulers.bind(): RxSchedulers
-}
-
-interface RxSchedulers {
-  val io: Scheduler
-  val main: Scheduler
 }
 
 class AppRxSchedulers @Inject constructor() : RxSchedulers {

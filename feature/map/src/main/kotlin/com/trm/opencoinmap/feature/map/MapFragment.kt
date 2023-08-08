@@ -20,31 +20,29 @@ import org.osmdroid.views.MapView
 
 @AndroidEntryPoint
 class MapFragment : Fragment(R.layout.fragment_map) {
-  private val viewBinding by viewBinding(FragmentMapBinding::bind)
+  private val binding by viewBinding(FragmentMapBinding::bind)
   private val viewModel by viewModels<MapViewModel>()
 
   @Inject internal lateinit var clusterMarkerIconBuilder: ClusterMarkerIconBuilder
   @Inject internal lateinit var markerClusterer: RadiusMarkerSizeClusterer
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    viewBinding.mapView.init()
+    binding.mapView.init()
     viewModel.observe()
   }
 
   private fun MapViewModel.observe() {
-    isLoading.observe(viewLifecycleOwner, viewBinding.loadingIndicator::isVisible::set)
-    initialMapPositionLoaded.observe(viewLifecycleOwner, viewBinding.mapView::restorePosition)
+    isLoading.observe(viewLifecycleOwner, binding.loadingIndicator::isVisible::set)
   }
 
   private fun MapView.init() {
     setDefaultConfig()
-    restorePosition(viewModel.mapPosition)
 
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
     fun MapViewModel.onMapUpdated() {
       onMapUpdated(
         boundingBox = boundingBox,
-        position = currentPosition(),
+        position = position,
         latDivisor = latDivisor,
         lonDivisor = lonDivisor
       )
@@ -64,9 +62,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
 
+    viewModel.mapPosition.observe(viewLifecycleOwner, ::position::set)
+
     val venueDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
-
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
       markerClusterer.items.clear()
       markerClusterer.invalidate()

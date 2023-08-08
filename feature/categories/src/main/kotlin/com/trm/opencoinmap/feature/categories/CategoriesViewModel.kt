@@ -3,7 +3,7 @@ package com.trm.opencoinmap.feature.categories
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.trm.opencoinmap.core.common.di.RxSchedulers
+import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase

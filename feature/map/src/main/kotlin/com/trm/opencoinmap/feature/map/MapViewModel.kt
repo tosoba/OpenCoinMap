@@ -4,25 +4,28 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.hadilq.liveevent.LiveEvent
 import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.common.R as commonR
-import com.trm.opencoinmap.core.common.di.RxSchedulers
-import com.trm.opencoinmap.core.common.view.get
+import com.trm.opencoinmap.core.common.view.getLiveData
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetInitialMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.GetVenueClickedUseCase
 import com.trm.opencoinmap.core.domain.usecase.SaveMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
+import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import com.trm.opencoinmap.feature.map.model.MapPosition
+import com.trm.opencoinmap.feature.map.util.MapDefaults
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import org.osmdroid.util.BoundingBox
@@ -39,6 +42,7 @@ constructor(
   private val coalesceGridMapBoundsUseCase: CoalesceGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
+  getVenueClickedUseCase: GetVenueClickedUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -46,17 +50,14 @@ constructor(
   private val boundsRelay = PublishRelay.create<CenteredGridBounds>()
   private val retryRelay = PublishRelay.create<Unit>()
 
-  var mapPosition by savedStateHandle.get(defaultValue = MapPosition())
-    private set
+  private val _mapPosition by savedStateHandle.getLiveData(initialValue = MapPosition())
+  val mapPosition: LiveData<MapPosition> = _mapPosition
 
   private val _isLoading = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
 
   private val _markersInBounds = MutableLiveData(emptyList<MapMarker>())
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
-
-  private val _initialMapPositionLoaded = LiveEvent<MapPosition>()
-  val initialMapPositionLoaded: LiveData<MapPosition> = _initialMapPositionLoaded
 
   init {
     getInitialMapCenterUseCase()
@@ -65,7 +66,7 @@ constructor(
       }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy(onSuccess = _initialMapPositionLoaded::setValue)
+      .subscribeBy(onSuccess = _mapPosition::setValue)
       .addTo(compositeDisposable)
 
     val coalescedBounds =
@@ -96,6 +97,15 @@ constructor(
         onError = Timber.Forest::e
       )
       .addTo(compositeDisposable)
+
+    getVenueClickedUseCase()
+      .map {
+        MapPosition(latitude = it.lat, longitude = it.lon, zoom = MapDefaults.INITIAL_LOCATION_ZOOM)
+      }
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeBy(onNext = _mapPosition::setValue, onError = Timber.Forest::e)
+      .addTo(compositeDisposable)
   }
 
   private fun sendMessage(loadable: Loadable<List<MapMarker>>) {
@@ -120,7 +130,7 @@ constructor(
   ) {
     sendMessageUseCase(Message.Hidden)
 
-    mapPosition = position
+    _mapPosition.value = position
 
     boundsRelay.accept(
       CenteredGridBounds(

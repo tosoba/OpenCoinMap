@@ -68,19 +68,19 @@ internal fun MapView.addCopyrightOverlay(
   )
 }
 
-internal fun MapView.restorePosition(position: MapPosition) {
-  controller.setZoom(position.zoom)
-  mapOrientation = position.orientation
-  setExpectedCenter(GeoPoint(position.latitude, position.longitude))
-}
-
-internal fun MapView.currentPosition(): MapPosition =
-  MapPosition(
-    latitude = mapCenter.latitude,
-    longitude = mapCenter.longitude,
-    zoom = zoomLevelDouble,
-    orientation = mapOrientation
-  )
+internal var MapView.position: MapPosition
+  set(value) {
+    controller.setZoom(value.zoom)
+    mapOrientation = value.orientation
+    setExpectedCenter(GeoPoint(value.latitude, value.longitude))
+  }
+  get() =
+    MapPosition(
+      latitude = mapCenter.latitude,
+      longitude = mapCenter.longitude,
+      zoom = zoomLevelDouble,
+      orientation = mapOrientation
+    )
 
 internal fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable): Marker =
   Marker(this).apply {
