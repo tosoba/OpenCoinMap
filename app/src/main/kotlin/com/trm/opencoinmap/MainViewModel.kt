@@ -9,6 +9,7 @@ import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendSheetSlideOffsetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -24,6 +25,7 @@ constructor(
   receiveMessageUseCase: ReceiveMessageUseCase,
   private val sendSheetSlideOffsetUseCase: SendSheetSlideOffsetUseCase,
   receiveCategoriesListLayoutEventUseCase: ReceiveCategoriesListLayoutEventUseCase,
+  receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -35,6 +37,9 @@ constructor(
   private val _categoriesUpdatedEvent = LiveEvent<Unit>()
   val categoriesUpdatedEvent: LiveData<Unit> = _categoriesUpdatedEvent
 
+  private val _venueClicked = LiveEvent<Long>()
+  val venueClicked: LiveData<Long> = _venueClicked
+
   init {
     receiveMessageUseCase()
       .subscribeBy(onNext = _snackbarMessage::setValue)
@@ -42,6 +47,10 @@ constructor(
 
     receiveCategoriesListLayoutEventUseCase()
       .subscribeBy(onNext = _categoriesUpdatedEvent::setValue)
+      .addTo(compositeDisposable)
+
+    receiveVenueClickedEventUseCase()
+      .subscribeBy(onNext = _venueClicked::setValue)
       .addTo(compositeDisposable)
   }
 

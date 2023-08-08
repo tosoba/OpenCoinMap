@@ -12,6 +12,7 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
@@ -152,6 +153,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         searchView?.isIconified == false -> {
           searchView?.isIconified = true
         }
+        bottomSheetFragmentNavController.popBackStack() -> {
+          return@addCallback
+        }
         sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
           sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
           sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
@@ -218,6 +222,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
   private fun MainViewModel.observe() {
     snackbarMessage.observe(viewLifecycleOwner, snackbarMessageObserver)
+
     categoriesUpdatedEvent.observe(viewLifecycleOwner) {
       with(binding.searchLayout) { measuredHeight + marginTop + marginBottom }
         .also {
@@ -225,6 +230,13 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
           searchViewsHeightPx = it
           viewModel.onSearchViewsSizeMeasure(sheetState = sheetController.state)
         }
+    }
+
+    venueClicked.observe(viewLifecycleOwner) {
+      bottomSheetFragmentNavController.navigate(
+        R.id.venues_fragment_to_venue_details_fragment,
+        bundleOf("venueId" to it)
+      )
     }
   }
 }

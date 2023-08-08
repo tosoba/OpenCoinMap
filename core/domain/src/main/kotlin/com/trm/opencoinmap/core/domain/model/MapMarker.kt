@@ -2,6 +2,7 @@ package com.trm.opencoinmap.core.domain.model
 
 sealed interface MapMarker {
   data class SingleVenue(val venue: Venue) : MapMarker
+
   data class VenuesCluster(
     val latSouth: Double,
     val latNorth: Double,

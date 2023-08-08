@@ -16,6 +16,8 @@ import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendVenueClickedEventUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
@@ -38,6 +40,8 @@ constructor(
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
   receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
   isVenuesSyncRunningUseCase: IsVenuesSyncRunningUseCase,
+  private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
+  private val receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -97,6 +101,10 @@ constructor(
       .filter { offset -> offset >= 0f }
       .subscribeBy(onNext = _sheetSlideOffset::setValue)
       .addTo(compositeDisposable)
+  }
+
+  fun onVenueClicked(id: Long) {
+    sendVenueClickedEventUseCase(id)
   }
 
   override fun onCleared() {
