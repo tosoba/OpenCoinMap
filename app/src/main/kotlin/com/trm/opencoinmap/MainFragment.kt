@@ -12,7 +12,6 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -224,28 +223,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
     binding.searchBar.setOnClickListener { searchView?.isIconified = false }
 
-    bottomSheetFragmentNavController.addOnDestinationChangedListener { _, destination, args ->
-      // TODO: fix call order here:
-      if (bottomSheetFragmentNavController.graph.startDestinationId == destination.id) {
-        searchView?.setQuery(viewModel.searchQuery, false)
-        if (viewModel.searchQuery.isNotBlank()) {
-          searchView?.isIconified = false
-          searchView?.clearFocus()
-        } else {
-          searchView?.isIconified = true
-        }
-        binding.searchBar.navigationIcon = null
-      } else {
-        val venueName =
-          args?.getString("venueName", viewModel.searchQuery)?.takeIf(String::isNotBlank)
-            ?: getString(R.string.unknown_place)
-        searchView?.setQuery(venueName, false)
-        searchView?.isIconified = false
-        searchView?.clearFocus()
-        binding.searchBar.navigationIcon =
-          ContextCompat.getDrawable(requireContext(), R.drawable.arrow_back)
-      }
-    }
+    binding.searchBar.navigationIcon = null
   }
 
   private fun MainViewModel.observe() {
