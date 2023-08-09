@@ -7,6 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.common.view.get
 import com.trm.opencoinmap.core.domain.model.Message
+import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
@@ -37,8 +38,8 @@ constructor(
   private val _categoriesUpdatedEvent = LiveEvent<Unit>()
   val categoriesUpdatedEvent: LiveData<Unit> = _categoriesUpdatedEvent
 
-  private val _venueClicked = LiveEvent<Long>()
-  val venueClicked: LiveData<Long> = _venueClicked
+  private val _venueClicked = LiveEvent<Venue>()
+  val venueClicked: LiveData<Venue> = _venueClicked
 
   init {
     receiveMessageUseCase()

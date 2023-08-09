@@ -29,9 +29,7 @@ import kotlin.math.roundToInt
 class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private val binding by viewBinding(FragmentVenuesBinding::bind)
   private val venuesAdapter by
-    lazy(LazyThreadSafetyMode.NONE) {
-      VenuesAdapter(onItemClick = { viewModel.onVenueClicked(it.id) })
-    }
+    lazy(LazyThreadSafetyMode.NONE) { VenuesAdapter(onItemClick = viewModel::onVenueClicked) }
 
   private val viewModel by viewModels<VenuesViewModel>()
 

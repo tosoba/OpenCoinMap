@@ -1,6 +1,7 @@
 package com.trm.opencoinmap.core.common.di
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendVenueClickedEventUseCase
 import dagger.Module
@@ -11,7 +12,7 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object VenueClickedEventModule {
-  private val relay = PublishRelay.create<Long>()
+  private val relay = PublishRelay.create<Venue>()
 
   @Provides fun sendVenueClickedEventUseCase() = SendVenueClickedEventUseCase(relay::accept)
   @Provides fun receiveVenueClickedEventUseCase() = ReceiveVenueClickedEventUseCase { relay }

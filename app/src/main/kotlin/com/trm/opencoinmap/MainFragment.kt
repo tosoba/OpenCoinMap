@@ -12,6 +12,7 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -20,7 +21,7 @@ import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.ext.requireAs
@@ -97,8 +98,13 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       )
     }
 
-  private val bottomSheetFragmentNavController: NavController
-    get() = Navigation.findNavController(binding.bottomSheetContainer)
+  private val bottomSheetFragmentNavController: NavController by
+    lazy(LazyThreadSafetyMode.NONE) {
+      childFragmentManager
+        .findFragmentById(R.id.bottom_sheet_container)!!
+        .requireAs<NavHostFragment>()
+        .navController
+    }
 
   override var searchViewsHeightPx: Int? = null
   private var searchMenuItem: MenuItem? = null
@@ -150,11 +156,11 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
     requireActivity().onBackPressedDispatcher.addCallback {
       when {
-        searchView?.isIconified == false -> {
-          searchView?.isIconified = true
-        }
         bottomSheetFragmentNavController.popBackStack() -> {
           return@addCallback
+        }
+        searchView?.isIconified == false -> {
+          searchView?.isIconified = true
         }
         sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
           sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
@@ -189,7 +195,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
           override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.menu_main, menu)
             searchMenuItem = menu.findItem(R.id.action_search)
-            searchMenuItem?.actionView?.safeAs<SearchView>()?.apply {
+            searchView?.apply {
               maxWidth = Int.MAX_VALUE
 
               setOnQueryTextListener(
@@ -216,8 +222,30 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         }
       )
 
-    binding.searchBar.navigationIcon = null
     binding.searchBar.setOnClickListener { searchView?.isIconified = false }
+
+    bottomSheetFragmentNavController.addOnDestinationChangedListener { _, destination, args ->
+      // TODO: fix call order here:
+      if (bottomSheetFragmentNavController.graph.startDestinationId == destination.id) {
+        searchView?.setQuery(viewModel.searchQuery, false)
+        if (viewModel.searchQuery.isNotBlank()) {
+          searchView?.isIconified = false
+          searchView?.clearFocus()
+        } else {
+          searchView?.isIconified = true
+        }
+        binding.searchBar.navigationIcon = null
+      } else {
+        val venueName =
+          args?.getString("venueName", viewModel.searchQuery)?.takeIf(String::isNotBlank)
+            ?: getString(R.string.unknown_place)
+        searchView?.setQuery(venueName, false)
+        searchView?.isIconified = false
+        searchView?.clearFocus()
+        binding.searchBar.navigationIcon =
+          ContextCompat.getDrawable(requireContext(), R.drawable.arrow_back)
+      }
+    }
   }
 
   private fun MainViewModel.observe() {
@@ -233,10 +261,15 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
     venueClicked.observe(viewLifecycleOwner) {
-      bottomSheetFragmentNavController.navigate(
-        R.id.venues_fragment_to_venue_details_fragment,
-        bundleOf("venueId" to it)
-      )
+      if (
+        bottomSheetFragmentNavController.currentDestination?.id !=
+          R.id.venues_fragment_to_venue_details_fragment
+      ) {
+        bottomSheetFragmentNavController.navigate(
+          R.id.venues_fragment_to_venue_details_fragment,
+          bundleOf("venueId" to it.id, "venueName" to it.name)
+        )
+      }
     }
   }
 }

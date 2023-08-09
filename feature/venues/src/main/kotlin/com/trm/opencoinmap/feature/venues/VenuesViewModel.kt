@@ -101,8 +101,8 @@ constructor(
       .addTo(compositeDisposable)
   }
 
-  fun onVenueClicked(id: Long) {
-    sendVenueClickedEventUseCase(id)
+  fun onVenueClicked(venue: Venue) {
+    sendVenueClickedEventUseCase(venue)
   }
 
   override fun onCleared() {

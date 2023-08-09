@@ -81,8 +81,6 @@ interface VenueDao {
   @Query("SELECT category, COUNT(*) AS count FROM venue GROUP BY category ORDER BY category")
   fun selectDistinctCategories(): Flowable<List<VenueCategoryCountResult>>
 
-  @Query("SELECT * FROM venue WHERE :id = id") fun selectById(id: Long): Single<VenueEntity>
-
   companion object {
     private const val SELECT_IN_BOUNDS =
       "SELECT * FROM venue " +

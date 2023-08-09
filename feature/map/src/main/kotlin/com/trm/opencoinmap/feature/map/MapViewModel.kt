@@ -11,7 +11,7 @@ import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetInitialMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
-import com.trm.opencoinmap.core.domain.usecase.GetVenueClickedUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.SaveMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
@@ -20,12 +20,10 @@ import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.MapDefaults
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import org.osmdroid.util.BoundingBox
@@ -42,7 +40,7 @@ constructor(
   private val coalesceGridMapBoundsUseCase: CoalesceGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
-  getVenueClickedUseCase: GetVenueClickedUseCase,
+  receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -98,12 +96,10 @@ constructor(
       )
       .addTo(compositeDisposable)
 
-    getVenueClickedUseCase()
+    receiveVenueClickedEventUseCase()
       .map {
         MapPosition(latitude = it.lat, longitude = it.lon, zoom = MapDefaults.INITIAL_LOCATION_ZOOM)
       }
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(onNext = _mapPosition::setValue, onError = Timber.Forest::e)
       .addTo(compositeDisposable)
   }

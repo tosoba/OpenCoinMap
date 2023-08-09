@@ -86,18 +86,6 @@ constructor(
       it.map { (category, count) -> VenueCategoryCount(category, count) }
     }
 
-  override fun getVenueById(id: Long): Single<Venue> =
-    venueDao.selectById(id).map {
-      Venue(
-        id = it.id,
-        lat = it.lat,
-        lon = it.lon,
-        category = it.category,
-        name = it.name,
-        createdOn = it.createdOn
-      )
-    }
-
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds
   ): Single<List<MapMarker>> {
