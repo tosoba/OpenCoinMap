@@ -29,6 +29,10 @@ android {
     targetCompatibility = JavaVersion.VERSION_1_8
   }
 
+  buildFeatures { compose = true }
+
+  composeOptions { kotlinCompilerExtensionVersion = "1.4.3" }
+
   kotlinOptions { jvmTarget = "1.8" }
 
   testOptions { unitTests { isIncludeAndroidResources = true } }
@@ -57,6 +61,9 @@ dependencies {
   implementation(libs.androidx.navigation.ui)
   implementation(libs.google.material)
   implementation(libs.viewBinding.propertyDelegate)
+
+  implementation(libs.androidx.compose.runtime)
+  implementation(platform(libs.androidx.compose.bom))
 
   implementation(libs.liveEvent)
 
