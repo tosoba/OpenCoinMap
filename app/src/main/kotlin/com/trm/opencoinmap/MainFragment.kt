@@ -2,18 +2,19 @@ package com.trm.opencoinmap
 
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SearchBar
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.os.bundleOf
-import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -114,14 +115,13 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    (requireActivity() as AppCompatActivity).setSupportActionBar(binding.searchBar)
 
     binding.showPlacesSheetFab.setOnClickListener {
       sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
     }
 
     initBottomSheet(savedInstanceState)
-    initSearchViews()
+    binding.initSearchViews()
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observe()
@@ -172,8 +172,8 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
   }
 
-  private fun initSearchViews() {
-    with(binding.searchLayout) {
+  private fun FragmentMainBinding.initSearchViews() {
+    with(searchLayout) {
       alpha =
         if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else collapsedSheetAlpha
 
@@ -188,42 +188,17 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       )
     }
 
-    requireActivity()
-      .addMenuProvider(
-        object : MenuProvider {
-          override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-            menuInflater.inflate(R.menu.menu_main, menu)
-            searchMenuItem = menu.findItem(R.id.action_search)
-            searchView?.apply {
-              maxWidth = Int.MAX_VALUE
-
-              setOnQueryTextListener(
-                object : SearchView.OnQueryTextListener {
-                  override fun onQueryTextSubmit(query: String?): Boolean = true
-
-                  override fun onQueryTextChange(newText: String?): Boolean {
-                    binding.searchBar.text = newText
-                    viewModel.searchQuery = newText.orEmpty()
-                    return true
-                  }
-                }
-              )
-
-              setQuery(viewModel.searchQuery, true)
-              if (viewModel.searchQuery.isNotBlank()) {
-                searchView?.isIconified = false
-                searchView?.clearFocus()
-              }
-            }
-          }
-
-          override fun onMenuItemSelected(menuItem: MenuItem): Boolean = true
-        }
-      )
-
-    binding.searchBar.setOnClickListener { searchView?.isIconified = false }
-
-    binding.searchBar.navigationIcon = null
+    searchBar.setContent {
+      @OptIn(ExperimentalMaterial3Api::class)
+      SearchBar(
+        query = viewModel.searchQuery,
+        onQueryChange = {},
+        onSearch = {},
+        active = false,
+        onActiveChange = {},
+        modifier = Modifier.padding(horizontal = 10.dp)
+      ) {}
+    }
   }
 
   private fun MainViewModel.observe() {

@@ -68,17 +68,13 @@
         android:orientation="horizontal"
         android:weightSum="1">
 
-        <com.google.android.material.search.SearchBar
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight=".5"
-            android:alpha="@dimen/collapsed_sheet_alpha"
-            android:hint="@string/search"
-            android:outlineAmbientShadowColor="@android:color/black"
-            android:outlineSpotShadowColor="@android:color/black"
-            app:contentInsetStart="16dp" />
+            android:alpha="@dimen/collapsed_sheet_alpha" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/categories_container"
@@ -86,7 +82,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="-10dp"
+            android:layout_marginStart="-5dp"
             android:layout_weight=".5"
             android:alpha="@dimen/collapsed_sheet_alpha" />
 
