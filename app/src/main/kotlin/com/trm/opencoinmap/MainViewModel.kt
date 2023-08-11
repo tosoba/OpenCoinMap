@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hadilq.liveevent.LiveEvent
-import com.trm.opencoinmap.core.common.view.get
+import com.trm.opencoinmap.core.common.view.getLiveData
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
@@ -30,7 +30,17 @@ constructor(
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  var searchQuery by savedStateHandle.get(defaultValue = "")
+  private val _searchQuery by savedStateHandle.getLiveData(initialValue = "")
+  val searchQuery: LiveData<String> = _searchQuery
+  fun setSearchQuery(query: String) {
+    _searchQuery.value = query
+  }
+
+  private val _searchFocused by savedStateHandle.getLiveData(initialValue = false)
+  val searchFocused: LiveData<Boolean> = _searchFocused
+  fun setSearchFocused(focused: Boolean) {
+    _searchFocused.value = focused
+  }
 
   private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage

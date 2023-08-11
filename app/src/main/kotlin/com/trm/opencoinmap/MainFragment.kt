@@ -11,7 +11,14 @@ import androidx.appcompat.widget.SearchView
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBar
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.os.bundleOf
@@ -155,6 +162,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
     requireActivity().onBackPressedDispatcher.addCallback {
       when {
+        viewModel.searchFocused.value == true -> {
+          viewModel.setSearchFocused(false)
+        }
         bottomSheetFragmentNavController.popBackStack() -> {
           return@addCallback
         }
@@ -189,15 +199,31 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
     searchBar.setContent {
+      val query = viewModel.searchQuery.observeAsState(initial = "")
+      val focusRequester = remember(::FocusRequester)
+      val focusManager = LocalFocusManager.current
+
       @OptIn(ExperimentalMaterial3Api::class)
       SearchBar(
-        query = viewModel.searchQuery,
-        onQueryChange = {},
-        onSearch = {},
+        query = query.value,
+        onQueryChange = viewModel::setSearchQuery,
+        onSearch = viewModel::setSearchQuery,
         active = false,
         onActiveChange = {},
-        modifier = Modifier.padding(horizontal = 10.dp)
+        modifier =
+          Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
+            viewModel.setSearchFocused(it.isFocused)
+          }
       ) {}
+
+      val focused = viewModel.searchFocused.observeAsState(initial = false)
+      LaunchedEffect(focused.value) {
+        if (focused.value) {
+          focusRequester.requestFocus()
+        } else {
+          focusManager.clearFocus()
+        }
+      }
     }
   }
 
