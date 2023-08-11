@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
 import androidx.appcompat.widget.SearchView
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBar
@@ -210,6 +211,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         onSearch = viewModel::setSearchQuery,
         active = false,
         onActiveChange = {},
+        windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         modifier =
           Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
             viewModel.setSearchFocused(it.isFocused)

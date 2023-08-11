@@ -75,7 +75,6 @@
             android:name="com.trm.opencoinmap.feature.categories.CategoriesFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:alpha="@dimen/collapsed_sheet_alpha" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
