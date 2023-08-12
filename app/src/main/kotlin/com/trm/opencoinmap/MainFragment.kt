@@ -2,12 +2,10 @@ package com.trm.opencoinmap
 
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
-import androidx.appcompat.widget.SearchView
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +31,6 @@ import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.ext.requireAs
-import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
@@ -115,9 +112,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
   override var searchViewsHeightPx: Int? = null
-  private var searchMenuItem: MenuItem? = null
-  private val searchView: SearchView?
-    get() = searchMenuItem?.actionView?.safeAs<SearchView>()
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -133,11 +127,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observe()
-  }
-
-  override fun onDestroyView() {
-    searchMenuItem = null
-    super.onDestroyView()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -168,9 +157,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         }
         bottomSheetFragmentNavController.popBackStack() -> {
           return@addCallback
-        }
-        searchView?.isIconified == false -> {
-          searchView?.isIconified = true
         }
         sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
           sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
