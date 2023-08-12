@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -175,51 +176,54 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       )
     }
 
-    searchBar.setContent {
-      val query = viewModel.searchQuery.observeAsState(initial = "")
+    searchBar.setContent { SearchBar() }
+  }
 
-      val focusRequester = remember(::FocusRequester)
-      val focusManager = LocalFocusManager.current
-      val focused = viewModel.searchFocused.observeAsState(initial = false)
-      LaunchedEffect(focused.value) {
-        if (focused.value) focusRequester.requestFocus() else focusManager.clearFocus()
-      }
+  @Composable
+  private fun SearchBar() {
+    val query = viewModel.searchQuery.observeAsState(initial = "")
 
-      val leadingIconMode =
-        viewModel.searchBarLeadingIconMode.observeAsState(initial = SearchBarLeadingIconMode.SEARCH)
-
-      @OptIn(ExperimentalMaterial3Api::class)
-      SearchBar(
-        query = query.value,
-        onQueryChange = viewModel.searchQuery::setValue,
-        onSearch = viewModel.searchQuery::setValue,
-        active = false,
-        onActiveChange = {},
-        leadingIcon = {
-          when (leadingIconMode.value) {
-            SearchBarLeadingIconMode.SEARCH -> {
-              Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = stringResource(id = R.string.search)
-              )
-            }
-            SearchBarLeadingIconMode.BACK -> {
-              Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.back),
-                modifier =
-                  Modifier.clickable { requireActivity().onBackPressedDispatcher.onBackPressed() }
-              )
-            }
-          }
-        },
-        windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
-        modifier =
-          Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
-            viewModel.searchFocused.value = it.isFocused
-          }
-      ) {}
+    val focusRequester = remember(::FocusRequester)
+    val focusManager = LocalFocusManager.current
+    val focused = viewModel.searchFocused.observeAsState(initial = false)
+    LaunchedEffect(focused.value) {
+      if (focused.value) focusRequester.requestFocus() else focusManager.clearFocus()
     }
+
+    val leadingIconMode =
+      viewModel.searchBarLeadingIconMode.observeAsState(initial = SearchBarLeadingIconMode.SEARCH)
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    SearchBar(
+      query = query.value,
+      onQueryChange = viewModel.searchQuery::setValue,
+      onSearch = viewModel.searchQuery::setValue,
+      active = false,
+      onActiveChange = {},
+      leadingIcon = {
+        when (leadingIconMode.value) {
+          SearchBarLeadingIconMode.SEARCH -> {
+            Icon(
+              imageVector = Icons.Filled.Search,
+              contentDescription = stringResource(id = R.string.search)
+            )
+          }
+          SearchBarLeadingIconMode.BACK -> {
+            Icon(
+              imageVector = Icons.Filled.ArrowBack,
+              contentDescription = stringResource(id = R.string.back),
+              modifier =
+                Modifier.clickable { requireActivity().onBackPressedDispatcher.onBackPressed() }
+            )
+          }
+        }
+      },
+      windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
+      modifier =
+        Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
+          viewModel.searchFocused.value = it.isFocused
+        }
+    ) {}
   }
 
   private fun initNavigation() {
