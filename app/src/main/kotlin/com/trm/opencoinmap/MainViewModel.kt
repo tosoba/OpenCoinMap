@@ -1,6 +1,8 @@
 package com.trm.opencoinmap
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -32,6 +34,29 @@ constructor(
 
   val searchQuery by savedStateHandle.getLiveData(initialValue = "")
   val searchFocused by savedStateHandle.getLiveData(initialValue = false)
+
+  val bottomSheetDestinationId = MutableLiveData<Int>()
+
+  private val _searchBarLeadingIconMode =
+    MediatorLiveData<SearchBarLeadingIconMode>().apply {
+      addSource(searchFocused) {
+        value =
+          if (it || bottomSheetDestinationId.value != R.id.venues_fragment) {
+            SearchBarLeadingIconMode.BACK
+          } else {
+            SearchBarLeadingIconMode.SEARCH
+          }
+      }
+      addSource(bottomSheetDestinationId) {
+        value =
+          if (it != R.id.venues_fragment || searchFocused.value == true) {
+            SearchBarLeadingIconMode.BACK
+          } else {
+            SearchBarLeadingIconMode.SEARCH
+          }
+      }
+    }
+  val searchBarLeadingIconMode: LiveData<SearchBarLeadingIconMode> = _searchBarLeadingIconMode
 
   private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage
@@ -68,4 +93,9 @@ constructor(
     super.onCleared()
     compositeDisposable.clear()
   }
+}
+
+internal enum class SearchBarLeadingIconMode {
+  SEARCH,
+  BACK
 }

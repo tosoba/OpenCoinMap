@@ -6,9 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -18,6 +23,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.os.bundleOf
@@ -125,6 +131,8 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     initBottomSheet(savedInstanceState)
     binding.initSearchViews()
 
+    initNavigation()
+
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observe()
   }
@@ -149,24 +157,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
     sheetController.initFrom(savedInstanceState)
-
-    requireActivity().onBackPressedDispatcher.addCallback {
-      when {
-        viewModel.searchFocused.value == true -> {
-          viewModel.searchFocused.value = false
-        }
-        bottomSheetFragmentNavController.popBackStack() -> {
-          return@addCallback
-        }
-        sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
-          sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-          sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
-        }
-        else -> {
-          requireActivity().finish()
-        }
-      }
-    }
   }
 
   private fun FragmentMainBinding.initSearchViews() {
@@ -195,6 +185,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         if (focused.value) focusRequester.requestFocus() else focusManager.clearFocus()
       }
 
+      val leadingIconMode =
+        viewModel.searchBarLeadingIconMode.observeAsState(initial = SearchBarLeadingIconMode.SEARCH)
+
       @OptIn(ExperimentalMaterial3Api::class)
       SearchBar(
         query = query.value,
@@ -202,12 +195,54 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         onSearch = viewModel.searchQuery::setValue,
         active = false,
         onActiveChange = {},
+        leadingIcon = {
+          when (leadingIconMode.value) {
+            SearchBarLeadingIconMode.SEARCH -> {
+              Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = stringResource(id = R.string.search)
+              )
+            }
+            SearchBarLeadingIconMode.BACK -> {
+              Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = stringResource(id = R.string.back),
+                modifier =
+                  Modifier.clickable { requireActivity().onBackPressedDispatcher.onBackPressed() }
+              )
+            }
+          }
+        },
         windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         modifier =
           Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
             viewModel.searchFocused.value = it.isFocused
           }
       ) {}
+    }
+  }
+
+  private fun initNavigation() {
+    requireActivity().onBackPressedDispatcher.addCallback {
+      when {
+        viewModel.searchFocused.value == true -> {
+          viewModel.searchFocused.value = false
+        }
+        bottomSheetFragmentNavController.popBackStack() -> {
+          return@addCallback
+        }
+        sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
+          sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+          sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        }
+        else -> {
+          requireActivity().finish()
+        }
+      }
+    }
+
+    bottomSheetFragmentNavController.addOnDestinationChangedListener { _, destination, arguments ->
+      viewModel.bottomSheetDestinationId.value = destination.id
     }
   }
 
