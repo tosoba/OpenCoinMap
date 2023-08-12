@@ -201,8 +201,13 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
     searchBar.setContent {
       val query = viewModel.searchQuery.observeAsState(initial = "")
+
       val focusRequester = remember(::FocusRequester)
       val focusManager = LocalFocusManager.current
+      val focused = viewModel.searchFocused.observeAsState(initial = false)
+      LaunchedEffect(focused.value) {
+        if (focused.value) focusRequester.requestFocus() else focusManager.clearFocus()
+      }
 
       @OptIn(ExperimentalMaterial3Api::class)
       SearchBar(
@@ -217,15 +222,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
             viewModel.searchFocused.value = it.isFocused
           }
       ) {}
-
-      val focused = viewModel.searchFocused.observeAsState(initial = false)
-      LaunchedEffect(focused.value) {
-        if (focused.value) {
-          focusRequester.requestFocus()
-        } else {
-          focusManager.clearFocus()
-        }
-      }
     }
   }
 
