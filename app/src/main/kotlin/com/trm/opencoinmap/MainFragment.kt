@@ -164,7 +164,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     requireActivity().onBackPressedDispatcher.addCallback {
       when {
         viewModel.searchFocused.value == true -> {
-          viewModel.setSearchFocused(false)
+          viewModel.searchFocused.value = false
         }
         bottomSheetFragmentNavController.popBackStack() -> {
           return@addCallback
@@ -207,14 +207,14 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       @OptIn(ExperimentalMaterial3Api::class)
       SearchBar(
         query = query.value,
-        onQueryChange = viewModel::setSearchQuery,
-        onSearch = viewModel::setSearchQuery,
+        onQueryChange = viewModel.searchQuery::setValue,
+        onSearch = viewModel.searchQuery::setValue,
         active = false,
         onActiveChange = {},
         windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         modifier =
           Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
-            viewModel.setSearchFocused(it.isFocused)
+            viewModel.searchFocused.value = it.isFocused
           }
       ) {}
 

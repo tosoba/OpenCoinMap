@@ -30,17 +30,8 @@ constructor(
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  private val _searchQuery by savedStateHandle.getLiveData(initialValue = "")
-  val searchQuery: LiveData<String> = _searchQuery
-  fun setSearchQuery(query: String) {
-    _searchQuery.value = query
-  }
-
-  private val _searchFocused by savedStateHandle.getLiveData(initialValue = false)
-  val searchFocused: LiveData<Boolean> = _searchFocused
-  fun setSearchFocused(focused: Boolean) {
-    _searchFocused.value = focused
-  }
+  val searchQuery by savedStateHandle.getLiveData(initialValue = "")
+  val searchFocused by savedStateHandle.getLiveData(initialValue = false)
 
   private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage
