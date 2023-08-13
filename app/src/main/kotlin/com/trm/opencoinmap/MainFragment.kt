@@ -6,11 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -187,7 +190,11 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     val query = viewModel.searchBarQuery.observeAsState(initial = "")
     val enabled = viewModel.searchBarEnabled.observeAsState(initial = true)
     val leadingIconMode =
-      viewModel.searchBarLeadingIconMode.observeAsState(initial = SearchBarLeadingIconMode.SEARCH)
+      viewModel.searchBarLeadingIconMode.observeAsState(
+        initial = MainSearchBarLeadingIconMode.SEARCH
+      )
+    val searchBarTrailingIconVisible =
+      viewModel.searchBarTrailingIconVisible.observeAsState(initial = false)
 
     val focusRequester = remember(::FocusRequester)
     val focusManager = LocalFocusManager.current
@@ -205,21 +212,32 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       onActiveChange = {},
       placeholder = { Text(text = stringResource(id = R.string.search)) },
       leadingIcon = {
-        when (leadingIconMode.value) {
-          SearchBarLeadingIconMode.SEARCH -> {
-            Icon(
-              imageVector = Icons.Filled.Search,
-              contentDescription = stringResource(id = R.string.search)
-            )
+        Crossfade(targetState = leadingIconMode.value, label = "LeadingIconCrossFade") {
+          when (it) {
+            MainSearchBarLeadingIconMode.SEARCH -> {
+              Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = stringResource(id = R.string.search)
+              )
+            }
+            MainSearchBarLeadingIconMode.BACK -> {
+              Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = stringResource(id = R.string.back),
+                modifier =
+                  Modifier.clickable { requireActivity().onBackPressedDispatcher.onBackPressed() }
+              )
+            }
           }
-          SearchBarLeadingIconMode.BACK -> {
-            Icon(
-              imageVector = Icons.Filled.ArrowBack,
-              contentDescription = stringResource(id = R.string.back),
-              modifier =
-                Modifier.clickable { requireActivity().onBackPressedDispatcher.onBackPressed() }
-            )
-          }
+        }
+      },
+      trailingIcon = {
+        AnimatedVisibility(visible = searchBarTrailingIconVisible.value) {
+          Icon(
+            imageVector = Icons.Filled.Clear,
+            contentDescription = stringResource(id = R.string.clear),
+            modifier = Modifier.clickable { viewModel.searchQuery.value = "" }
+          )
         }
       },
       colors =

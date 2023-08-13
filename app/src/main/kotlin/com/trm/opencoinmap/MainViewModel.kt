@@ -39,25 +39,36 @@ constructor(
   val searchFocused by savedStateHandle.getLiveData(initialValue = false)
 
   private val _searchBarLeadingIconMode =
-    MediatorLiveData<SearchBarLeadingIconMode>().apply {
+    MediatorLiveData<MainSearchBarLeadingIconMode>().apply {
       addSource(searchFocused) {
         value =
           if (it || _bottomSheetDestinationId.value != R.id.venues_fragment) {
-            SearchBarLeadingIconMode.BACK
+            MainSearchBarLeadingIconMode.BACK
           } else {
-            SearchBarLeadingIconMode.SEARCH
+            MainSearchBarLeadingIconMode.SEARCH
           }
       }
       addSource(_bottomSheetDestinationId) {
         value =
           if (it != R.id.venues_fragment || searchFocused.value == true) {
-            SearchBarLeadingIconMode.BACK
+            MainSearchBarLeadingIconMode.BACK
           } else {
-            SearchBarLeadingIconMode.SEARCH
+            MainSearchBarLeadingIconMode.SEARCH
           }
       }
     }
-  val searchBarLeadingIconMode: LiveData<SearchBarLeadingIconMode> = _searchBarLeadingIconMode
+  val searchBarLeadingIconMode: LiveData<MainSearchBarLeadingIconMode> = _searchBarLeadingIconMode
+
+  private val _searchBarTrailingIconVisible =
+    MediatorLiveData<Boolean>().apply {
+      addSource(_bottomSheetDestinationId) {
+        value = it == R.id.venues_fragment && !searchQuery.value.isNullOrBlank()
+      }
+      addSource(searchQuery) {
+        value = _bottomSheetDestinationId.value == R.id.venues_fragment && !it.isNullOrBlank()
+      }
+    }
+  val searchBarTrailingIconVisible: LiveData<Boolean> = _searchBarTrailingIconVisible
 
   private val _searchBarQuery =
     MediatorLiveData<String>().apply {
@@ -125,9 +136,4 @@ constructor(
     super.onCleared()
     compositeDisposable.clear()
   }
-}
-
-internal enum class SearchBarLeadingIconMode {
-  SEARCH,
-  BACK
 }
