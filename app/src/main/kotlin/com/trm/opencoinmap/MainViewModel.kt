@@ -32,22 +32,23 @@ constructor(
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
+  private val _bottomSheetDestinationId = MutableLiveData(R.id.venues_fragment)
+  private val _bottomSheetVenueName = MutableLiveData<String?>()
+
   val searchQuery by savedStateHandle.getLiveData(initialValue = "")
   val searchFocused by savedStateHandle.getLiveData(initialValue = false)
-
-  val bottomSheetDestinationId = MutableLiveData<Int>()
 
   private val _searchBarLeadingIconMode =
     MediatorLiveData<SearchBarLeadingIconMode>().apply {
       addSource(searchFocused) {
         value =
-          if (it || bottomSheetDestinationId.value != R.id.venues_fragment) {
+          if (it || _bottomSheetDestinationId.value != R.id.venues_fragment) {
             SearchBarLeadingIconMode.BACK
           } else {
             SearchBarLeadingIconMode.SEARCH
           }
       }
-      addSource(bottomSheetDestinationId) {
+      addSource(_bottomSheetDestinationId) {
         value =
           if (it != R.id.venues_fragment || searchFocused.value == true) {
             SearchBarLeadingIconMode.BACK
@@ -57,6 +58,32 @@ constructor(
       }
     }
   val searchBarLeadingIconMode: LiveData<SearchBarLeadingIconMode> = _searchBarLeadingIconMode
+
+  private val _searchBarQuery =
+    MediatorLiveData<String>().apply {
+      addSource(_bottomSheetDestinationId) {
+        value =
+          if (it == R.id.venues_fragment) searchQuery.value
+          else _bottomSheetVenueName.value.orEmpty()
+      }
+      addSource(searchQuery) {
+        if (_bottomSheetDestinationId.value == R.id.venues_fragment) {
+          value = searchQuery.value
+        }
+      }
+      addSource(_bottomSheetVenueName) {
+        if (_bottomSheetDestinationId.value != R.id.venues_fragment) {
+          value = _bottomSheetVenueName.value
+        }
+      }
+    }
+  val searchBarQuery: LiveData<String> = _searchBarQuery
+
+  private val _searchBarEnabled =
+    MediatorLiveData<Boolean>().apply {
+      addSource(_bottomSheetDestinationId) { value = it == R.id.venues_fragment }
+    }
+  val searchBarEnabled: LiveData<Boolean> = _searchBarEnabled
 
   private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage
@@ -87,6 +114,11 @@ constructor(
 
   fun onSheetSlide(slideOffset: Float) {
     sendSheetSlideOffsetUseCase(slideOffset)
+  }
+
+  fun onBottomSheetFragmentChanged(destinationId: Int, venueName: String?) {
+    _bottomSheetDestinationId.value = destinationId
+    _bottomSheetVenueName.value = venueName
   }
 
   override fun onCleared() {

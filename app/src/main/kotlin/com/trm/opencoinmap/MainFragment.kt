@@ -14,7 +14,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -181,7 +183,10 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
 
   @Composable
   private fun SearchBar() {
-    val query = viewModel.searchQuery.observeAsState(initial = "")
+    val query = viewModel.searchBarQuery.observeAsState(initial = "")
+    val enabled = viewModel.searchBarEnabled.observeAsState(initial = true)
+    val leadingIconMode =
+      viewModel.searchBarLeadingIconMode.observeAsState(initial = SearchBarLeadingIconMode.SEARCH)
 
     val focusRequester = remember(::FocusRequester)
     val focusManager = LocalFocusManager.current
@@ -189,9 +194,6 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     LaunchedEffect(focused.value) {
       if (focused.value) focusRequester.requestFocus() else focusManager.clearFocus()
     }
-
-    val leadingIconMode =
-      viewModel.searchBarLeadingIconMode.observeAsState(initial = SearchBarLeadingIconMode.SEARCH)
 
     @OptIn(ExperimentalMaterial3Api::class)
     SearchBar(
@@ -218,7 +220,16 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
           }
         }
       },
+      colors =
+        SearchBarDefaults.colors(
+          inputFieldColors =
+            SearchBarDefaults.inputFieldColors(
+              disabledTextColor = MaterialTheme.colorScheme.onSurface,
+              disabledLeadingIconColor = MaterialTheme.colorScheme.onSurface
+            )
+        ),
       windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
+      enabled = enabled.value,
       modifier =
         Modifier.padding(horizontal = 10.dp).focusRequester(focusRequester).onFocusChanged {
           viewModel.searchFocused.value = it.isFocused
@@ -246,7 +257,10 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
     bottomSheetFragmentNavController.addOnDestinationChangedListener { _, destination, arguments ->
-      viewModel.bottomSheetDestinationId.value = destination.id
+      viewModel.onBottomSheetFragmentChanged(
+        destinationId = destination.id,
+        venueName = arguments?.getString(VENUE_NAME_KEY, getString(R.string.unknown_place))
+      )
     }
   }
 
@@ -269,9 +283,14 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       ) {
         bottomSheetFragmentNavController.navigate(
           R.id.venues_fragment_to_venue_details_fragment,
-          bundleOf("venueId" to it.id, "venueName" to it.name)
+          bundleOf(VENUE_ID_KEY to it.id, VENUE_NAME_KEY to it.name)
         )
       }
     }
+  }
+
+  companion object {
+    private const val VENUE_ID_KEY = "venueId"
+    private const val VENUE_NAME_KEY = "venueName"
   }
 }
