@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -202,6 +203,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       onSearch = viewModel.searchQuery::setValue,
       active = false,
       onActiveChange = {},
+      placeholder = { Text(text = stringResource(id = R.string.search)) },
       leadingIcon = {
         when (leadingIconMode.value) {
           SearchBarLeadingIconMode.SEARCH -> {
