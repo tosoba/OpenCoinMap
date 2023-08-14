@@ -3,6 +3,7 @@ package com.trm.opencoinmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -105,6 +106,8 @@ constructor(
   private val _venueClicked = LiveEvent<Venue>()
   val venueClicked: LiveData<Venue> = _venueClicked
 
+  private val searchQueryObserver = Observer<String> {}
+
   init {
     receiveMessageUseCase()
       .subscribeBy(onNext = _snackbarMessage::setValue)
@@ -117,6 +120,8 @@ constructor(
     receiveVenueClickedEventUseCase()
       .subscribeBy(onNext = _venueClicked::setValue)
       .addTo(compositeDisposable)
+
+    searchQuery.observeForever(searchQueryObserver)
   }
 
   fun onSearchViewsSizeMeasure(@BottomSheetBehavior.State sheetState: Int) {
@@ -134,6 +139,7 @@ constructor(
 
   override fun onCleared() {
     super.onCleared()
+    searchQuery.removeObserver(searchQueryObserver)
     compositeDisposable.clear()
   }
 }
