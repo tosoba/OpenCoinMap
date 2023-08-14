@@ -15,6 +15,7 @@ import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventU
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendSheetSlideOffsetUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendVenueQueryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -30,6 +31,7 @@ constructor(
   private val sendSheetSlideOffsetUseCase: SendSheetSlideOffsetUseCase,
   receiveCategoriesListLayoutEventUseCase: ReceiveCategoriesListLayoutEventUseCase,
   receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
+  sendVenueQueryUseCase: SendVenueQueryUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -106,7 +108,7 @@ constructor(
   private val _venueClicked = LiveEvent<Venue>()
   val venueClicked: LiveData<Venue> = _venueClicked
 
-  private val searchQueryObserver = Observer<String> {}
+  private val searchQueryObserver = Observer(sendVenueQueryUseCase::invoke)
 
   init {
     receiveMessageUseCase()

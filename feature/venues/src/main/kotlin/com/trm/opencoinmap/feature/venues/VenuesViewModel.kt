@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.rxjava3.cachedIn
 import com.hadilq.liveevent.LiveEvent
-import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
@@ -16,7 +15,9 @@ import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueQueryUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendVenueClickedEventUseCase
+import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
@@ -40,6 +41,7 @@ constructor(
   receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
   isVenuesSyncRunningUseCase: IsVenuesSyncRunningUseCase,
   private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
+  receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
