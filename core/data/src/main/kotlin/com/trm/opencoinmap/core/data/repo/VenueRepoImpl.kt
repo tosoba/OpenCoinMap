@@ -87,7 +87,8 @@ constructor(
     }
 
   override fun getVenueMarkersInLatLngBounds(
-    gridMapBounds: GridMapBounds
+    gridMapBounds: GridMapBounds,
+    query: String
   ): Single<List<MapMarker>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
     val (latSouth, latNorth, lonWest, lonEast) = bounds
@@ -102,29 +103,32 @@ constructor(
           )
           .flatMap { allExist ->
             if (allExist) {
-              venueDao.countInBoundsSingle(
+              venueDao.countMatchingQueryInBoundsSingle(
                 minLat = latSouth,
                 maxLat = latNorth,
                 minLon = lonWest,
-                maxLon = lonEast
+                maxLon = lonEast,
+                query = query,
               )
             } else {
               getAndInsertVenuesFromNetwork(
                 minLat = latSouth,
                 maxLat = latNorth,
                 minLon = lonWest,
-                maxLon = lonEast
+                maxLon = lonEast,
+                query = query,
               )
             }
           }
           .flatMap { count ->
             if (count < BOUNDS_MARKERS_LIMIT) {
               venueDao
-                .selectInBoundsSingle(
+                .selectMatchingQueryInBoundsSingle(
                   minLat = latSouth,
                   maxLat = latNorth,
                   minLon = lonWest,
-                  maxLon = lonEast
+                  maxLon = lonEast,
+                  query = query
                 )
                 .map { it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } }
             } else {
@@ -142,7 +146,11 @@ constructor(
                 )
 
               Single.fromCallable {
-                  selectCellMarkers(gridCells = gridCells, gridCellLimit = gridCellLimit)
+                  selectCellMarkers(
+                    gridCells = gridCells,
+                    gridCellLimit = gridCellLimit,
+                    query = query
+                  )
                 }
                 .map { cells ->
                   cells.flatMap { cell ->
@@ -178,17 +186,19 @@ constructor(
 
   private fun selectCellMarkers(
     gridCells: List<MapBounds>,
-    gridCellLimit: Int
+    gridCellLimit: Int,
+    query: String,
   ): List<GridCellMarkers> =
     db.runInTransaction(
       Callable {
         gridCells.map { (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
           val countInCell =
-            venueDao.countInBounds(
+            venueDao.countMatchingQueryInBounds(
               minLat = cellMinLat,
               maxLat = cellMaxLat,
               minLon = cellMinLon,
-              maxLon = cellMaxLon
+              maxLon = cellMaxLon,
+              query = query,
             )
           if (countInCell > gridCellLimit) {
             GridCellMarkers.Cluster(
@@ -201,11 +211,12 @@ constructor(
           } else {
             GridCellMarkers.Venues(
               venueDao
-                .selectInBounds(
+                .selectMatchingQueryInBounds(
                   minLat = cellMinLat,
                   maxLat = cellMaxLat,
                   minLon = cellMinLon,
-                  maxLon = cellMaxLon
+                  maxLon = cellMaxLon,
+                  query = query
                 )
                 .map(VenueEntity::asDomainModel)
             )
@@ -257,20 +268,21 @@ constructor(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
-    maxLon: Double
+    maxLon: Double,
+    query: String
   ): Single<Int> =
     coinMapApi
       .getVenues(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
       .map { it.venues?.map(VenueResponseItem::asDomainModel) ?: emptyList() }
       .flatMap { venues ->
         insertVenuesInBounds(
-            venues = venues.map(Venue::asEntity),
-            minLat = minLat,
-            maxLat = maxLat,
-            minLon = minLon,
-            maxLon = maxLon
-          )
-          .toSingleDefault(venues.size)
+          venues = venues.map(Venue::asEntity),
+          minLat = minLat,
+          maxLat = maxLat,
+          minLon = minLon,
+          maxLon = maxLon,
+          query = query
+        )
       }
 
   private fun insertVenuesInBounds(
@@ -278,21 +290,31 @@ constructor(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
-    maxLon: Double
-  ): Completable =
-    Completable.fromAction {
-      db.runInTransaction {
-        venueDao.upsert(venues)
-        boundsDao.upsert(
-          BoundsEntity(
+    maxLon: Double,
+    query: String
+  ): Single<Int> =
+    Single.fromCallable {
+      db.runInTransaction(
+        Callable {
+          venueDao.upsert(venues)
+          boundsDao.upsert(
+            BoundsEntity(
+              minLat = minLat,
+              maxLat = maxLat,
+              minLon = minLon,
+              maxLon = maxLon,
+              whole = false
+            )
+          )
+          venueDao.countMatchingQueryInBounds(
             minLat = minLat,
             maxLat = maxLat,
             minLon = minLon,
             maxLon = maxLon,
-            whole = false
+            query = query
           )
-        )
-      }
+        }
+      )
     }
 
   private fun insertVenuesInWholeBounds(venues: List<VenueEntity>): Completable =

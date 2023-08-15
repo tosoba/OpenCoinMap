@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "venue", indices = [Index("lat", "lon")])
+@Entity(tableName = "venue", indices = [Index("lat", "lon", "name")])
 data class VenueEntity(
   @PrimaryKey val id: Long,
   val lat: Double,

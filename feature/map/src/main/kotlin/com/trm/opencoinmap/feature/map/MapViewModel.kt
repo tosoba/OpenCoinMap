@@ -80,11 +80,17 @@ constructor(
         .map { (bounds, _, centerLon) ->
           coalesceGridMapBoundsUseCase(gridMapBounds = bounds, centerLon = centerLon)
         }
-    coalescedBounds
-      .mergeWith(retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds })
+    Observable.combineLatest(
+        coalescedBounds.mergeWith(
+          retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds }
+        ),
+        receiveVenueQueryUseCase().startWithItem("").distinctUntilChanged()
+      ) { bounds, query ->
+        bounds to query
+      }
       .debounce(1L, TimeUnit.SECONDS)
-      .doOnNext { sendMapBoundsUseCase(it.map(GridMapBounds::bounds)) }
-      .switchMap(getMarkersInBoundsUseCase::invoke)
+      .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
+      .switchMap { (bounds, query) -> getMarkersInBoundsUseCase(bounds, query) }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .doOnNext { if (it is Failed) Timber.e(it.throwable) }

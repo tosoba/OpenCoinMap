@@ -2,9 +2,10 @@ package com.trm.opencoinmap.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "bounds")
+@Entity(tableName = "bounds", indices = [Index("min_lat", "max_lat", "min_lon", "max_lon")])
 data class BoundsEntity(
   @PrimaryKey(autoGenerate = true) var id: Long = 0L,
   @ColumnInfo("min_lat") val minLat: Double,

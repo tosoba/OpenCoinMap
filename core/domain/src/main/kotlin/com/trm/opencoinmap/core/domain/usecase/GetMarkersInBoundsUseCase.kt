@@ -12,8 +12,13 @@ constructor(
   private val repo: VenueRepo,
   private val sendMarkersLoadingStatusUseCase: SendMarkersLoadingStatusUseCase
 ) {
-  operator fun invoke(bounds: List<GridMapBounds>): Observable<Loadable<List<MapMarker>>> =
-    Single.zip(bounds.map(repo::getVenueMarkersInLatLngBounds)) { result ->
+  operator fun invoke(
+    bounds: List<GridMapBounds>,
+    query: String
+  ): Observable<Loadable<List<MapMarker>>> =
+    Single.zip(
+        bounds.map { repo.getVenueMarkersInLatLngBounds(gridMapBounds = it, query = query) }
+      ) { result ->
         result.filterIsInstance<List<MapMarker>>().flatten()
       }
       .map(List<MapMarker>::asLoadable)
