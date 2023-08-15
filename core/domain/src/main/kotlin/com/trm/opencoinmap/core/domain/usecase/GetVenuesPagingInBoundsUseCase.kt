@@ -8,6 +8,6 @@ import io.reactivex.rxjava3.core.Flowable
 import javax.inject.Inject
 
 class GetVenuesPagingInBoundsUseCase @Inject constructor(private val repo: VenueRepo) {
-  operator fun invoke(mapBounds: List<MapBounds>): Flowable<PagingData<Venue>> =
-    repo.getVenuesPagingInBounds(mapBounds)
+  operator fun invoke(mapBounds: List<MapBounds>, query: String): Flowable<PagingData<Venue>> =
+    repo.getVenuesPagingInBounds(mapBounds, query)
 }

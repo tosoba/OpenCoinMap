@@ -13,7 +13,10 @@ import io.reactivex.rxjava3.core.Single
 interface VenueRepo {
   fun sync(): Completable
 
-  fun getVenuesPagingInBounds(mapBounds: List<MapBounds>): Flowable<PagingData<Venue>>
+  fun getVenuesPagingInBounds(
+    mapBounds: List<MapBounds>,
+    query: String
+  ): Flowable<PagingData<Venue>>
 
   fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds,

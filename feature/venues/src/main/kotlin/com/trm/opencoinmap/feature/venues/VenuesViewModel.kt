@@ -78,11 +78,19 @@ constructor(
         } else {
           receiveMapBoundsUseCase()
             .toFlowable(BackpressureStrategy.LATEST)
-            .switchMap { bounds -> getVenuesPagingInBoundsUseCase(bounds).cachedIn(viewModelScope) }
+            .combineLatest(
+              receiveVenueQueryUseCase()
+                .startWithItem("")
+                .distinctUntilChanged()
+                .toFlowable(BackpressureStrategy.LATEST)
+            )
+            .switchMap { (bounds, query) ->
+              getVenuesPagingInBoundsUseCase(bounds, query).cachedIn(viewModelScope)
+            }
             .combineLatest(
               receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST)
             )
-            .debounce(250L, TimeUnit.MILLISECONDS)
+            .debounce(500L, TimeUnit.MILLISECONDS)
         }
       }
       .subscribeOn(schedulers.io)

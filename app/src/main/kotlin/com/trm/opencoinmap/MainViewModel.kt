@@ -11,7 +11,7 @@ import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.common.view.getLiveData
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.core.domain.model.Venue
-import com.trm.opencoinmap.core.domain.usecase.GetTrimmedContainsQueryOrEmptyUseCase
+import com.trm.opencoinmap.core.domain.usecase.GetTrimmedQueryOrEmptyUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
@@ -33,7 +33,7 @@ constructor(
   receiveCategoriesListLayoutEventUseCase: ReceiveCategoriesListLayoutEventUseCase,
   receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
   sendVenueQueryUseCase: SendVenueQueryUseCase,
-  getTrimmedContainsQueryOrEmptyUseCase: GetTrimmedContainsQueryOrEmptyUseCase,
+  getTrimmedQueryOrEmptyUseCase: GetTrimmedQueryOrEmptyUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -112,7 +112,7 @@ constructor(
 
   private val searchQueryObserver =
     Observer<String> { query ->
-      sendVenueQueryUseCase(getTrimmedContainsQueryOrEmptyUseCase(query, MIN_QUERY_LENGTH))
+      sendVenueQueryUseCase(getTrimmedQueryOrEmptyUseCase(query, MIN_QUERY_LENGTH))
     }
 
   init {

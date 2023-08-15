@@ -49,7 +49,10 @@ constructor(
       .doAfterTerminate { syncDataSource.isRunning = false }
   }
 
-  override fun getVenuesPagingInBounds(mapBounds: List<MapBounds>): Flowable<PagingData<Venue>> =
+  override fun getVenuesPagingInBounds(
+    mapBounds: List<MapBounds>,
+    query: String
+  ): Flowable<PagingData<Venue>> =
     Pager(config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50)) {
         when (mapBounds.size) {
           1 -> {
@@ -58,7 +61,8 @@ constructor(
               minLat = latSouth,
               maxLat = latNorth,
               minLon = lonWest,
-              maxLon = lonEast
+              maxLon = lonEast,
+              query = query
             )
           }
           2 -> {
@@ -72,7 +76,8 @@ constructor(
               minLat2 = latSouth2,
               maxLat2 = latNorth2,
               minLon2 = lonWest2,
-              maxLon2 = lonEast2
+              maxLon2 = lonEast2,
+              query = query
             )
           }
           else -> throw IllegalArgumentException("Invalid map bounds.")

@@ -88,7 +88,7 @@ constructor(
       ) { bounds, query ->
         bounds to query
       }
-      .debounce(1L, TimeUnit.SECONDS)
+      .debounce(500L, TimeUnit.MILLISECONDS)
       .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
       .switchMap { (bounds, query) -> getMarkersInBoundsUseCase(bounds, query) }
       .subscribeOn(schedulers.io)

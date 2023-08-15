@@ -40,18 +40,19 @@ interface VenueDao {
     query: String
   ): List<VenueEntity>
 
-  @Query(SELECT_IN_BOUNDS)
+  @Query(SELECT_MATCHING_QUERY_IN_BOUNDS)
   fun selectPageInBounds(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
-    maxLon: Double
+    maxLon: Double,
+    query: String
   ): PagingSource<Int, VenueEntity>
 
   @Query(
     "SELECT * FROM venue " +
-      "WHERE (lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
-      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)"
+      "WHERE (lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1 AND (:query = '' OR LOWER(name) LIKE :query)) " +
+      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2 AND (:query = '' OR LOWER(name) LIKE :query))"
   )
   fun selectPageIn2Bounds(
     minLat1: Double,
@@ -61,7 +62,8 @@ interface VenueDao {
     minLat2: Double,
     maxLat2: Double,
     minLon2: Double,
-    maxLon2: Double
+    maxLon2: Double,
+    query: String
   ): PagingSource<Int, VenueEntity>
 
   @Query(COUNT_MATCHING_QUERY_IN_BOUNDS)
@@ -91,13 +93,14 @@ interface VenueDao {
   fun selectDistinctCategories(): Flowable<List<VenueCategoryCountResult>>
 
   companion object {
-    private const val SELECT_IN_BOUNDS =
+    private const val SELECT_MATCHING_QUERY_IN_BOUNDS =
       "SELECT * FROM venue " +
-        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon"
+          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
+          "ORDER BY CASE WHEN LOWER(name) LIKE LOWER(:query) || '%' THEN 1 ELSE 2 END, LOWER(name)"
 
     private const val SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS =
       "SELECT * FROM venue " +
-          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE :query) " +
+          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
           "AND EXISTS (" +
           "SELECT * FROM bounds WHERE whole = TRUE " +
           "UNION " +
@@ -106,6 +109,6 @@ interface VenueDao {
 
     private const val COUNT_MATCHING_QUERY_IN_BOUNDS =
       "SELECT COUNT(*) FROM venue " +
-        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE :query)"
+          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%')"
   }
 }
