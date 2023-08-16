@@ -5,35 +5,45 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.feature.categories.databinding.ItemCategoryBinding
 
-class CategoriesAdapter :
-  ListAdapter<VenueCategoryCount, CategoriesAdapter.ViewHolder>(
-    object : DiffUtil.ItemCallback<VenueCategoryCount>() {
+class CategoriesAdapter(
+  private val isChecked: (Int) -> Boolean,
+  private val onCheckedChange: (Int, Boolean) -> Unit
+) :
+  ListAdapter<CheckedVenueCategoryCount, CategoriesAdapter.ViewHolder>(
+    object : DiffUtil.ItemCallback<CheckedVenueCategoryCount>() {
       override fun areItemsTheSame(
-        oldItem: VenueCategoryCount,
-        newItem: VenueCategoryCount
+        oldItem: CheckedVenueCategoryCount,
+        newItem: CheckedVenueCategoryCount
       ): Boolean = oldItem == newItem
 
       override fun areContentsTheSame(
-        oldItem: VenueCategoryCount,
-        newItem: VenueCategoryCount
+        oldItem: CheckedVenueCategoryCount,
+        newItem: CheckedVenueCategoryCount
       ): Boolean = oldItem == newItem
     }
   ) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
     ViewHolder(ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+      .apply {
+        binding.categoryChip.setOnCheckedChangeListener { _, isChecked ->
+          onCheckedChange(bindingAdapterPosition, isChecked)
+        }
+      }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    holder.bind(getItem(position))
+    holder.bind(getItem(position), position)
   }
 
   inner class ViewHolder(
-    private val binding: ItemCategoryBinding,
+    val binding: ItemCategoryBinding,
   ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: VenueCategoryCount) {
-      binding.categoryChip.text = item.category
+    fun bind(item: CheckedVenueCategoryCount, index: Int) {
+      with(binding.categoryChip) {
+        text = item.categoryCount.category
+        isChecked = isChecked(index)
+      }
     }
   }
 }

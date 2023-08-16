@@ -11,7 +11,13 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CategoriesFragment : Fragment(R.layout.fragment_categories) {
   private val binding by viewBinding(FragmentCategoriesBinding::bind)
-  private val adapter by lazy(LazyThreadSafetyMode.NONE, ::CategoriesAdapter)
+  private val adapter by
+    lazy(LazyThreadSafetyMode.NONE) {
+      CategoriesAdapter(
+        isChecked = viewModel::isCategoryAtIndexChecked,
+        onCheckedChange = viewModel::onCategoryAtIndexCheckedChange
+      )
+    }
 
   private val viewModel by viewModels<CategoriesViewModel>()
 
@@ -20,6 +26,6 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories) {
     binding.categoriesRecyclerView.viewTreeObserver.addOnGlobalLayoutListener {
       viewModel.onCategoriesListLayout()
     }
-    viewModel.categories.observe(viewLifecycleOwner, adapter::submitList)
+    viewModel.categories.observe(viewLifecycleOwner) { if (it.isNotEmpty()) adapter.submitList(it) }
   }
 }
