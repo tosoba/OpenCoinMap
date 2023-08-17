@@ -50,7 +50,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/bottom_sheet_container"
-        android:name="com.trm.opencoinmap.feature.venues.VenuesFragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         style="@style/Widget.Material3.BottomSheet"
         android:layout_width="0dp"
         android:layout_height="match_parent"

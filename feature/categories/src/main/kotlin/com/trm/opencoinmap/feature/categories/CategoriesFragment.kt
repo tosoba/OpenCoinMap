@@ -26,6 +26,8 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories) {
     binding.categoriesRecyclerView.viewTreeObserver.addOnGlobalLayoutListener {
       viewModel.onCategoriesListLayout()
     }
-    viewModel.categories.observe(viewLifecycleOwner) { if (it.isNotEmpty()) adapter.submitList(it) }
+
+    viewModel.categories.observe(viewLifecycleOwner, adapter::submitList)
+    viewModel.categoryAtIndexUpdated.observe(viewLifecycleOwner, adapter::notifyItemChanged)
   }
 }

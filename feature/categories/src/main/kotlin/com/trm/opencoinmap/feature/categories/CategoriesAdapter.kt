@@ -5,22 +5,23 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.feature.categories.databinding.ItemCategoryBinding
 
 class CategoriesAdapter(
   private val isChecked: (Int) -> Boolean,
   private val onCheckedChange: (Int, Boolean) -> Unit
 ) :
-  ListAdapter<CheckedVenueCategoryCount, CategoriesAdapter.ViewHolder>(
-    object : DiffUtil.ItemCallback<CheckedVenueCategoryCount>() {
+  ListAdapter<VenueCategoryCount, CategoriesAdapter.ViewHolder>(
+    object : DiffUtil.ItemCallback<VenueCategoryCount>() {
       override fun areItemsTheSame(
-        oldItem: CheckedVenueCategoryCount,
-        newItem: CheckedVenueCategoryCount
+        oldItem: VenueCategoryCount,
+        newItem: VenueCategoryCount
       ): Boolean = oldItem == newItem
 
       override fun areContentsTheSame(
-        oldItem: CheckedVenueCategoryCount,
-        newItem: CheckedVenueCategoryCount
+        oldItem: VenueCategoryCount,
+        newItem: VenueCategoryCount
       ): Boolean = oldItem == newItem
     }
   ) {
@@ -39,9 +40,9 @@ class CategoriesAdapter(
   inner class ViewHolder(
     val binding: ItemCategoryBinding,
   ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: CheckedVenueCategoryCount, index: Int) {
+    fun bind(item: VenueCategoryCount, index: Int) {
       with(binding.categoryChip) {
-        text = item.categoryCount.category
+        text = item.category
         isChecked = isChecked(index)
       }
     }

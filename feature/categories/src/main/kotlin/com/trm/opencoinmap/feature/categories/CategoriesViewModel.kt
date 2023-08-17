@@ -3,6 +3,8 @@ package com.trm.opencoinmap.feature.categories
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.util.RxSchedulers
@@ -22,24 +24,19 @@ constructor(
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  private val _categories = mutableListOf<CheckedVenueCategoryCount>()
+  private val _categories = MutableLiveData<List<VenueCategoryCount>>(emptyList())
+  val categories: LiveData<List<VenueCategoryCount>> = _categories
 
-  private val _categoriesLive = MutableLiveData<List<CheckedVenueCategoryCount>>(_categories)
-  val categories: LiveData<List<CheckedVenueCategoryCount>> = _categoriesLive
+  private val checkedCategories = mutableSetOf<String>()
+
+  private val _categoryAtIndexUpdated = LiveEvent<Int>()
+  val categoryAtIndexUpdated: LiveData<Int> = _categoryAtIndexUpdated
 
   init {
     getCategoriesUseCase()
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy(
-        onNext = {
-          _categories.clear()
-          _categories.addAll(
-            it.map { count -> CheckedVenueCategoryCount(categoryCount = count, isChecked = false) }
-          )
-          _categoriesLive.value = _categories
-        }
-      )
+      .subscribeBy(onNext = _categories::setValue)
       .addTo(compositeDisposable)
   }
 
@@ -47,11 +44,13 @@ constructor(
     sendCategoriesListLayoutEventUseCase()
   }
 
-  fun isCategoryAtIndexChecked(index: Int): Boolean = _categories[index].isChecked
+  fun isCategoryAtIndexChecked(index: Int): Boolean =
+    _categories.value?.get(index)?.category?.let(checkedCategories::contains) ?: false
 
   fun onCategoryAtIndexCheckedChange(index: Int, isChecked: Boolean) {
-    _categories[index] = _categories[index].copy(isChecked = isChecked)
-    _categoriesLive.value = _categories
+    val (category) = _categories.value?.get(index) ?: return
+    checkedCategories.apply { if (isChecked) add(category) else remove(category) }
+    _categoryAtIndexUpdated.postValue(index)
   }
 
   override fun onCleared() {
