@@ -43,6 +43,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
@@ -75,9 +76,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     }
 
   private val fabMarginPx: Float by
-    lazy(LazyThreadSafetyMode.NONE) {
-      resources.getDimension(com.trm.opencoinmap.core.common.R.dimen.fab_margin)
-    }
+    lazy(LazyThreadSafetyMode.NONE) { resources.getDimension(commonR.dimen.fab_margin) }
 
   private val sheetPeekHeightPx: Float by
     lazy(LazyThreadSafetyMode.NONE) { resources.getDimension(R.dimen.sheet_peek_height) }
