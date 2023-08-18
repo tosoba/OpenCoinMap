@@ -75,20 +75,6 @@ interface VenueDao {
     query: String,
   ): Int
 
-  @Query(
-    "SELECT EXISTS (" +
-      "SELECT * FROM bounds WHERE whole = TRUE " +
-      "UNION " +
-      "SELECT * FROM bounds WHERE min_lat <= :minLat AND max_lat >= :maxLat AND min_lon <= :minLon AND max_lon >= :maxLon" +
-      ")"
-  )
-  fun allExistInBounds(
-    minLat: Double,
-    maxLat: Double,
-    minLon: Double,
-    maxLon: Double
-  ): Single<Boolean>
-
   @Query("SELECT category, COUNT(*) AS count FROM venue GROUP BY category ORDER BY category")
   fun selectDistinctCategories(): Flowable<List<VenueCategoryCountResult>>
 

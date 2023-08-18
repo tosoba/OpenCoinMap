@@ -39,14 +39,20 @@ constructor(
 
   override fun sync(): Completable {
     syncDataSource.isRunning = true
-    return coinMapApi
-      .getVenues()
-      .map { response ->
-        response.venues?.filter(VenueResponseItem::isValid)?.map(VenueResponseItem::asEntity)
-          ?: emptyList()
-      }
-      .flatMapCompletable(::insertVenuesInWholeBounds)
-      .doAfterTerminate { syncDataSource.isRunning = false }
+    return boundsDao
+      .selectExistsWhole()
+      .doOnSuccess { if (it) syncDataSource.isRunning = false }
+      .ignoreElement()
+      .andThen(
+        coinMapApi
+          .getVenues()
+          .map { response ->
+            response.venues?.filter(VenueResponseItem::isValid)?.map(VenueResponseItem::asEntity)
+              ?: emptyList()
+          }
+          .flatMapCompletable(::insertVenuesInWholeBounds)
+          .doAfterTerminate { syncDataSource.isRunning = false }
+      )
   }
 
   override fun getVenuesPagingInBounds(
@@ -99,8 +105,8 @@ constructor(
     val (latSouth, latNorth, lonWest, lonEast) = bounds
     return waitUntilSyncCompleted()
       .andThen(
-        venueDao
-          .allExistInBounds(
+        boundsDao
+          .selectExistsBounds(
             minLat = latSouth,
             maxLat = latNorth,
             minLon = lonWest,
