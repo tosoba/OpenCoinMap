@@ -9,8 +9,8 @@ fun VenueResponseItem.asEntity(): VenueEntity =
     id = requireNotNull(id),
     lat = requireNotNull(lat),
     lon = requireNotNull(lon),
-    category = requireNotNull(category),
-    name = requireNotNull(name),
+    category = requireNotNull(category).trim(),
+    name = requireNotNull(name).trim(),
     createdOn = requireNotNull(createdOn)
   )
 
