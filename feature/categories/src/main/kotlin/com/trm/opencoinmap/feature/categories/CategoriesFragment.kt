@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.feature.categories
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
@@ -59,7 +60,8 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories) {
       .requireAs<Chip>()
       .apply {
         tag = category
-        text = "$category $count"
+        @SuppressLint("SetTextI18n")
+        text = "$category - $count"
         isChecked = viewModel.isCategoryChecked(category)
         setOnCheckedChangeListener(
           if (category == CategoriesViewModel.ALL_CATEGORY) allCategoryCheckedChangeListener
