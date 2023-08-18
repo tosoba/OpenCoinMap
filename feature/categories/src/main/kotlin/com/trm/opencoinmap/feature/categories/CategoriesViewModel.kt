@@ -3,7 +3,6 @@ package com.trm.opencoinmap.feature.categories
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase
@@ -12,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,14 +29,23 @@ constructor(
 
   private val checkedCategories = mutableSetOf<String>()
 
-  private val _categoryAtIndexUpdated = LiveEvent<Int>()
-  val categoryAtIndexUpdated: LiveData<Int> = _categoryAtIndexUpdated
-
   init {
     getCategoriesUseCase()
+      .filter(List<VenueCategoryCount>::isNotEmpty)
+      .map {
+        buildList {
+          add(
+            VenueCategoryCount(category = ALL_CATEGORY, count = it.sumOf(VenueCategoryCount::count))
+          )
+          addAll(it)
+        }
+      }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy(onNext = _categories::setValue)
+      .subscribeBy {
+        checkedCategories.add(ALL_CATEGORY)
+        _categories.setValue(it)
+      }
       .addTo(compositeDisposable)
   }
 
@@ -44,17 +53,25 @@ constructor(
     sendCategoriesListLayoutEventUseCase()
   }
 
-  fun isCategoryAtIndexChecked(index: Int): Boolean =
-    _categories.value?.get(index)?.category?.let(checkedCategories::contains) ?: false
+  fun isCategoryChecked(category: String): Boolean = checkedCategories.contains(category)
 
-  fun onCategoryAtIndexCheckedChange(index: Int, isChecked: Boolean) {
-    val (category) = _categories.value?.get(index) ?: return
-    checkedCategories.apply { if (isChecked) add(category) else remove(category) }
-    _categoryAtIndexUpdated.postValue(index)
+  fun onCategoryCheckedChange(category: String, isChecked: Boolean) {
+    checkedCategories.apply {
+      if (isChecked) {
+        add(category)
+        if (category != ALL_CATEGORY) remove(ALL_CATEGORY)
+      } else {
+        remove(category)
+      }
+    }
   }
 
   override fun onCleared() {
     super.onCleared()
     compositeDisposable.clear()
+  }
+
+  companion object {
+    const val ALL_CATEGORY = "All"
   }
 }
