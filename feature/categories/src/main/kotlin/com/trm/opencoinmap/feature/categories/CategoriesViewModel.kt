@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
 import com.trm.opencoinmap.core.domain.usecase.GetCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendCategoriesUseCase
 import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -19,6 +20,7 @@ internal class CategoriesViewModel
 constructor(
   getCategoriesUseCase: GetCategoriesUseCase,
   private val sendCategoriesListLayoutEventUseCase: SendCategoriesListLayoutEventUseCase,
+  private val sendCategoriesUseCase: SendCategoriesUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -63,6 +65,8 @@ constructor(
         remove(category)
       }
     }
+
+    sendCategoriesUseCase(checkedCategories.filter { it != ALL_CATEGORY })
   }
 
   override fun onCleared() {

@@ -12,6 +12,7 @@ import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
@@ -42,6 +43,7 @@ constructor(
   isVenuesSyncRunningUseCase: IsVenuesSyncRunningUseCase,
   private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
+  receiveCategoriesUseCase: ReceiveCategoriesUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()

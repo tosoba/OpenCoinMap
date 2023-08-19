@@ -11,6 +11,7 @@ import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetInitialMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueQueryUseCase
 import com.trm.opencoinmap.core.domain.usecase.SaveMapCenterUseCase
@@ -43,6 +44,7 @@ constructor(
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
   receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
+  receiveCategoriesUseCase: ReceiveCategoriesUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
