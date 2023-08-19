@@ -28,7 +28,7 @@ constructor(
   private val _categories = MutableLiveData<List<VenueCategoryCount>>(emptyList())
   val categories: LiveData<List<VenueCategoryCount>> = _categories
 
-  private val checkedCategories = mutableSetOf<String>()
+  private val checkedCategories = mutableSetOf(ALL_CATEGORY)
 
   init {
     getCategoriesUseCase()
@@ -43,10 +43,7 @@ constructor(
       }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy {
-        checkedCategories.add(ALL_CATEGORY)
-        _categories.setValue(it)
-      }
+      .subscribeBy(onNext = _categories::setValue)
       .addTo(compositeDisposable)
   }
 
