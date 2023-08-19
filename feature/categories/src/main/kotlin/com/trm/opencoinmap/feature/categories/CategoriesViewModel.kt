@@ -4,11 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
-import com.trm.opencoinmap.core.domain.usecase.GetCategoriesUseCase
+import com.trm.opencoinmap.core.domain.usecase.GetCategoriesWithCountInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendCategoriesUseCase
 import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -18,7 +20,8 @@ import javax.inject.Inject
 internal class CategoriesViewModel
 @Inject
 constructor(
-  getCategoriesUseCase: GetCategoriesUseCase,
+  receiveMapBoundsUseCase: ReceiveMapBoundsUseCase,
+  getCategoriesWithCountInBoundsUseCase: GetCategoriesWithCountInBoundsUseCase,
   private val sendCategoriesListLayoutEventUseCase: SendCategoriesListLayoutEventUseCase,
   private val sendCategoriesUseCase: SendCategoriesUseCase,
   schedulers: RxSchedulers
@@ -31,14 +34,19 @@ constructor(
   private val checkedCategories = mutableSetOf(ALL_CATEGORY)
 
   init {
-    getCategoriesUseCase()
-      .filter(List<VenueCategoryCount>::isNotEmpty)
-      .map {
-        buildList {
-          add(
-            VenueCategoryCount(category = ALL_CATEGORY, count = it.sumOf(VenueCategoryCount::count))
-          )
-          addAll(it)
+    receiveMapBoundsUseCase()
+      .toFlowable(BackpressureStrategy.LATEST)
+      .switchMap<List<VenueCategoryCount>> {
+        getCategoriesWithCountInBoundsUseCase(it).filter(List<VenueCategoryCount>::isNotEmpty).map {
+          buildList {
+            add(
+              VenueCategoryCount(
+                category = ALL_CATEGORY,
+                count = it.sumOf(VenueCategoryCount::count)
+              )
+            )
+            addAll(it)
+          }
         }
       }
       .subscribeOn(schedulers.io)

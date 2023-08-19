@@ -25,5 +25,5 @@ interface VenueRepo {
     categories: List<String>
   ): Single<List<MapMarker>>
 
-  fun getCategories(): Flowable<List<VenueCategoryCount>>
+  fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>): Flowable<List<VenueCategoryCount>>
 }

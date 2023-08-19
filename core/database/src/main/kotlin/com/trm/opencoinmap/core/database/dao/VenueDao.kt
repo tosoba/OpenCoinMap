@@ -90,8 +90,42 @@ interface VenueDao {
     categoriesCount: Int
   ): Int
 
-  @Query("SELECT category, COUNT(*) AS count FROM venue GROUP BY category ORDER BY category")
-  fun selectDistinctCategories(): Flowable<List<VenueCategoryCountResult>>
+  @Query(
+    "SELECT * FROM (SELECT category, COUNT(*) AS count FROM venue " +
+      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "GROUP BY category " +
+      "UNION SELECT category, 0 AS count FROM venue " +
+      "WHERE category NOT IN (SELECT category FROM venue WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon)) " +
+      "ORDER BY category"
+  )
+  fun selectCategoriesWithCountInBounds(
+    minLat: Double,
+    maxLat: Double,
+    minLon: Double,
+    maxLon: Double,
+  ): Flowable<List<VenueCategoryCountResult>>
+
+  @Query(
+    "SELECT * FROM (SELECT category, COUNT(*) AS count FROM venue " +
+        "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
+        "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
+        "GROUP BY category " +
+        "UNION SELECT category, 0 AS count FROM venue " +
+        "WHERE category NOT IN (SELECT category FROM venue " +
+        "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
+        "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)))) " +
+        "ORDER BY category"
+  )
+  fun selectCategoriesWithCountIn2Bounds(
+    minLat1: Double,
+    maxLat1: Double,
+    minLon1: Double,
+    maxLon1: Double,
+    minLat2: Double,
+    maxLat2: Double,
+    minLon2: Double,
+    maxLon2: Double,
+  ): Flowable<List<VenueCategoryCountResult>>
 
   companion object {
     private const val SELECT_MATCHING_QUERY_IN_BOUNDS =

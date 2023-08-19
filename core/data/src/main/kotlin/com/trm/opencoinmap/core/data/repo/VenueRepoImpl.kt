@@ -97,10 +97,38 @@ constructor(
       .flowable
       .map { it.map(VenueEntity::asDomainModel) }
 
-  override fun getCategories(): Flowable<List<VenueCategoryCount>> =
-    venueDao.selectDistinctCategories().map {
-      it.map { (category, count) -> VenueCategoryCount(category, count) }
-    }
+  override fun getCategoriesWithCountInBounds(
+    mapBounds: List<MapBounds>
+  ): Flowable<List<VenueCategoryCount>> =
+    Flowable.defer {
+        when (mapBounds.size) {
+          1 -> {
+            val (latSouth, latNorth, lonWest, lonEast) = mapBounds.first()
+            venueDao.selectCategoriesWithCountInBounds(
+              minLat = latSouth,
+              maxLat = latNorth,
+              minLon = lonWest,
+              maxLon = lonEast,
+            )
+          }
+          2 -> {
+            val (latSouth1, latNorth1, lonWest1, lonEast1) = mapBounds.first()
+            val (latSouth2, latNorth2, lonWest2, lonEast2) = mapBounds.last()
+            venueDao.selectCategoriesWithCountIn2Bounds(
+              minLat1 = latSouth1,
+              maxLat1 = latNorth1,
+              minLon1 = lonWest1,
+              maxLon1 = lonEast1,
+              minLat2 = latSouth2,
+              maxLat2 = latNorth2,
+              minLon2 = lonWest2,
+              maxLon2 = lonEast2,
+            )
+          }
+          else -> throw IllegalArgumentException("Invalid map bounds.")
+        }
+      }
+      .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
 
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds,

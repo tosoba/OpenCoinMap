@@ -53,6 +53,7 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories) {
     binding.root.viewTreeObserver.addOnGlobalLayoutListener { viewModel.onCategoriesListLayout() }
 
     viewModel.categories.observe(viewLifecycleOwner) { categories ->
+      binding.categoriesChipGroup.removeAllViews()
       categories.forEach { binding.categoriesChipGroup.addView(categoryChip(it)) }
     }
   }
