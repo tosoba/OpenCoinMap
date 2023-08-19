@@ -52,13 +52,18 @@ interface VenueDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
+    categories: List<String>,
+    categoriesCount: Int
   ): PagingSource<Int, VenueEntity>
 
   @Query(
     "SELECT * FROM venue " +
-      "WHERE (lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1 AND (:query = '' OR LOWER(name) LIKE :query)) " +
-      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2 AND (:query = '' OR LOWER(name) LIKE :query))"
+      "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
+      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
+      "AND (:query = '' OR LOWER(name) LIKE :query) " +
+      "AND (:categoriesCount = 0 OR category IN (:categories)) " +
+      "ORDER BY CASE WHEN LOWER(name) LIKE LOWER(:query) || '%' THEN 1 ELSE 2 END, LOWER(name)"
   )
   fun selectPageIn2Bounds(
     minLat1: Double,
@@ -69,7 +74,9 @@ interface VenueDao {
     maxLat2: Double,
     minLon2: Double,
     maxLon2: Double,
-    query: String
+    query: String,
+    categories: List<String>,
+    categoriesCount: Int
   ): PagingSource<Int, VenueEntity>
 
   @Query(COUNT_MATCHING_QUERY_IN_BOUNDS)
@@ -89,7 +96,9 @@ interface VenueDao {
   companion object {
     private const val SELECT_MATCHING_QUERY_IN_BOUNDS =
       "SELECT * FROM venue " +
-        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
+        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+        "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
+        "AND (:categoriesCount = 0 OR category IN (:categories)) " +
         "ORDER BY CASE WHEN LOWER(name) LIKE LOWER(:query) || '%' THEN 1 ELSE 2 END, LOWER(name)"
 
     private const val SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS =

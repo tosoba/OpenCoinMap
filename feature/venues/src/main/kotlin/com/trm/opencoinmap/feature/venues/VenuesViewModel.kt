@@ -78,16 +78,26 @@ constructor(
         if (isRunning) {
           Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.InProgress)
         } else {
-          receiveMapBoundsUseCase()
-            .toFlowable(BackpressureStrategy.LATEST)
-            .combineLatest(
+          Flowable.combineLatest(
+              receiveMapBoundsUseCase().toFlowable(BackpressureStrategy.LATEST),
               receiveVenueQueryUseCase()
                 .startWithItem("")
                 .distinctUntilChanged()
-                .toFlowable(BackpressureStrategy.LATEST)
-            )
-            .switchMap { (bounds, query) ->
-              getVenuesPagingInBoundsUseCase(bounds, query).cachedIn(viewModelScope)
+                .toFlowable(BackpressureStrategy.LATEST),
+              receiveCategoriesUseCase()
+                .startWithItem(emptyList())
+                .distinctUntilChanged()
+                .toFlowable(BackpressureStrategy.LATEST),
+            ) { bounds, query, categories ->
+              Triple(bounds, query, categories)
+            }
+            .switchMap { (bounds, query, categories) ->
+              getVenuesPagingInBoundsUseCase(
+                  mapBounds = bounds,
+                  query = query,
+                  categories = categories
+                )
+                .cachedIn(viewModelScope)
             }
             .combineLatest(
               receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST)

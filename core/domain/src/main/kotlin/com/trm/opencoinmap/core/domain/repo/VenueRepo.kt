@@ -15,7 +15,8 @@ interface VenueRepo {
 
   fun getVenuesPagingInBounds(
     mapBounds: List<MapBounds>,
-    query: String
+    query: String,
+    categories: List<String>
   ): Flowable<PagingData<Venue>>
 
   fun getVenueMarkersInLatLngBounds(
