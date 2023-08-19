@@ -56,7 +56,7 @@ constructor(
 
   fun isCategoryChecked(category: String): Boolean = checkedCategories.contains(category)
 
-  fun onCategoryCheckedChange(category: String, isChecked: Boolean) {
+  fun onCategoryCheckedChange(category: String, isChecked: Boolean): Int {
     checkedCategories.apply {
       if (isChecked) {
         add(category)
@@ -67,6 +67,8 @@ constructor(
     }
 
     sendCategoriesUseCase(checkedCategories.filter { it != ALL_CATEGORY })
+
+    return checkedCategories.size
   }
 
   override fun onCleared() {

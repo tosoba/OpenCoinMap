@@ -33,15 +33,19 @@ class CategoriesFragment : Fragment(R.layout.fragment_categories) {
 
   private val regularCategoryCheckedChangeListener =
     CompoundButton.OnCheckedChangeListener { view, isChecked ->
-      viewModel.onCategoryCheckedChange(view.tag.toString(), isChecked)
+      val checkedCount = viewModel.onCategoryCheckedChange(view.tag.toString(), isChecked)
 
       binding.categoriesChipGroup.children
         .filterIsInstance<Chip>()
         .find { it.tag == CategoriesViewModel.ALL_CATEGORY }
         ?.also {
-          it.setOnCheckedChangeListener(null)
-          it.isChecked = false
-          it.setOnCheckedChangeListener(allCategoryCheckedChangeListener)
+          if (checkedCount > 0) {
+            it.setOnCheckedChangeListener(null)
+            it.isChecked = false
+            it.setOnCheckedChangeListener(allCategoryCheckedChangeListener)
+          } else {
+            it.isChecked = true
+          }
         }
     }
 
