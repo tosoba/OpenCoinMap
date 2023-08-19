@@ -99,7 +99,8 @@ constructor(
 
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds,
-    query: String
+    query: String,
+    categories: List<String>
   ): Single<List<MapMarker>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
     val (latSouth, latNorth, lonWest, lonEast) = bounds
@@ -120,6 +121,8 @@ constructor(
                 minLon = lonWest,
                 maxLon = lonEast,
                 query = query,
+                categories = categories,
+                categoriesCount = categories.size
               )
             } else {
               getAndInsertVenuesFromNetwork(
@@ -128,6 +131,7 @@ constructor(
                 minLon = lonWest,
                 maxLon = lonEast,
                 query = query,
+                categories = categories
               )
             }
           }
@@ -139,7 +143,9 @@ constructor(
                   maxLat = latNorth,
                   minLon = lonWest,
                   maxLon = lonEast,
-                  query = query
+                  query = query,
+                  categories = categories,
+                  categoriesCount = categories.size,
                 )
                 .map { it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } }
             } else {
@@ -160,7 +166,8 @@ constructor(
                   selectCellMarkers(
                     gridCells = gridCells,
                     gridCellLimit = gridCellLimit,
-                    query = query
+                    query = query,
+                    categories = categories,
                   )
                 }
                 .map { cells ->
@@ -199,6 +206,7 @@ constructor(
     gridCells: List<MapBounds>,
     gridCellLimit: Int,
     query: String,
+    categories: List<String>
   ): List<GridCellMarkers> =
     db.runInTransaction(
       Callable {
@@ -210,6 +218,8 @@ constructor(
               minLon = cellMinLon,
               maxLon = cellMaxLon,
               query = query,
+              categories = categories,
+              categoriesCount = categories.size
             )
           if (countInCell > gridCellLimit) {
             GridCellMarkers.Cluster(
@@ -227,7 +237,9 @@ constructor(
                   maxLat = cellMaxLat,
                   minLon = cellMinLon,
                   maxLon = cellMaxLon,
-                  query = query
+                  query = query,
+                  categories = categories,
+                  categoriesCount = categories.size,
                 )
                 .map(VenueEntity::asDomainModel)
             )
@@ -280,7 +292,8 @@ constructor(
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
+    categories: List<String>,
   ): Single<Int> =
     coinMapApi
       .getVenues(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
@@ -292,7 +305,8 @@ constructor(
           maxLat = maxLat,
           minLon = minLon,
           maxLon = maxLon,
-          query = query
+          query = query,
+          categories = categories,
         )
       }
 
@@ -302,7 +316,8 @@ constructor(
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
+    categories: List<String>
   ): Single<Int> =
     Single.fromCallable {
       db.runInTransaction(
@@ -322,7 +337,9 @@ constructor(
             maxLat = maxLat,
             minLon = minLon,
             maxLon = maxLon,
-            query = query
+            query = query,
+            categories = categories,
+            categoriesCount = categories.size
           )
         }
       )

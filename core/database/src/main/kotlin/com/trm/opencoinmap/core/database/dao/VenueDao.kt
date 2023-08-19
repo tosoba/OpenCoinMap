@@ -19,7 +19,9 @@ interface VenueDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
+    categories: List<String>,
+    categoriesCount: Int
   ): Single<List<VenueEntity>>
 
   @Query(COUNT_MATCHING_QUERY_IN_BOUNDS)
@@ -28,7 +30,9 @@ interface VenueDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
+    categories: List<String>,
+    categoriesCount: Int
   ): Single<Int>
 
   @Query(SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS)
@@ -37,7 +41,9 @@ interface VenueDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
+    categories: List<String>,
+    categoriesCount: Int
   ): List<VenueEntity>
 
   @Query(SELECT_MATCHING_QUERY_IN_BOUNDS)
@@ -73,6 +79,8 @@ interface VenueDao {
     minLon: Double,
     maxLon: Double,
     query: String,
+    categories: List<String>,
+    categoriesCount: Int
   ): Int
 
   @Query("SELECT category, COUNT(*) AS count FROM venue GROUP BY category ORDER BY category")
@@ -81,20 +89,24 @@ interface VenueDao {
   companion object {
     private const val SELECT_MATCHING_QUERY_IN_BOUNDS =
       "SELECT * FROM venue " +
-          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
-          "ORDER BY CASE WHEN LOWER(name) LIKE LOWER(:query) || '%' THEN 1 ELSE 2 END, LOWER(name)"
+        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
+        "ORDER BY CASE WHEN LOWER(name) LIKE LOWER(:query) || '%' THEN 1 ELSE 2 END, LOWER(name)"
 
     private const val SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS =
       "SELECT * FROM venue " +
-          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
-          "AND EXISTS (" +
-          "SELECT * FROM bounds WHERE whole = TRUE " +
-          "UNION " +
-          "SELECT * FROM bounds WHERE min_lat <= :minLat AND max_lat >= :maxLat AND min_lon <= :minLon AND max_lon >= :maxLon" +
-          ")"
+        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+        "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
+        "AND (:categoriesCount = 0 OR category IN (:categories)) " +
+        "AND EXISTS (" +
+        "SELECT * FROM bounds WHERE whole = TRUE " +
+        "UNION " +
+        "SELECT * FROM bounds WHERE min_lat <= :minLat AND max_lat >= :maxLat AND min_lon <= :minLon AND max_lon >= :maxLon" +
+        ")"
 
     private const val COUNT_MATCHING_QUERY_IN_BOUNDS =
       "SELECT COUNT(*) FROM venue " +
-          "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%')"
+        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+        "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
+        "AND (:categoriesCount = 0 OR category IN (:categories))"
   }
 }

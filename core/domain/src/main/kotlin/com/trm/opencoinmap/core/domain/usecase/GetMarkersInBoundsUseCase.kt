@@ -14,10 +14,17 @@ constructor(
 ) {
   operator fun invoke(
     bounds: List<GridMapBounds>,
-    query: String
+    query: String,
+    categories: List<String>,
   ): Observable<Loadable<List<MapMarker>>> =
     Single.zip(
-        bounds.map { repo.getVenueMarkersInLatLngBounds(gridMapBounds = it, query = query) }
+        bounds.map {
+          repo.getVenueMarkersInLatLngBounds(
+            gridMapBounds = it,
+            query = query,
+            categories = categories
+          )
+        }
       ) { result ->
         result.filterIsInstance<List<MapMarker>>().flatten()
       }

@@ -86,13 +86,16 @@ constructor(
         coalescedBounds.mergeWith(
           retryRelay.withLatestFrom(coalescedBounds) { _, bounds -> bounds }
         ),
-        receiveVenueQueryUseCase().startWithItem("").distinctUntilChanged()
-      ) { bounds, query ->
-        bounds to query
+        receiveVenueQueryUseCase().startWithItem("").distinctUntilChanged(),
+        receiveCategoriesUseCase().startWithItem(emptyList()).distinctUntilChanged(),
+      ) { bounds, query, categories ->
+        Triple(bounds, query, categories)
       }
       .debounce(500L, TimeUnit.MILLISECONDS)
       .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
-      .switchMap { (bounds, query) -> getMarkersInBoundsUseCase(bounds, query) }
+      .switchMap { (bounds, query, categories) ->
+        getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
+      }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .doOnNext { if (it is Failed) Timber.e(it.throwable) }
