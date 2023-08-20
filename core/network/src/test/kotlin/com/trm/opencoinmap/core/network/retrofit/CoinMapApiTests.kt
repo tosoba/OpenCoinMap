@@ -10,4 +10,9 @@ class CoinMapApiTests {
   fun getVenues() {
     api.getVenues().blockingGet().venues
   }
+
+  @Test
+  fun getVenue() {
+    println(api.getVenue(1).blockingGet())
+  }
 }

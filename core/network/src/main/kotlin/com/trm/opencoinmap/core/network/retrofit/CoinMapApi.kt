@@ -1,8 +1,10 @@
 package com.trm.opencoinmap.core.network.retrofit
 
+import com.trm.opencoinmap.core.network.model.VenueResponse
 import com.trm.opencoinmap.core.network.model.VenuesResponse
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CoinMapApi {
@@ -17,6 +19,8 @@ interface CoinMapApi {
     @Query("limit") limit: Int? = null,
     @Query("offset") offset: Int? = null,
   ): Single<VenuesResponse>
+
+  @GET("/api/v1/venues/{id}") fun getVenue(@Path("id") id: Int): Single<VenueResponse>
 
   companion object {
     internal const val BASE_URL = "https://coinmap.org/"
