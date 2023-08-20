@@ -74,7 +74,13 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       markers.map { marker ->
         when (marker) {
           is MapMarker.SingleVenue -> {
-            markerClusterer.add(venueMarker(marker = marker, drawable = venueDrawable))
+            markerClusterer.add(
+              venueMarker(
+                marker = marker,
+                drawable = venueDrawable,
+                onClick = viewModel::onVenueMarkerClick
+              )
+            )
           }
           is MapMarker.VenuesCluster -> {
             overlays.add(

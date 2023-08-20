@@ -111,7 +111,7 @@ constructor(
 
     receiveVenueClickedEventUseCase()
       .map {
-        MapPosition(latitude = it.lat, longitude = it.lon, zoom = MapDefaults.INITIAL_LOCATION_ZOOM)
+        MapPosition(latitude = it.lat, longitude = it.lon, zoom = MapDefaults.VENUE_LOCATION_ZOOM)
       }
       .subscribeBy(onNext = _mapPosition::setValue, onError = Timber.Forest::e)
       .addTo(compositeDisposable)
@@ -155,6 +155,8 @@ constructor(
       )
     )
   }
+
+  fun onVenueMarkerClick(venue: Venue) {}
 
   override fun onCleared() {
     super.onCleared()

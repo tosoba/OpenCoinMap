@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
+import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import kotlin.math.max
@@ -82,12 +83,25 @@ internal var MapView.position: MapPosition
       orientation = mapOrientation
     )
 
-internal fun MapView.venueMarker(marker: MapMarker.SingleVenue, drawable: Drawable): Marker =
+internal fun MapView.venueMarker(
+  marker: MapMarker.SingleVenue,
+  drawable: Drawable,
+  onClick: (Venue) -> Unit
+): Marker =
   Marker(this).apply {
     position = GeoPoint(marker.venue.lat, marker.venue.lon)
     icon = drawable
     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     infoWindow = null
+    setOnMarkerClickListener { _, _ ->
+      controller.animateTo(
+        GeoPoint(marker.venue.lat, marker.venue.lon),
+        MapDefaults.VENUE_LOCATION_ZOOM,
+        MapDefaults.ANIMATION_DURATION_MS
+      )
+      onClick(marker.venue)
+      true
+    }
   }
 
 internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Marker =
@@ -101,9 +115,19 @@ internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Dr
       if (
         boundingBox.latNorth != boundingBox.latSouth || boundingBox.lonEast != boundingBox.lonWest
       ) {
-        zoomToBoundingBox(boundingBox.increaseByScale(1.15f), true)
+        zoomToBoundingBox(
+          boundingBox.increaseByScale(1.15f),
+          true,
+          0,
+          MapDefaults.VENUE_LOCATION_ZOOM,
+          MapDefaults.ANIMATION_DURATION_MS
+        )
       } else {
-        setExpectedCenter(boundingBox.centerWithDateLine)
+        controller.animateTo(
+          boundingBox.centerWithDateLine,
+          MapDefaults.VENUE_LOCATION_ZOOM,
+          MapDefaults.ANIMATION_DURATION_MS
+        )
       }
       true
     }
