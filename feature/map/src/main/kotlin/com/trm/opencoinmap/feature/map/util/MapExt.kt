@@ -3,6 +3,7 @@ package com.trm.opencoinmap.feature.map.util
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.view.MotionEvent
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
@@ -88,33 +89,55 @@ internal fun MapView.venueMarker(
   drawable: Drawable,
   onClick: (Venue) -> Unit
 ): Marker =
-  Marker(this).apply {
-    position = GeoPoint(marker.venue.lat, marker.venue.lon)
-    icon = drawable
-    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    infoWindow = null
-    setOnMarkerClickListener { _, _ ->
-      controller.animateTo(
-        GeoPoint(marker.venue.lat, marker.venue.lon),
-        zoomLevelDouble,
-        MapDefaults.ANIMATION_DURATION_MS
-      )
-      onClick(marker.venue)
-      true
+  object : Marker(this) {
+      override fun onSingleTapConfirmed(event: MotionEvent?, mapView: MapView?): Boolean {
+        return if (hitTest(event, mapView)) {
+          if (mOnMarkerClickListener == null) {
+            true
+          } else {
+            mOnMarkerClickListener.onMarkerClick(this, mapView)
+          }
+        } else false
+      }
     }
-  }
+    .apply {
+      position = GeoPoint(marker.venue.lat, marker.venue.lon)
+      icon = drawable
+      setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+      infoWindow = null
+      setOnMarkerClickListener { _, _ ->
+        controller.animateTo(
+          GeoPoint(marker.venue.lat, marker.venue.lon),
+          zoomLevelDouble,
+          MapDefaults.ANIMATION_DURATION_MS
+        )
+        onClick(marker.venue)
+        true
+      }
+    }
 
 internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Drawable): Marker =
-  Marker(this).apply {
-    position = GeoPoint(marker.lat, marker.lon)
-    icon = drawable
-    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    infoWindow = null
-    setOnMarkerClickListener { _, _ ->
-      animateTo(marker.getBoundingBox())
-      true
+  object : Marker(this) {
+      override fun onSingleTapConfirmed(event: MotionEvent?, mapView: MapView?): Boolean {
+        return if (hitTest(event, mapView)) {
+          if (mOnMarkerClickListener == null) {
+            true
+          } else {
+            mOnMarkerClickListener.onMarkerClick(this, mapView)
+          }
+        } else false
+      }
     }
-  }
+    .apply {
+      position = GeoPoint(marker.lat, marker.lon)
+      icon = drawable
+      setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+      infoWindow = null
+      setOnMarkerClickListener { _, _ ->
+        animateTo(marker.getBoundingBox())
+        true
+      }
+    }
 
 internal fun MapView.animateTo(boundingBox: BoundingBox) {
   if (boundingBox.latNorth != boundingBox.latSouth || boundingBox.lonEast != boundingBox.lonWest) {
