@@ -54,7 +54,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
         fun onMapInteraction(): Boolean {
-          viewModel.onMapUpdated()
+          if (!isAnimating) viewModel.onMapUpdated()
           return false
         }
       }
@@ -62,7 +62,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
 
-    viewModel.mapPosition.observe(viewLifecycleOwner, ::position::set)
+    viewModel.mapPosition.observe(viewLifecycleOwner) { if (!isAnimating) position = it }
 
     val venueDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
