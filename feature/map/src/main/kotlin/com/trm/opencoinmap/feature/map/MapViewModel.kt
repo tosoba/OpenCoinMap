@@ -113,7 +113,11 @@ constructor(
 
     receiveVenueClickedEventUseCase()
       .map {
-        MapPosition(latitude = it.lat, longitude = it.lon, zoom = MapDefaults.VENUE_LOCATION_ZOOM)
+        MapPosition(
+          latitude = it.lat,
+          longitude = it.lon,
+          zoom = _mapPosition.value?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
+        )
       }
       .subscribeBy(onNext = _mapPosition::setValue, onError = Timber.Forest::e)
       .addTo(compositeDisposable)

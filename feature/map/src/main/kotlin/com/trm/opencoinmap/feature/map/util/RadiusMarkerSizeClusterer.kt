@@ -20,5 +20,17 @@ constructor(
       setInfoWindow(null)
       setAnchor(mAnchorU, mAnchorV)
       icon = iconBuilder.build(cluster.size)
+      if (cluster.size > 1) {
+        repeat(cluster.size) { getItem(it).setOnMarkerClickListener(null) }
+      } else if (cluster.size == 0) {
+        getItem(0).setOnMarkerClickListener { marker, mapView ->
+          // TODO: figure out a way to add on marker click
+          true
+        }
+      }
     }
+
+  override fun zoomOnCluster(mapView: MapView, cluster: StaticCluster) {
+    mapView.animateTo(cluster.boundingBox)
+  }
 }

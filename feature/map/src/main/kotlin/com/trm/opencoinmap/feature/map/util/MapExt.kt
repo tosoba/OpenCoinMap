@@ -96,7 +96,7 @@ internal fun MapView.venueMarker(
     setOnMarkerClickListener { _, _ ->
       controller.animateTo(
         GeoPoint(marker.venue.lat, marker.venue.lon),
-        MapDefaults.VENUE_LOCATION_ZOOM,
+        zoomLevelDouble,
         MapDefaults.ANIMATION_DURATION_MS
       )
       onClick(marker.venue)
@@ -111,27 +111,28 @@ internal fun MapView.clusterMarker(marker: MapMarker.VenuesCluster, drawable: Dr
     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     infoWindow = null
     setOnMarkerClickListener { _, _ ->
-      val boundingBox = marker.getBoundingBox()
-      if (
-        boundingBox.latNorth != boundingBox.latSouth || boundingBox.lonEast != boundingBox.lonWest
-      ) {
-        zoomToBoundingBox(
-          boundingBox.increaseByScale(1.15f),
-          true,
-          0,
-          MapDefaults.VENUE_LOCATION_ZOOM,
-          MapDefaults.ANIMATION_DURATION_MS
-        )
-      } else {
-        controller.animateTo(
-          boundingBox.centerWithDateLine,
-          MapDefaults.VENUE_LOCATION_ZOOM,
-          MapDefaults.ANIMATION_DURATION_MS
-        )
-      }
+      animateTo(marker.getBoundingBox())
       true
     }
   }
+
+internal fun MapView.animateTo(boundingBox: BoundingBox) {
+  if (boundingBox.latNorth != boundingBox.latSouth || boundingBox.lonEast != boundingBox.lonWest) {
+    zoomToBoundingBox(
+      boundingBox.increaseByScale(1.15f),
+      true,
+      0,
+      MapDefaults.CLUSTER_MAX_ZOOM,
+      MapDefaults.ANIMATION_DURATION_MS
+    )
+  } else {
+    controller.animateTo(
+      boundingBox.centerWithDateLine,
+      MapDefaults.CLUSTER_MAX_ZOOM,
+      MapDefaults.ANIMATION_DURATION_MS
+    )
+  }
+}
 
 private fun MapMarker.VenuesCluster.getBoundingBox(): BoundingBox =
   BoundingBox(latNorth, lonWest, latSouth, lonEast)
