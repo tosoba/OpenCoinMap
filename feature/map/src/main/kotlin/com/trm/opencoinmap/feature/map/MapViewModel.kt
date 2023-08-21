@@ -17,6 +17,7 @@ import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueQueryUseCase
 import com.trm.opencoinmap.core.domain.usecase.SaveMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import com.trm.opencoinmap.feature.map.model.MapPosition
 import com.trm.opencoinmap.feature.map.util.MapDefaults
@@ -43,6 +44,7 @@ constructor(
   private val sendMessageUseCase: SendMessageUseCase,
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
   receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
+  private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
   receiveCategoriesUseCase: ReceiveCategoriesUseCase,
   schedulers: RxSchedulers
@@ -156,7 +158,9 @@ constructor(
     )
   }
 
-  fun onVenueMarkerClick(venue: Venue) {}
+  fun onVenueMarkerClick(venue: Venue) {
+    sendVenueClickedEventUseCase(venue)
+  }
 
   override fun onCleared() {
     super.onCleared()
