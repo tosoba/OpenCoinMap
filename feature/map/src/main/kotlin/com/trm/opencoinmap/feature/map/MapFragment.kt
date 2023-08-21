@@ -62,7 +62,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
 
-    viewModel.mapPosition.observe(viewLifecycleOwner) { position = it }
+    viewModel.mapPosition.observe(viewLifecycleOwner, ::position::set)
 
     val venueDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
