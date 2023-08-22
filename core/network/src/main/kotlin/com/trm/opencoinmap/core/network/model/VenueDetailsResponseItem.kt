@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Venue(
+data class VenueDetailsResponseItem(
   @SerialName("category") val category: String?,
   @SerialName("city") val city: String?,
   @SerialName("coins") val coins: List<String>?,
