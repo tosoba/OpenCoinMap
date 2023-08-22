@@ -6,8 +6,10 @@ import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.model.VenueCategoryCount
+import com.trm.opencoinmap.core.domain.model.VenueDetails
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 
 interface VenueRepo {
@@ -26,4 +28,6 @@ interface VenueRepo {
   ): Single<List<MapMarker>>
 
   fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>): Flowable<List<VenueCategoryCount>>
+
+  fun getVenueDetails(id: Int): Maybe<VenueDetails>
 }
