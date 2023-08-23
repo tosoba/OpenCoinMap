@@ -20,7 +20,7 @@ interface CoinMapApi {
     @Query("offset") offset: Int? = null,
   ): Single<VenuesResponse>
 
-  @GET("/api/v1/venues/{id}") fun getVenue(@Path("id") id: Int): Single<VenueResponse>
+  @GET("/api/v1/venues/{id}") fun getVenue(@Path("id") id: Long): Single<VenueResponse>
 
   companion object {
     internal const val BASE_URL = "https://coinmap.org/"

@@ -29,5 +29,5 @@ interface VenueRepo {
 
   fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>): Flowable<List<VenueCategoryCount>>
 
-  fun getVenueDetails(id: Int): Maybe<VenueDetails>
+  fun getVenueDetails(id: Long): Maybe<VenueDetails>
 }

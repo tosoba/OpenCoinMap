@@ -33,7 +33,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -50,6 +49,8 @@ import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
+import com.trm.opencoinmap.feature.venue.details.VenueDetailsArgs
+import com.trm.opencoinmap.feature.venue.details.getVenueName
 import com.trm.opencoinmap.feature.venues.VenuesSearchController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
@@ -278,7 +279,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     bottomSheetFragmentNavController.addOnDestinationChangedListener { _, destination, arguments ->
       viewModel.onBottomSheetFragmentChanged(
         destinationId = destination.id,
-        venueName = arguments?.getString(VENUE_NAME_KEY, getString(R.string.unknown_place))
+        venueName = arguments?.getVenueName() ?: getString(R.string.unknown_place)
       )
     }
   }
@@ -302,14 +303,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
       ) {
         bottomSheetFragmentNavController.navigate(
           R.id.venues_fragment_to_venue_details_fragment,
-          bundleOf(VENUE_ID_KEY to it.id, VENUE_NAME_KEY to it.name)
+          VenueDetailsArgs.argsBundle(it.id, it.name)
         )
       }
     }
-  }
-
-  companion object {
-    private const val VENUE_ID_KEY = "venueId"
-    private const val VENUE_NAME_KEY = "venueName"
   }
 }

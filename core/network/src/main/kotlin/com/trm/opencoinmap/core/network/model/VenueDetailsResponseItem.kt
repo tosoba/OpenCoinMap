@@ -16,7 +16,7 @@ data class VenueDetailsResponseItem(
   @SerialName("fax") val fax: String?,
   @SerialName("geolocation_degrees") val geolocationDegrees: String?,
   @SerialName("houseno") val houseNumber: String?,
-  @SerialName("id") val id: Int?,
+  @SerialName("id") val id: Long?,
   @SerialName("instagram") val instagram: String?,
   @SerialName("lat") val lat: Double?,
   @SerialName("logo_url") val logoUrl: String?,

@@ -20,7 +20,6 @@ import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.sync.SyncDataSource
 import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
-import com.trm.opencoinmap.core.network.model.VenueDetailsResponseItem
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
 import io.reactivex.rxjava3.core.Completable
@@ -133,7 +132,7 @@ constructor(
       }
       .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
 
-  override fun getVenueDetails(id: Int): Maybe<VenueDetails> =
+  override fun getVenueDetails(id: Long): Maybe<VenueDetails> =
     coinMapApi.getVenue(id).flatMapMaybe { (venue) ->
       venue?.let { Maybe.just(it.asDomainModel()) } ?: Maybe.empty()
     }

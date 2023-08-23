@@ -12,7 +12,7 @@ data class VenueDetails(
   val fax: String?,
   val geolocationDegrees: String?,
   val houseNumber: String?,
-  val id: Int?,
+  val id: Long?,
   val instagram: String?,
   val lat: Double?,
   val logoUrl: String?,
