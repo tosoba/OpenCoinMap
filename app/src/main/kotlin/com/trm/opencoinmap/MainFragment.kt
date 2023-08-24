@@ -301,6 +301,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         bottomSheetFragmentNavController.currentDestination?.id !=
           R.id.venues_fragment_to_venue_details_fragment
       ) {
+        if (sheetController.state == BottomSheetBehavior.STATE_HIDDEN) {
+          sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        }
         bottomSheetFragmentNavController.navigate(
           R.id.venues_fragment_to_venue_details_fragment,
           VenueDetailsArgs.argsBundle(it.id, it.name)
