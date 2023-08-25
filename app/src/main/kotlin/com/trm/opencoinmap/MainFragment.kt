@@ -51,7 +51,7 @@ import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
 import com.trm.opencoinmap.feature.venue.details.VenueDetailsArgs
 import com.trm.opencoinmap.feature.venue.details.getVenueName
-import com.trm.opencoinmap.feature.venues.VenuesSearchController
+import com.trm.opencoinmap.core.common.view.VenuesSearchController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 

@@ -1,4 +1,4 @@
-package com.trm.opencoinmap.feature.venues
+package com.trm.opencoinmap.core.common.view
 
 interface VenuesSearchController {
   val searchViewsHeightPx: Int?

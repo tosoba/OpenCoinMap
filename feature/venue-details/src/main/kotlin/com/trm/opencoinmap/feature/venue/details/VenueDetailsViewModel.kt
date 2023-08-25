@@ -4,8 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.usecase.GetVenueDetailsUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
@@ -21,15 +23,24 @@ internal class VenueDetailsViewModel
 @Inject
 constructor(
   private val savedStateHandle: SavedStateHandle,
-  private val getVenueDetailsUseCase: GetVenueDetailsUseCase
+  private val getVenueDetailsUseCase: GetVenueDetailsUseCase,
+  receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
   private val _viewState = MutableLiveData<ViewState>(ViewState.Loading)
   val viewState: LiveData<ViewState> = _viewState
 
+  private val _sheetSlideOffset = LiveEvent<Float>()
+  val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
+
   init {
     getVenueDetails()
+
+    receiveSheetSlideOffsetUseCase()
+      .filter { offset -> offset >= 0f }
+      .subscribeBy(onNext = _sheetSlideOffset::setValue)
+      .addTo(compositeDisposable)
   }
 
   fun onRetryClick() {
@@ -38,7 +49,7 @@ constructor(
 
   private fun getVenueDetails() {
     getVenueDetailsUseCase(requireNotNull(savedStateHandle[VenueDetailsArgs.VENUE_ID_KEY]))
-      .map { if (it.website != null) ViewState.Loaded(it) else ViewState.WebsiteMissing(it) }
+      .map<ViewState>(ViewState::Loaded)
       .startWith(Maybe.just(ViewState.Loading))
       .defaultIfEmpty(ViewState.NotFound)
       .doOnError { Timber.e(it) }
@@ -51,9 +62,34 @@ constructor(
 
   sealed interface ViewState {
     object Loading : ViewState
-    data class Loaded(val venueDetails: VenueDetails) : ViewState
+
+    data class Loaded(val venueDetails: VenueDetails) : ViewState {
+      val actionsScrollViewVisible: Boolean
+        get() =
+          venueDetails.phone != null ||
+            venueDetails.email != null ||
+            venueDetails.facebook != null ||
+            venueDetails.twitter != null ||
+            venueDetails.instagram != null
+
+      val phoneVisible: Boolean
+        get() = !venueDetails.phone.isNullOrBlank()
+
+      val emailVisible: Boolean
+        get() = !venueDetails.email.isNullOrBlank()
+
+      val facebookVisible: Boolean
+        get() = !venueDetails.facebook.isNullOrBlank()
+
+      val twitterVisible: Boolean
+        get() = !venueDetails.twitter.isNullOrBlank()
+
+      val instagramVisible: Boolean
+        get() = !venueDetails.instagram.isNullOrBlank()
+    }
+
     object Error : ViewState
+
     object NotFound : ViewState
-    data class WebsiteMissing(val venueDetails: VenueDetails) : ViewState
   }
 }

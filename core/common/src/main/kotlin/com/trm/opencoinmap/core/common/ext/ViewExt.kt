@@ -1,6 +1,8 @@
 package com.trm.opencoinmap.core.common.ext
 
+import android.os.Build
 import android.view.View
+import android.view.WindowInsets
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.view.isGone
@@ -51,3 +53,10 @@ fun View.showAnimated() {
     }
   )
 }
+
+fun WindowInsets.getSystemWindowTopInsetPx(): Int =
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    getInsets(WindowInsets.Type.systemBars()).top
+  } else {
+    systemWindowInsetTop
+  }

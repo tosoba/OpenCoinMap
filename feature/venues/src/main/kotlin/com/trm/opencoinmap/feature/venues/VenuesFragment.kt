@@ -1,12 +1,10 @@
 package com.trm.opencoinmap.feature.venues
 
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.WindowInsets
 import android.widget.GridLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -16,10 +14,12 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.addOnScrollIdleListener
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
+import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
 import com.trm.opencoinmap.core.common.ext.hideAnimated
 import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.showAnimated
 import com.trm.opencoinmap.core.common.ext.toDp
+import com.trm.opencoinmap.core.common.view.VenuesSearchController
 import com.trm.opencoinmap.feature.venues.databinding.FragmentVenuesBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.max
@@ -43,14 +43,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
   private fun FragmentVenuesBinding.initViews() {
     requireView().setOnApplyWindowInsetsListener { _, insets ->
-      systemWindowTopInsetPx =
-        insets.run {
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            getInsets(WindowInsets.Type.systemBars()).top
-          } else {
-            systemWindowInsetTop
-          }
-        }
+      systemWindowTopInsetPx = insets.getSystemWindowTopInsetPx()
       insets
     }
 

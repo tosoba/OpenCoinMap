@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dial_venue_phone_number">Dial venue\'s phone number</string>
+    <string name="email_venue">Email the venue</string>
+    <string name="venue_facebook_profile">Venue\'s facebook profile</string>
+    <string name="venue_twitter_profile">Venue\'s twitter profile</string>
+    <string name="venue_instagram_profile">Venue\'s instagram profile</string>
+</resources>
