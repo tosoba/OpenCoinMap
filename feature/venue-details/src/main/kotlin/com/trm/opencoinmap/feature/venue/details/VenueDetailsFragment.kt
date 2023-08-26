@@ -17,7 +17,6 @@ import com.trm.opencoinmap.core.common.view.BottomSheetController
 import com.trm.opencoinmap.feature.venue.details.databinding.FragmentVenueDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
-import timber.log.Timber
 
 @AndroidEntryPoint
 class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
@@ -90,10 +89,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     venueDetailsRetryButton.isVisible = viewState is VenueDetailsViewModel.ViewState.Error
 
     if (viewState is VenueDetailsViewModel.ViewState.Loaded) {
-      viewState.venueDetails.website
-        ?.replace("http:", "https:")
-        ?.also { Timber.tag("WEBSITE").e(it) }
-        ?.let(venueDetailsWebView::loadUrl)
+      viewState.venueDetails.website?.replace("http:", "https:")?.let(venueDetailsWebView::loadUrl)
 
       venueDetailsActionsScrollView.isVisible = viewState.actionsScrollViewVisible
       phoneImageView.isVisible = viewState.phoneVisible

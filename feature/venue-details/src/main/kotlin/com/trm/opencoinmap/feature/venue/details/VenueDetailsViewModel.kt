@@ -66,11 +66,7 @@ constructor(
     data class Loaded(val venueDetails: VenueDetails) : ViewState {
       val actionsScrollViewVisible: Boolean
         get() =
-          venueDetails.phone != null ||
-            venueDetails.email != null ||
-            venueDetails.facebook != null ||
-            venueDetails.twitter != null ||
-            venueDetails.instagram != null
+          phoneVisible || emailVisible || facebookVisible || twitterVisible || instagramVisible
 
       val phoneVisible: Boolean
         get() = !venueDetails.phone.isNullOrBlank()

@@ -33,50 +33,55 @@
 
             <ImageView
                 android:id="@+id/phone_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:contentDescription="@string/dial_venue_phone_number"
                 android:paddingEnd="5dp"
+                android:scaleType="fitXY"
                 android:src="@drawable/phone"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/email_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:contentDescription="@string/email_venue"
                 android:paddingHorizontal="5dp"
+                android:scaleType="fitXY"
                 android:src="@drawable/email"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/facebook_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:contentDescription="@string/venue_facebook_profile"
                 android:paddingHorizontal="5dp"
+                android:scaleType="fitXY"
                 android:src="@drawable/facebook"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/twitter_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:contentDescription="@string/venue_twitter_profile"
                 android:paddingHorizontal="5dp"
+                android:scaleType="fitXY"
                 android:src="@drawable/twitter"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/instagram_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:contentDescription="@string/venue_instagram_profile"
                 android:paddingStart="5dp"
+                android:scaleType="fitXY"
                 android:src="@drawable/instagram"
                 android:visibility="gone"
                 tools:visibility="visible" />
