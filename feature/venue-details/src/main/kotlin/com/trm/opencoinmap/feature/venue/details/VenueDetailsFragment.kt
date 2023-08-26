@@ -1,11 +1,15 @@
 package com.trm.opencoinmap.feature.venue.details
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -66,8 +70,17 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     venueDetailsWebView.webViewClient =
       object : WebViewClient() {
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {}
-        override fun onPageFinished(view: WebView?, url: String?) {}
+        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+          view.setOnClickListener(null)
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+          view.setOnClickListener {
+            if (findParentFragmentOfType<BottomSheetController>()?.bottomSheetExpanded == true) {
+              goToUrlInBrowser(url)
+            }
+          }
+        }
       }
 
     venueDetailsRetryButton.setOnClickListener { viewModel.onRetryClick() }
@@ -97,6 +110,19 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       facebookImageView.isVisible = viewState.facebookVisible
       twitterImageView.isVisible = viewState.twitterVisible
       instagramImageView.isVisible = viewState.instagramVisible
+    }
+  }
+
+  private fun goToUrlInBrowser(url: String) {
+    try {
+      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (ex: ActivityNotFoundException) {
+      Toast.makeText(
+          requireContext(),
+          getString(R.string.browser_app_was_not_found),
+          Toast.LENGTH_SHORT
+        )
+        .show()
     }
   }
 }

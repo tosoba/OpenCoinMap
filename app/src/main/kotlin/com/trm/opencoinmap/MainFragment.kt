@@ -127,6 +127,8 @@ class MainFragment : Fragment(R.layout.fragment_main), BottomSheetController {
   override var bottomSheetContainerTopMarginPx: Int? = null
   override val bottomSheetSlideOffset: Float
     get() = if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+  override val bottomSheetExpanded: Boolean
+    get() = sheetController.state == BottomSheetBehavior.STATE_EXPANDED
 
   private val viewModel: MainViewModel by viewModels()
 

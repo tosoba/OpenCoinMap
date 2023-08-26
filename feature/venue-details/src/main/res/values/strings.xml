@@ -5,4 +5,5 @@
     <string name="venue_facebook_profile">Venue\'s facebook profile</string>
     <string name="venue_twitter_profile">Venue\'s twitter profile</string>
     <string name="venue_instagram_profile">Venue\'s instagram profile</string>
+    <string name="browser_app_was_not_found">Browser app was not found.</string>
 </resources>
