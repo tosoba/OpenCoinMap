@@ -19,7 +19,7 @@ import com.trm.opencoinmap.core.common.ext.hideAnimated
 import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.showAnimated
 import com.trm.opencoinmap.core.common.ext.toDp
-import com.trm.opencoinmap.core.common.view.VenuesSearchController
+import com.trm.opencoinmap.core.common.view.BottomSheetController
 import com.trm.opencoinmap.feature.venues.databinding.FragmentVenuesBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.max
@@ -48,6 +48,14 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
     }
 
     with(binding.venuesDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
+
+    findParentFragmentOfType<BottomSheetController>()
+      ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
+      ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
+        if (searchViewsHeightPx != null) {
+          updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
+        }
+      }
 
     binding.root.viewTreeObserver.addOnGlobalLayoutListener(
       object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -119,11 +127,18 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun VenuesViewModel.observeEvents() {
     sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       val searchBarHeightPx =
-        findParentFragmentOfType<VenuesSearchController>()?.searchViewsHeightPx ?: return@observe
-      binding.venuesContainer.layoutParams =
-        binding.venuesContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
-          topMargin = (((systemWindowTopInsetPx ?: 0) + searchBarHeightPx) * offset).roundToInt()
-        }
+        findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx ?: return@observe
+      binding.updateContainerLayoutParams(searchBarHeightPx, offset)
     }
+  }
+
+  private fun FragmentVenuesBinding.updateContainerLayoutParams(
+    searchBarHeightPx: Int,
+    offset: Float
+  ) {
+    venuesContainer.layoutParams =
+      venuesContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
+        topMargin = (((systemWindowTopInsetPx ?: 0) + searchBarHeightPx) * offset).roundToInt()
+      }
   }
 }

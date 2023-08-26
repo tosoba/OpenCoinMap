@@ -46,17 +46,17 @@ import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
+import com.trm.opencoinmap.core.common.view.BottomSheetController
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
 import com.trm.opencoinmap.feature.venue.details.VenueDetailsArgs
 import com.trm.opencoinmap.feature.venue.details.getVenueName
-import com.trm.opencoinmap.core.common.view.VenuesSearchController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
+class MainFragment : Fragment(R.layout.fragment_main), BottomSheetController {
   private val binding by viewBinding(FragmentMainBinding::bind)
 
   private val snackbarMessageObserver: SnackbarMessageObserver by
@@ -124,7 +124,9 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         .navController
     }
 
-  override var searchViewsHeightPx: Int? = null
+  override var bottomSheetContainerTopMarginPx: Int? = null
+  override val bottomSheetSlideOffset: Float
+    get() = if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
 
   private val viewModel: MainViewModel by viewModels()
 
@@ -175,7 +177,7 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
         object : ViewTreeObserver.OnGlobalLayoutListener {
           override fun onGlobalLayout() {
             viewTreeObserver.removeOnGlobalLayoutListener(this)
-            searchViewsHeightPx = measuredHeight + marginTop + marginBottom
+            bottomSheetContainerTopMarginPx = measuredHeight + marginTop + marginBottom
             viewModel.onSearchViewsSizeMeasure(sheetState = sheetController.state)
           }
         }
@@ -290,8 +292,8 @@ class MainFragment : Fragment(R.layout.fragment_main), VenuesSearchController {
     categoriesUpdatedEvent.observe(viewLifecycleOwner) {
       with(binding.searchLayout) { measuredHeight + marginTop + marginBottom }
         .also {
-          if (it == searchViewsHeightPx) return@also
-          searchViewsHeightPx = it
+          if (it == bottomSheetContainerTopMarginPx) return@also
+          bottomSheetContainerTopMarginPx = it
           viewModel.onSearchViewsSizeMeasure(sheetState = sheetController.state)
         }
     }
