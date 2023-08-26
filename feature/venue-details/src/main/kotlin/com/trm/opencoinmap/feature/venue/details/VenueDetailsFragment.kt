@@ -12,10 +12,13 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
 import com.trm.opencoinmap.core.common.ext.requireAs
@@ -126,15 +129,46 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     if (viewState is VenueDetailsViewModel.ViewState.Loaded) {
       viewState.venueDetails.website?.replace("http:", "https:")?.let(venueDetailsWebView::loadUrl)
-
+      venueDetailsActionsChipGroup.updateActionChips(viewState)
       venueDetailsActionsScrollView.isVisible = viewState.actionsScrollViewVisible
-      phoneImageView.isVisible = viewState.phoneVisible
-      emailImageView.isVisible = viewState.emailVisible
-      facebookImageView.isVisible = viewState.facebookVisible
-      twitterImageView.isVisible = viewState.twitterVisible
-      instagramImageView.isVisible = viewState.instagramVisible
     }
   }
+
+  private fun ChipGroup.updateActionChips(viewState: VenueDetailsViewModel.ViewState.Loaded) {
+    removeAllViews()
+    viewState.venueDetails.website?.let { url ->
+      addView(actionChip("Open in browser", R.drawable.browser) { goToUrlInBrowser(url) })
+    }
+    if (viewState.phoneVisible) {
+      addView(actionChip("Call", R.drawable.phone) {})
+    }
+    if (viewState.emailVisible) {
+      addView(actionChip("Email", R.drawable.email) {})
+    }
+    if (viewState.facebookVisible) {
+      addView(actionChip("Facebook", R.drawable.facebook) {})
+    }
+    if (viewState.twitterVisible) {
+      addView(actionChip("Twitter", R.drawable.twitter) {})
+    }
+    if (viewState.instagramVisible) {
+      addView(actionChip("Instagram", R.drawable.instagram) {})
+    }
+  }
+
+  private fun actionChip(
+    text: String,
+    @DrawableRes drawableRes: Int,
+    onClick: View.OnClickListener
+  ): Chip =
+    layoutInflater
+      .inflate(R.layout.item_venue_details_action, binding.venueDetailsActionsChipGroup, false)
+      .requireAs<Chip>()
+      .also {
+        it.text = text
+        it.setChipIconResource(drawableRes)
+        it.setOnClickListener(onClick)
+      }
 
   private fun goToUrlInBrowser(url: String) {
     try {
