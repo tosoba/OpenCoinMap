@@ -47,6 +47,7 @@ import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.BottomSheetController
+import com.trm.opencoinmap.core.common.view.OnBackPressedController
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
@@ -56,7 +57,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-class MainFragment : Fragment(R.layout.fragment_main), BottomSheetController {
+class MainFragment :
+  Fragment(R.layout.fragment_main), BottomSheetController, OnBackPressedController {
   private val binding by viewBinding(FragmentMainBinding::bind)
 
   private val snackbarMessageObserver: SnackbarMessageObserver by
@@ -262,29 +264,31 @@ class MainFragment : Fragment(R.layout.fragment_main), BottomSheetController {
   }
 
   private fun initNavigation() {
-    requireActivity().onBackPressedDispatcher.addCallback {
-      when {
-        viewModel.searchFocused.value == true -> {
-          viewModel.searchFocused.value = false
-        }
-        bottomSheetFragmentNavController.popBackStack() -> {
-          return@addCallback
-        }
-        sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
-          sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-          sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
-        }
-        else -> {
-          requireActivity().finish()
-        }
-      }
-    }
+    requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
 
     bottomSheetFragmentNavController.addOnDestinationChangedListener { _, destination, arguments ->
       viewModel.onBottomSheetFragmentChanged(
         destinationId = destination.id,
         venueName = arguments?.getVenueName() ?: getString(R.string.unknown_place)
       )
+    }
+  }
+
+  override fun onBackPressed() {
+    when {
+      viewModel.searchFocused.value == true -> {
+        viewModel.searchFocused.value = false
+      }
+      bottomSheetFragmentNavController.popBackStack() -> {
+        return
+      }
+      sheetController.state == BottomSheetBehavior.STATE_EXPANDED ||
+        sheetController.state == BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+        sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+      }
+      else -> {
+        requireActivity().finish()
+      }
     }
   }
 

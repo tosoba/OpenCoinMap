@@ -4,12 +4,14 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,9 +20,12 @@ import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
 import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.view.BottomSheetController
+import com.trm.opencoinmap.core.common.view.OnBackPressedController
+import com.trm.opencoinmap.core.common.view.ScrollDirection
 import com.trm.opencoinmap.feature.venue.details.databinding.FragmentVenueDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
+import timber.log.Timber
 
 @AndroidEntryPoint
 class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
@@ -68,20 +73,38 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     with(binding.venueDetailsDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
 
+    Timber.tag("SCROLL_WV")
+      .e(venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction).toString())
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      venueDetailsWebView.setOnScrollChangeListener { _, _, _, _, _ ->
+        Timber.tag("SCROLL_WV")
+          .e(venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction).toString())
+      }
+    }
     venueDetailsWebView.webViewClient =
       object : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-          view.setOnClickListener(null)
+          venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
         }
 
         override fun onPageFinished(view: WebView, url: String) {
-          view.setOnClickListener {
-            if (findParentFragmentOfType<BottomSheetController>()?.bottomSheetExpanded == true) {
-              goToUrlInBrowser(url)
-            }
-          }
+          venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
         }
       }
+
+    requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+      when {
+        venueDetailsWebView.canGoBack() -> {
+          venueDetailsWebView.goBack()
+        }
+        venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction) -> {
+          venueDetailsWebView.scrollTo(0, 0)
+        }
+        else -> {
+          findParentFragmentOfType<OnBackPressedController>()?.onBackPressed()
+        }
+      }
+    }
 
     venueDetailsRetryButton.setOnClickListener { viewModel.onRetryClick() }
   }

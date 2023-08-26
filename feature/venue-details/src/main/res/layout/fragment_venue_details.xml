@@ -90,7 +90,16 @@
 
     </HorizontalScrollView>
 
-    <com.trm.opencoinmap.feature.venue.details.VenueDetailsWebView
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/venue_details_website_loading_progress_indicator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view" />
+
+    <WebView
         android:id="@+id/venue_details_web_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -98,7 +107,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view"
+        app:layout_constraintTop_toBottomOf="@id/venue_details_website_loading_progress_indicator"
         tools:visibility="visible" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
