@@ -35,26 +35,35 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     viewModel.sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       val searchBarHeightPx =
-        findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx ?: return@observe
+        findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx
+          ?: return@observe
       binding.updateContainerLayoutParams(searchBarHeightPx, offset)
     }
   }
 
+  override fun onDestroyView() {
+    systemWindowTopInsetPx = null
+    super.onDestroyView()
+  }
+
   private fun FragmentVenueDetailsBinding.initViews() {
     requireView().setOnApplyWindowInsetsListener { _, insets ->
+      if (systemWindowTopInsetPx != null) return@setOnApplyWindowInsetsListener insets
+
       systemWindowTopInsetPx = insets.getSystemWindowTopInsetPx()
+
+      findParentFragmentOfType<BottomSheetController>()
+        ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
+        ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
+          if (searchViewsHeightPx != null) {
+            updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
+          }
+        }
+
       insets
     }
 
     with(binding.venueDetailsDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
-
-    findParentFragmentOfType<BottomSheetController>()
-      ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
-      ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
-        if (searchViewsHeightPx != null) {
-          updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
-        }
-      }
 
     venueDetailsWebView.webViewClient =
       object : WebViewClient() {

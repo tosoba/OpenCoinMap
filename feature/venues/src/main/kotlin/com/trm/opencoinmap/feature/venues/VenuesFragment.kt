@@ -41,21 +41,29 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
     viewModel.observeEvents()
   }
 
+  override fun onDestroyView() {
+    systemWindowTopInsetPx = null
+    super.onDestroyView()
+  }
+
   private fun FragmentVenuesBinding.initViews() {
     requireView().setOnApplyWindowInsetsListener { _, insets ->
+      if (systemWindowTopInsetPx != null) return@setOnApplyWindowInsetsListener insets
+
       systemWindowTopInsetPx = insets.getSystemWindowTopInsetPx()
+
+      findParentFragmentOfType<BottomSheetController>()
+        ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
+        ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
+          if (searchViewsHeightPx != null) {
+            updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
+          }
+        }
+
       insets
     }
 
     with(binding.venuesDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
-
-    findParentFragmentOfType<BottomSheetController>()
-      ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
-      ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
-        if (searchViewsHeightPx != null) {
-          updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
-        }
-      }
 
     binding.root.viewTreeObserver.addOnGlobalLayoutListener(
       object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -127,7 +135,8 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun VenuesViewModel.observeEvents() {
     sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       val searchBarHeightPx =
-        findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx ?: return@observe
+        findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx
+          ?: return@observe
       binding.updateContainerLayoutParams(searchBarHeightPx, offset)
     }
   }
