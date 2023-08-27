@@ -37,6 +37,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -47,6 +48,7 @@ import com.trm.opencoinmap.core.common.ext.requireAs
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.BottomSheetController
+import com.trm.opencoinmap.core.common.view.LockableBottomSheetBehavior
 import com.trm.opencoinmap.core.common.view.OnBackPressedController
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
@@ -126,6 +128,11 @@ class MainFragment :
         .navController
     }
 
+  private val bottomSheetBehavior: LockableBottomSheetBehavior<FragmentContainerView>
+    get() =
+      BottomSheetBehavior.from(binding.bottomSheetContainer)
+        as LockableBottomSheetBehavior<FragmentContainerView>
+
   override var bottomSheetContainerTopMarginPx: Int? = null
   override val bottomSheetSlideOffset: Float
     get() = if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
@@ -147,7 +154,7 @@ class MainFragment :
     initNavigation()
 
     lifecycle.addObserver(snackbarMessageObserver)
-    viewModel.observe()
+    viewModel.observeEvents()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -271,6 +278,10 @@ class MainFragment :
         destinationId = destination.id,
         venueName = arguments?.getVenueName() ?: getString(R.string.unknown_place)
       )
+
+      if (destination.id == bottomSheetFragmentNavController.graph.startDestinationId) {
+        bottomSheetBehavior.isLocked = false
+      }
     }
   }
 
@@ -292,10 +303,10 @@ class MainFragment :
     }
   }
 
-  private fun MainViewModel.observe() {
+  private fun MainViewModel.observeEvents() {
     snackbarMessage.observe(viewLifecycleOwner, snackbarMessageObserver)
 
-    categoriesUpdatedEvent.observe(viewLifecycleOwner) {
+    categoriesUpdated.observe(viewLifecycleOwner) {
       with(binding.searchLayout) { measuredHeight + marginTop + marginBottom }
         .also {
           if (it == bottomSheetContainerTopMarginPx) return@also
@@ -317,6 +328,11 @@ class MainFragment :
           VenueDetailsArgs.argsBundle(it.id, it.name)
         )
       }
+    }
+
+    webViewScrollableUpwards.observe(viewLifecycleOwner) { isScrollable ->
+      bottomSheetBehavior.isLocked =
+        if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) isScrollable else false
     }
   }
 }

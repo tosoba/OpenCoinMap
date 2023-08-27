@@ -13,6 +13,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -28,7 +29,6 @@ import com.trm.opencoinmap.core.common.view.ScrollDirection
 import com.trm.opencoinmap.feature.venue.details.databinding.FragmentVenueDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
-import timber.log.Timber
 
 @AndroidEntryPoint
 class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
@@ -80,12 +80,14 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     with(binding.venueDetailsDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
 
-    Timber.tag("SCROLL_WV")
-      .e(venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction).toString())
+    viewModel.onWebViewScrolled(
+      venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction)
+    )
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       venueDetailsWebView.setOnScrollChangeListener { _, _, _, _, _ ->
-        Timber.tag("SCROLL_WV")
-          .e(venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction).toString())
+        viewModel.onWebViewScrolled(
+          venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction)
+        )
       }
     }
     venueDetailsWebView.webViewClient =
@@ -140,28 +142,28 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun ChipGroup.updateActionChips(viewState: VenueDetailsViewModel.ViewState.Loaded) {
     removeAllViews()
-    viewState.venueDetails.website?.let { url ->
-      addView(actionChip("Open in browser", R.drawable.browser) { goToUrlInBrowser(url) })
+    viewState.websiteUrl?.let { url ->
+      addView(actionChip(R.string.open_in_browser, R.drawable.browser) { goToUrlInBrowser(url) })
     }
     if (viewState.phoneVisible) {
-      addView(actionChip("Call", R.drawable.phone) {})
+      addView(actionChip(R.string.call, R.drawable.phone) {})
     }
     if (viewState.emailVisible) {
-      addView(actionChip("Email", R.drawable.email) {})
+      addView(actionChip(R.string.email, R.drawable.email) {})
     }
     if (viewState.facebookVisible) {
-      addView(actionChip("Facebook", R.drawable.facebook) {})
+      addView(actionChip(R.string.facebook, R.drawable.facebook) {})
     }
     if (viewState.twitterVisible) {
-      addView(actionChip("Twitter", R.drawable.twitter) {})
+      addView(actionChip(R.string.twitter, R.drawable.twitter) {})
     }
     if (viewState.instagramVisible) {
-      addView(actionChip("Instagram", R.drawable.instagram) {})
+      addView(actionChip(R.string.instagram, R.drawable.instagram) {})
     }
   }
 
   private fun actionChip(
-    text: String,
+    @StringRes textRes: Int,
     @DrawableRes drawableRes: Int,
     onClick: View.OnClickListener
   ): Chip =
@@ -169,7 +171,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       .inflate(R.layout.item_venue_details_action, binding.venueDetailsActionsChipGroup, false)
       .requireAs<Chip>()
       .also {
-        it.text = text
+        it.setText(textRes)
         it.setChipIconResource(drawableRes)
         it.setOnClickListener(onClick)
       }

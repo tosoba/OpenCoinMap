@@ -6,4 +6,10 @@
     <string name="venue_twitter_profile">Venue\'s twitter profile</string>
     <string name="venue_instagram_profile">Venue\'s instagram profile</string>
     <string name="browser_app_was_not_found">Browser app was not found.</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="call">Call</string>
+    <string name="email">Email</string>
+    <string name="facebook">Facebook</string>
+    <string name="twitter">Twitter</string>
+    <string name="instagram">Instagram</string>
 </resources>

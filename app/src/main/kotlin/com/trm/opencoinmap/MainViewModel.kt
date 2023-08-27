@@ -15,6 +15,7 @@ import com.trm.opencoinmap.core.domain.usecase.GetTrimmedQueryOrEmptyUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesListLayoutEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveWebViewScrollableUpwardsUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendSheetSlideOffsetUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendVenueQueryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +35,7 @@ constructor(
   receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
   sendVenueQueryUseCase: SendVenueQueryUseCase,
   getTrimmedQueryOrEmptyUseCase: GetTrimmedQueryOrEmptyUseCase,
+  receiveWebViewScrollableUpwardsUseCase: ReceiveWebViewScrollableUpwardsUseCase
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -104,8 +106,8 @@ constructor(
   private val _snackbarMessage = LiveEvent<Message>()
   val snackbarMessage: LiveData<Message> = _snackbarMessage
 
-  private val _categoriesUpdatedEvent = LiveEvent<Unit>()
-  val categoriesUpdatedEvent: LiveData<Unit> = _categoriesUpdatedEvent
+  private val _categoriesUpdated = LiveEvent<Unit>()
+  val categoriesUpdated: LiveData<Unit> = _categoriesUpdated
 
   private val _venueClicked = LiveEvent<Venue>()
   val venueClicked: LiveData<Venue> = _venueClicked
@@ -115,17 +117,24 @@ constructor(
       sendVenueQueryUseCase(getTrimmedQueryOrEmptyUseCase(query, MIN_QUERY_LENGTH))
     }
 
+  private val _webViewScrollableUpwards = LiveEvent<Boolean>()
+  val webViewScrollableUpwards: LiveData<Boolean> = _webViewScrollableUpwards
+
   init {
     receiveMessageUseCase()
       .subscribeBy(onNext = _snackbarMessage::setValue)
       .addTo(compositeDisposable)
 
     receiveCategoriesListLayoutEventUseCase()
-      .subscribeBy(onNext = _categoriesUpdatedEvent::setValue)
+      .subscribeBy(onNext = _categoriesUpdated::setValue)
       .addTo(compositeDisposable)
 
     receiveVenueClickedEventUseCase()
       .subscribeBy(onNext = _venueClicked::setValue)
+      .addTo(compositeDisposable)
+
+    receiveWebViewScrollableUpwardsUseCase()
+      .subscribeBy(onNext = _webViewScrollableUpwards::setValue)
       .addTo(compositeDisposable)
 
     searchQuery.observeForever(searchQueryObserver)

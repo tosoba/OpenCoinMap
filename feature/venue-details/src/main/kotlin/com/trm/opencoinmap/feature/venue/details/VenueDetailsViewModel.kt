@@ -8,6 +8,7 @@ import com.hadilq.liveevent.LiveEvent
 import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.usecase.GetVenueDetailsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
+import com.trm.opencoinmap.core.domain.usecase.SendWebViewScrollableUpwardsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
@@ -25,6 +26,7 @@ constructor(
   private val savedStateHandle: SavedStateHandle,
   private val getVenueDetailsUseCase: GetVenueDetailsUseCase,
   receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
+  private val sendWebViewScrollableUpwardsUseCase: SendWebViewScrollableUpwardsUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -60,13 +62,28 @@ constructor(
       .addTo(compositeDisposable)
   }
 
+  fun onWebViewScrolled(isScrollableUpwards: Boolean) {
+    sendWebViewScrollableUpwardsUseCase(isScrollableUpwards)
+  }
+
   sealed interface ViewState {
     object Loading : ViewState
 
     data class Loaded(val venueDetails: VenueDetails) : ViewState {
       val actionsScrollViewVisible: Boolean
         get() =
-          phoneVisible || emailVisible || facebookVisible || twitterVisible || instagramVisible
+          openInBrowserVisible ||
+            phoneVisible ||
+            emailVisible ||
+            facebookVisible ||
+            twitterVisible ||
+            instagramVisible
+
+      private val openInBrowserVisible: Boolean
+        get() = !venueDetails.website.isNullOrBlank()
+
+      val websiteUrl: String?
+        get() = venueDetails.website?.takeIf(String::isNotBlank)
 
       val phoneVisible: Boolean
         get() = !venueDetails.phone.isNullOrBlank()
