@@ -45,6 +45,8 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     viewModel.viewState.observe(viewLifecycleOwner) { binding.onViewState(it) }
 
     viewModel.sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
+      binding.venueDetailsWebView.interactionDisabled = offset < 1f
+
       val searchBarHeightPx =
         findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx
           ?: return@observe
@@ -66,6 +68,8 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       findParentFragmentOfType<BottomSheetController>()
         ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
         ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
+          binding.venueDetailsWebView.interactionDisabled = bottomSheetSlideOffset < 1f
+
           if (searchViewsHeightPx != null) {
             updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
           }

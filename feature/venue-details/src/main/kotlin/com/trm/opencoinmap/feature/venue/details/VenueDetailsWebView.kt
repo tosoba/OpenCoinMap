@@ -8,7 +8,11 @@ import android.webkit.WebView
 class VenueDetailsWebView(context: Context, attrs: AttributeSet?) : WebView(context, attrs) {
   constructor(context: Context) : this(context, null)
 
+  var interactionDisabled = false
+
   override fun onTouchEvent(event: MotionEvent?): Boolean {
+    if (!interactionDisabled) return super.onTouchEvent(event)
+
     when (event?.action) {
       MotionEvent.ACTION_UP -> performClick()
     }
@@ -16,6 +20,8 @@ class VenueDetailsWebView(context: Context, attrs: AttributeSet?) : WebView(cont
   }
 
   override fun performClick(): Boolean {
+    if (!interactionDisabled) return super.performClick()
+
     super.performClick()
     return true
   }
