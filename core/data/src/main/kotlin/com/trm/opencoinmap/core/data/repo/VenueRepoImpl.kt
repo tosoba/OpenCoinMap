@@ -149,6 +149,9 @@ constructor(
       )
       .map(VenueDetailsEntity::asDomainModel)
 
+  override fun deleteVenueDetailsOlderThan(timestamp: Long): Completable =
+    venueDetailsDao.deleteInsertedAtBeforeTimestamp(timestamp)
+
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds,
     query: String,

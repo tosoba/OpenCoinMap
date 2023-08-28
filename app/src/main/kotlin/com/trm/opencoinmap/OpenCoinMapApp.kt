@@ -1,6 +1,7 @@
 package com.trm.opencoinmap
 
 import android.app.Application
+import com.trm.opencoinmap.sync.initializer.Cleanup
 import com.trm.opencoinmap.sync.initializer.Sync
 import dagger.hilt.android.HiltAndroidApp
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
@@ -13,7 +14,7 @@ class OpenCoinMapApp : Application() {
     super.onCreate()
     initTimber()
     initRxErrorHandler()
-    initSync()
+    initWorkers()
     initOsm()
   }
 
@@ -25,8 +26,9 @@ class OpenCoinMapApp : Application() {
     RxJavaPlugins.setErrorHandler { Timber.tag("RX").e(it) }
   }
 
-  private fun initSync() {
-    Sync.initialize(context = this)
+  private fun initWorkers() {
+    Sync.initialize(this)
+    Cleanup.initialize(this)
   }
 
   private fun initOsm() {

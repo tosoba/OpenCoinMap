@@ -13,4 +13,7 @@ interface VenueDetailsDao {
   fun selectById(id: Long): Maybe<VenueDetailsEntity>
 
   @Upsert fun upsert(entity: VenueDetailsEntity): Completable
+
+  @Query("DELETE FROM venue_details WHERE inserted_at_timestamp < :timestamp")
+  fun deleteInsertedAtBeforeTimestamp(timestamp: Long): Completable
 }

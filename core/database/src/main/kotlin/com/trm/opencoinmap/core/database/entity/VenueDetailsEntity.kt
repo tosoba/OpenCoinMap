@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.core.database.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,27 +10,27 @@ data class VenueDetailsEntity(
   val city: String?,
   val coins: List<String>?,
   val country: String?,
-  val createdOn: Int?,
+  @ColumnInfo("created_on") val createdOn: Int?,
   val description: String?,
   val email: String?,
   val facebook: String?,
   val fax: String?,
-  val geolocationDegrees: String?,
-  val houseNumber: String?,
+  @ColumnInfo("geolocation_degrees") val geolocationDegrees: String?,
+  @ColumnInfo("house_number") val houseNumber: String?,
   @PrimaryKey val id: Long,
   val instagram: String?,
   val lat: Double?,
-  val logoUrl: String?,
+  @ColumnInfo("logo_url") val logoUrl: String?,
   val lon: Double?,
   val name: String?,
-  val nameAscii: String?,
+  @ColumnInfo("name_ascii") val nameAscii: String?,
   val phone: String?,
   val postcode: String?,
-  val srcId: String?,
+  @ColumnInfo("src_id") val srcId: String?,
   val state: String?,
   val street: String?,
   val twitter: String?,
-  val updatedOn: Int?,
+  @ColumnInfo("updated_on") val updatedOn: Int?,
   val website: String?,
-  val insertedAtTimestamp: Long
+  @ColumnInfo("inserted_at_timestamp") val insertedAtTimestamp: Long
 )

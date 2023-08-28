@@ -30,4 +30,6 @@ interface VenueRepo {
   fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>): Flowable<List<VenueCategoryCount>>
 
   fun getVenueDetails(id: Long): Maybe<VenueDetails>
+
+  fun deleteVenueDetailsOlderThan(timestamp: Long): Completable
 }
