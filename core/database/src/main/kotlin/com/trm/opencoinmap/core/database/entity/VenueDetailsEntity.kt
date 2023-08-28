@@ -30,5 +30,6 @@ data class VenueDetailsEntity(
   val street: String?,
   val twitter: String?,
   val updatedOn: Int?,
-  val website: String?
+  val website: String?,
+  val insertedAtTimestamp: Long
 )

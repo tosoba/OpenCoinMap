@@ -10,6 +10,7 @@ import com.trm.opencoinmap.core.data.mapper.asDomainModel
 import com.trm.opencoinmap.core.data.mapper.asEntity
 import com.trm.opencoinmap.core.database.OpenCoinMapDatabase
 import com.trm.opencoinmap.core.database.entity.BoundsEntity
+import com.trm.opencoinmap.core.database.entity.VenueDetailsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
 import com.trm.opencoinmap.core.domain.model.GridMapBounds
 import com.trm.opencoinmap.core.domain.model.MapBounds
@@ -39,6 +40,7 @@ constructor(
 ) : VenueRepo {
   private val venueDao = db.venueDao()
   private val boundsDao = db.boundsDao()
+  private val venueDetailsDao = db.venueDetailsDao()
 
   override fun sync(): Completable {
     syncDataSource.isRunning = true
@@ -134,10 +136,18 @@ constructor(
       .map { it.map { (category, count) -> VenueCategoryCount(category, count) } }
 
   override fun getVenueDetails(id: Long): Maybe<VenueDetails> =
-    coinMapApi.getVenue(id).flatMapMaybe { (venue) ->
-      venue?.takeIf(VenueDetailsResponseItem::isValid)?.let { Maybe.just(it.asDomainModel()) }
-        ?: Maybe.empty()
-    }
+    venueDetailsDao
+      .selectById(id)
+      .switchIfEmpty(
+        coinMapApi
+          .getVenue(id)
+          .flatMapMaybe { (venue) ->
+            venue?.takeIf(VenueDetailsResponseItem::isValid)?.let { Maybe.just(it.asEntity()) }
+              ?: Maybe.empty()
+          }
+          .flatMap { venueDetailsDao.upsert(it).andThen(Maybe.just(it)) }
+      )
+      .map(VenueDetailsEntity::asDomainModel)
 
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds,

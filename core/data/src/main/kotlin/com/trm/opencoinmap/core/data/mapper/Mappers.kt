@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.core.data.mapper
 
+import com.trm.opencoinmap.core.database.entity.VenueDetailsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.model.VenueDetails
@@ -40,6 +41,67 @@ fun VenueResponseItem.asDomainModel(): Venue =
   )
 
 fun VenueDetailsResponseItem.asDomainModel(): VenueDetails =
+  VenueDetails(
+    category = category,
+    city = city,
+    coins = coins,
+    country = country,
+    createdOn = createdOn,
+    description = description,
+    email = email,
+    facebook = facebook,
+    fax = fax,
+    geolocationDegrees = geolocationDegrees,
+    houseNumber = houseNumber,
+    id = id,
+    instagram = instagram,
+    lat = lat,
+    logoUrl = logoUrl,
+    lon = lon,
+    name = name,
+    nameAscii = nameAscii,
+    phone = phone,
+    postcode = postcode,
+    srcId = srcId,
+    state = state,
+    street = street,
+    twitter = twitter,
+    updatedOn = updatedOn,
+    website = website
+  )
+
+fun VenueDetailsResponseItem.asEntity(): VenueDetailsEntity =
+  VenueDetailsEntity(
+    category = category,
+    city = city,
+    coins = coins,
+    country = country,
+    createdOn = createdOn,
+    description = description,
+    email = email,
+    facebook = facebook,
+    fax = fax,
+    geolocationDegrees = geolocationDegrees,
+    houseNumber = houseNumber,
+    id = requireNotNull(id),
+    instagram = instagram,
+    lat = lat,
+    logoUrl = logoUrl,
+    lon = lon,
+    name = name,
+    nameAscii = nameAscii,
+    phone = phone,
+    postcode = postcode,
+    srcId = srcId,
+    state = state,
+    street = street,
+    twitter = twitter,
+    updatedOn = updatedOn,
+    website = website,
+    insertedAtTimestamp = System.currentTimeMillis()
+  )
+
+fun VenueDetailsEntity.asDomainModel(): VenueDetails =
   VenueDetails(
     category = category,
     city = city,
