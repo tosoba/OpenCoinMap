@@ -4,6 +4,7 @@ import android.content.Context
 import com.trm.opencoinmap.core.database.OpenCoinMapDatabase
 import com.trm.opencoinmap.core.database.dao.BoundsDao
 import com.trm.opencoinmap.core.database.dao.VenueDao
+import com.trm.opencoinmap.core.database.dao.VenueDetailsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +21,8 @@ object DatabaseModule {
     OpenCoinMapDatabase.build(context)
 
   @Provides fun venueDao(db: OpenCoinMapDatabase): VenueDao = db.venueDao()
+
+  @Provides fun venueDetailsDao(db: OpenCoinMapDatabase): VenueDetailsDao = db.venueDetailsDao()
 
   @Provides fun boundsDao(db: OpenCoinMapDatabase): BoundsDao = db.boundsDao()
 }
