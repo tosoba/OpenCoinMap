@@ -8,6 +8,8 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -29,6 +31,7 @@ import com.trm.opencoinmap.core.common.view.ScrollDirection
 import com.trm.opencoinmap.feature.venue.details.databinding.FragmentVenueDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
+import timber.log.Timber
 
 @AndroidEntryPoint
 class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
@@ -99,6 +102,17 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         override fun onPageFinished(view: WebView, url: String) {
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
         }
+
+        override fun onReceivedError(
+          view: WebView,
+          request: WebResourceRequest,
+          error: WebResourceError
+        ) {
+          super.onReceivedError(view, request, error)
+          if (request.url?.toString() == viewModel.venueWebsite) {
+            Timber.tag("WEB_ERR").e("Error occurred for ${request.url}")
+          }
+        }
       }
 
     requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
@@ -134,7 +148,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     venueDetailsRetryButton.isVisible = viewState is VenueDetailsViewModel.ViewState.Error
 
     if (viewState is VenueDetailsViewModel.ViewState.Loaded) {
-      viewState.venueDetails.website?.replace("http:", "https:")?.let(venueDetailsWebView::loadUrl)
+      viewState.websiteUrl?.let(venueDetailsWebView::loadUrl)
       venueDetailsActionsChipGroup.updateActionChips(viewState)
       venueDetailsActionsScrollView.isVisible = viewState.actionsScrollViewVisible
     }

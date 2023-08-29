@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.usecase.GetVenueDetailsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
@@ -32,6 +33,9 @@ constructor(
 
   private val _viewState = MutableLiveData<ViewState>(ViewState.Loading)
   val viewState: LiveData<ViewState> = _viewState
+
+  val venueWebsite: String?
+    get() = viewState.value?.safeAs<ViewState.Loaded>()?.websiteUrl
 
   private val _sheetSlideOffset = LiveEvent<Float>()
   val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
@@ -83,7 +87,7 @@ constructor(
         get() = !venueDetails.website.isNullOrBlank()
 
       val websiteUrl: String?
-        get() = venueDetails.website?.takeIf(String::isNotBlank)
+        get() = venueDetails.website?.takeIf(String::isNotBlank)?.replace("http:", "https:")
 
       val phoneVisible: Boolean
         get() = !venueDetails.phone.isNullOrBlank()

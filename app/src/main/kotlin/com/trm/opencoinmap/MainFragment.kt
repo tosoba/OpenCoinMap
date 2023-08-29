@@ -316,14 +316,15 @@ class MainFragment :
     }
 
     venueClicked.observe(viewLifecycleOwner) {
-      if (
-        bottomSheetFragmentNavController.currentDestination?.id !=
-          R.id.venues_fragment_to_venue_details_fragment
-      ) {
-        if (sheetController.state == BottomSheetBehavior.STATE_HIDDEN) {
-          sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+      if (sheetController.state == BottomSheetBehavior.STATE_HIDDEN) {
+        sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
+      }
+
+      with(bottomSheetFragmentNavController) {
+        if (currentDestination?.id == R.id.venues_fragment_to_venue_details_fragment) {
+          popBackStack()
         }
-        bottomSheetFragmentNavController.navigate(
+        navigate(
           R.id.venues_fragment_to_venue_details_fragment,
           VenueDetailsArgs.argsBundle(it.id, it.name)
         )
