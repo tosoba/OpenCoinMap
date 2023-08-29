@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -109,6 +110,19 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           error: WebResourceError
         ) {
           super.onReceivedError(view, request, error)
+          onWebViewError(request)
+        }
+
+        override fun onReceivedHttpError(
+          view: WebView,
+          request: WebResourceRequest,
+          errorResponse: WebResourceResponse
+        ) {
+          super.onReceivedHttpError(view, request, errorResponse)
+          onWebViewError(request)
+        }
+
+        private fun onWebViewError(request: WebResourceRequest) {
           if (request.url?.toString() == viewModel.venueWebsite) {
             Timber.tag("WEB_ERR").e("Error occurred for ${request.url}")
           }
