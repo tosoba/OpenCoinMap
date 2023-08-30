@@ -96,12 +96,22 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     }
     venueDetailsWebView.webViewClient =
       object : WebViewClient() {
+        var currentPageUrl: String? = null
+
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+          Timber.tag("WEBVIEW").e("Started $url")
+          currentPageUrl = url
+
+          venueDetailsWebView.isVisible = true
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
+          venueDetailsWebsiteErrorGroup.isVisible = false
         }
 
         override fun onPageFinished(view: WebView, url: String) {
+          Timber.tag("WEBVIEW").e("Finished $url")
+
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
+          goBackButton.isEnabled = venueDetailsWebView.canGoBack()
         }
 
         override fun onReceivedError(
@@ -123,11 +133,17 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         }
 
         private fun onWebViewError(request: WebResourceRequest) {
-          if (request.url?.toString() == viewModel.venueWebsite) {
-            Timber.tag("WEB_ERR").e("Error occurred for ${request.url}")
-          }
+          Timber.tag("WEBVIEW").e("Error occurred for ${request.url}")
+          if (currentPageUrl != request.url.toString()) return
+
+          venueDetailsWebView.isVisible = false
+          venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
+          venueDetailsWebsiteErrorGroup.isVisible = true
         }
       }
+
+    goBackButton.setOnClickListener { venueDetailsWebView.goBack() }
+    refreshButton.setOnClickListener { venueDetailsWebView.reload() }
 
     requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
       when {
