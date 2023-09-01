@@ -105,6 +105,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           venueDetailsWebView.isVisible = true
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
           venueDetailsWebsiteExpandedErrorGroup.isVisible = false
+          venueDetailsWebsiteCollapsedErrorGroup.isVisible = false
         }
 
         override fun onPageFinished(view: WebView, url: String) {
@@ -112,6 +113,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
           expandedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
+          collapsedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
         }
 
         override fun onReceivedError(
@@ -139,6 +141,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           venueDetailsWebView.isVisible = false
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
           venueDetailsWebsiteExpandedErrorGroup.isVisible = true
+          venueDetailsWebsiteCollapsedErrorGroup.isVisible = true
         }
       }
 
