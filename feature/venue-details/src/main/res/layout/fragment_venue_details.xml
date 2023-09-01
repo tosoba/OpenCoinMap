@@ -53,48 +53,48 @@
         tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Group
-        android:id="@+id/venue_details_website_error_group"
+        android:id="@+id/venue_details_website_expanded_error_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="error_image_view,go_back_button,refresh_button" />
+        app:constraint_referenced_ids="expanded_error_image_view,expanded_go_back_button,expanded_refresh_button" />
 
     <ImageView
-        android:id="@+id/error_image_view"
+        android:id="@+id/expanded_error_image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/error_occurred"
         android:src="@drawable/error"
-        app:layout_constraintBottom_toTopOf="@id/go_back_button"
+        app:layout_constraintBottom_toTopOf="@id/expanded_go_back_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
-        android:id="@+id/go_back_button"
+        android:id="@+id/expanded_go_back_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="5dp"
         android:text="@string/go_back"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/refresh_button"
+        app:layout_constraintEnd_toStartOf="@id/expanded_refresh_button"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/error_image_view" />
+        app:layout_constraintTop_toBottomOf="@id/expanded_error_image_view" />
 
     <Button
-        android:id="@+id/refresh_button"
+        android:id="@+id/expanded_refresh_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="10dp"
         android:text="@string/refresh"
-        app:layout_constraintBottom_toBottomOf="@id/go_back_button"
+        app:layout_constraintBottom_toBottomOf="@id/expanded_go_back_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/go_back_button"
-        app:layout_constraintTop_toTopOf="@id/go_back_button" />
+        app:layout_constraintStart_toEndOf="@id/expanded_go_back_button"
+        app:layout_constraintTop_toTopOf="@id/expanded_go_back_button" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/venue_details_progress_indicator"

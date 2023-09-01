@@ -104,14 +104,14 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
           venueDetailsWebView.isVisible = true
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
-          venueDetailsWebsiteErrorGroup.isVisible = false
+          venueDetailsWebsiteExpandedErrorGroup.isVisible = false
         }
 
         override fun onPageFinished(view: WebView, url: String) {
           Timber.tag("WEBVIEW").e("Finished $url")
 
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
-          goBackButton.isEnabled = venueDetailsWebView.canGoBack()
+          expandedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
         }
 
         override fun onReceivedError(
@@ -138,12 +138,12 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
           venueDetailsWebView.isVisible = false
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
-          venueDetailsWebsiteErrorGroup.isVisible = true
+          venueDetailsWebsiteExpandedErrorGroup.isVisible = true
         }
       }
 
-    goBackButton.setOnClickListener { venueDetailsWebView.goBack() }
-    refreshButton.setOnClickListener { venueDetailsWebView.reload() }
+    expandedGoBackButton.setOnClickListener { venueDetailsWebView.goBack() }
+    expandedRefreshButton.setOnClickListener { venueDetailsWebView.reload() }
 
     requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
       when {
