@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error_occurred">Error occurred.</string>
+    <string name="error_occurred_try_to_open_in_browser">Error occurred. Try to use \"Open in browser\" action above.</string>
     <string name="retry">Retry</string>
 </resources>

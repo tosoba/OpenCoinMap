@@ -98,40 +98,54 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/venue_details_website_loading_progress_indicator"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@id/venue_details_website_loading_progress_indicator" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/venue_details_website_expanded_error_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="expanded_error_image_view,expanded_go_back_button,expanded_refresh_button" />
+        app:constraint_referenced_ids="expanded_error_image_view,expanded_error_text_view,expanded_go_back_button,expanded_refresh_button"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/expanded_error_image_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_margin="10dp"
         android:contentDescription="@string/error_occurred"
         android:src="@drawable/error"
-        app:layout_constraintBottom_toTopOf="@id/expanded_go_back_button"
+        app:layout_constraintBottom_toTopOf="@id/expanded_error_text_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view"
         app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/expanded_error_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/error_occurred_try_to_open_in_browser"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/expanded_go_back_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/expanded_error_image_view" />
 
     <Button
         android:id="@+id/expanded_go_back_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="5dp"
         android:text="@string/go_back"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/expanded_refresh_button"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expanded_error_image_view" />
+        app:layout_constraintTop_toBottomOf="@id/expanded_error_text_view" />
 
     <Button
         android:id="@+id/expanded_refresh_button"
