@@ -50,6 +50,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     viewModel.sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       binding.venueDetailsWebView.interactionDisabled = offset < 1f
+      binding.updateErrorGroupsAlpha(offset)
 
       val searchBarHeightPx =
         findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx
@@ -73,6 +74,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
         ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
           binding.venueDetailsWebView.interactionDisabled = bottomSheetSlideOffset < 1f
+          updateErrorGroupsAlpha(bottomSheetSlideOffset)
 
           if (searchViewsHeightPx != null) {
             updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
@@ -163,6 +165,15 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     }
 
     venueDetailsRetryButton.setOnClickListener { viewModel.onRetryClick() }
+  }
+
+  private fun FragmentVenueDetailsBinding.updateErrorGroupsAlpha(bottomSheetSlideOffset: Float) {
+    venueDetailsWebsiteCollapsedErrorGroup.referencedIds.forEach {
+      binding.root.findViewById<View>(it).alpha = 1f - bottomSheetSlideOffset
+    }
+    venueDetailsWebsiteExpandedErrorGroup.referencedIds.forEach {
+      binding.root.findViewById<View>(it).alpha = bottomSheetSlideOffset
+    }
   }
 
   private fun FragmentVenueDetailsBinding.updateContainerLayoutParams(
