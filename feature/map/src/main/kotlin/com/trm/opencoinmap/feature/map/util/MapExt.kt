@@ -73,7 +73,7 @@ internal var MapView.position: MapPosition
   set(value) {
     controller.setZoom(value.zoom)
     mapOrientation = value.orientation
-    setExpectedCenter(GeoPoint(value.latitude, value.longitude))
+    controller.setCenter(GeoPoint(value.latitude, value.longitude))
   }
   get() =
     MapPosition(
