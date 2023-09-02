@@ -48,27 +48,21 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       )
     }
 
-    var listenersAdded = false
-    viewModel.mapPosition.observe(viewLifecycleOwner) {
-      position = it
-      if (listenersAdded) return@observe
+    addMapListener(
+      object : MapListener {
+        override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
+        override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
-      addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
-
-      addMapListener(
-        object : MapListener {
-          override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
-          override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
-
-          fun onMapInteraction(): Boolean {
-            viewModel.onMapUpdated()
-            return false
-          }
+        fun onMapInteraction(): Boolean {
+          viewModel.onMapUpdated()
+          return false
         }
-      )
+      }
+    )
 
-      listenersAdded = true
-    }
+    addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
+
+    viewModel.mapPosition.observe(viewLifecycleOwner, ::position::set)
 
     val venueDrawable =
       requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
