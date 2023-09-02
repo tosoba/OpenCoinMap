@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -101,9 +102,8 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         var currentPageUrl: String? = null
 
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-          Timber.tag("WEBVIEW").e("Started $url")
+          Timber.tag("WEB_VIEW").e("Started $url")
           currentPageUrl = url
-
           venueDetailsWebView.isVisible = true
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
           venueDetailsWebsiteExpandedErrorGroup.isVisible = false
@@ -111,8 +111,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         }
 
         override fun onPageFinished(view: WebView, url: String) {
-          Timber.tag("WEBVIEW").e("Finished $url")
-
+          Timber.tag("WEB_VIEW").e("Finished $url")
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
           expandedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
           collapsedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
@@ -137,13 +136,12 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         }
 
         private fun onWebViewError(request: WebResourceRequest) {
-          Timber.tag("WEBVIEW").e("Error occurred for ${request.url}")
+          Timber.tag("WEB_VIEW").e("Error occurred for ${request.url}")
           if (currentPageUrl != request.url.toString()) return
-
-          venueDetailsWebView.isVisible = false
-          venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
-          venueDetailsWebsiteExpandedErrorGroup.isVisible = true
-          venueDetailsWebsiteCollapsedErrorGroup.isVisible = true
+          updateViewsOnWebViewError(
+            R.string.error_occurred_try_to_open_in_browser,
+            R.drawable.error
+          )
         }
       }
 
@@ -165,6 +163,20 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     }
 
     venueDetailsRetryButton.setOnClickListener { viewModel.onRetryClick() }
+  }
+
+  private fun FragmentVenueDetailsBinding.updateViewsOnWebViewError(
+    @StringRes errorMessageRes: Int,
+    @DrawableRes errorDrawableRes: Int
+  ) {
+    venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
+    venueDetailsWebView.isVisible = false
+    val drawable = ContextCompat.getDrawable(requireContext(), errorDrawableRes)
+    collapsedErrorImageView.setImageDrawable(drawable)
+    expandedErrorImageView.setImageDrawable(drawable)
+    expandedErrorTextView.setText(errorMessageRes)
+    venueDetailsWebsiteExpandedErrorGroup.isVisible = true
+    venueDetailsWebsiteCollapsedErrorGroup.isVisible = true
   }
 
   private fun FragmentVenueDetailsBinding.updateErrorGroupsAlpha(bottomSheetSlideOffset: Float) {
@@ -193,6 +205,13 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
     if (viewState is VenueDetailsViewModel.ViewState.Loaded) {
       viewState.websiteUrl?.let(venueDetailsWebView::loadUrl)
+        ?: run {
+          updateViewsOnWebViewError(R.string.no_website, R.drawable.error)
+          expandedGoBackButton.isEnabled = false
+          expandedRefreshButton.isEnabled = false
+          collapsedGoBackButton.isEnabled = false
+          collapsedRefreshButton.isEnabled = false
+        }
       venueDetailsActionsChipGroup.updateActionChips(viewState)
       venueDetailsActionsScrollView.isVisible = viewState.actionsScrollViewVisible
     }

@@ -7,6 +7,9 @@
     <string name="venue_instagram_profile">Venue\'s instagram profile</string>
     <string name="browser_app_was_not_found">Browser app was not found.</string>
     <string name="open_in_browser">Open in browser</string>
+    <string name="error_occurred_try_to_open_in_browser">Error occurred. Try to use \"Open in browser\" action above.</string>
+    <string name="timeout_occurred">Loading timed out after 10 seconds. Try to use \"Open in browser\" action above.</string>
+    <string name="no_website">Venue website is not available.</string>
     <string name="call">Call</string>
     <string name="email">Email</string>
     <string name="facebook">Facebook</string>
