@@ -32,6 +32,21 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     viewModel.observe()
   }
 
+  override fun onDestroyView() {
+    binding.mapView.onDetach()
+    super.onDestroyView()
+  }
+
+  override fun onResume() {
+    super.onResume()
+    binding.mapView.onResume()
+  }
+
+  override fun onPause() {
+    binding.mapView.onPause()
+    super.onPause()
+  }
+
   private fun MapViewModel.observe() {
     isLoading.observe(viewLifecycleOwner, binding.loadingIndicator::isVisible::set)
   }
@@ -43,7 +58,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     fun MapViewModel.onMapUpdated() {
       val pos = position
       Timber.tag("MAP_POS").e(pos.toString())
-
       onMapUpdated(
         boundingBox = boundingBox,
         position = pos,
@@ -58,6 +72,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
           Timber.tag("MAP_POS").e("onScroll")
           return onMapInteraction()
         }
+
         override fun onZoom(event: ZoomEvent?): Boolean {
           Timber.tag("MAP_POS").e("onZoom")
           return onMapInteraction()
