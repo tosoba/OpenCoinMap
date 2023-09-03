@@ -20,6 +20,7 @@ import com.trm.opencoinmap.core.domain.usecase.SendMessageUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.util.RxSchedulers
 import com.trm.opencoinmap.feature.map.model.MapPosition
+import com.trm.opencoinmap.feature.map.model.MapPositionUpdate
 import com.trm.opencoinmap.feature.map.util.MapDefaults
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,8 +55,11 @@ constructor(
   private val boundsRelay = PublishRelay.create<CenteredGridBounds>()
   private val retryRelay = PublishRelay.create<Unit>()
 
-  private val _mapPosition by savedStateHandle.getLiveData(initialValue = MapPosition() to true)
-  val mapPosition: LiveData<Pair<MapPosition, Boolean>> = _mapPosition
+  private val _mapPositionUpdate by
+    savedStateHandle.getLiveData(
+      initialValue = MapPositionUpdate(position = MapPosition(), shouldUpdate = true)
+    )
+  val mapPosition: LiveData<MapPositionUpdate> = _mapPositionUpdate
 
   private val _isLoading = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
@@ -66,11 +70,14 @@ constructor(
   init {
     getInitialMapCenterUseCase()
       .map { (latitude, longitude, zoom) ->
-        MapPosition(latitude = latitude, longitude = longitude, zoom = zoom) to true
+        MapPositionUpdate(
+          position = MapPosition(latitude = latitude, longitude = longitude, zoom = zoom),
+          shouldUpdate = true
+        )
       }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy(onSuccess = _mapPosition::setValue)
+      .subscribeBy(onSuccess = _mapPositionUpdate::setValue)
       .addTo(compositeDisposable)
 
     val coalescedBounds =
@@ -99,9 +106,9 @@ constructor(
       .switchMap { (bounds, query, categories) ->
         getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
       }
+      .doOnNext { if (it is Failed) Timber.e(it.throwable) }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .doOnNext { if (it is Failed) Timber.e(it.throwable) }
       .subscribeBy(
         onNext = {
           _isLoading.value = it is Loading
@@ -114,13 +121,17 @@ constructor(
 
     receiveVenueClickedEventUseCase()
       .map {
-        MapPosition(
-          latitude = it.lat,
-          longitude = it.lon,
-          zoom = _mapPosition.value?.first?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
-        ) to true
+        MapPositionUpdate(
+          position =
+            MapPosition(
+              latitude = it.lat,
+              longitude = it.lon,
+              zoom = _mapPositionUpdate.value?.position?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
+            ),
+          shouldUpdate = true
+        )
       }
-      .subscribeBy(onNext = _mapPosition::setValue, onError = Timber.Forest::e)
+      .subscribeBy(onNext = _mapPositionUpdate::setValue, onError = Timber.Forest::e)
       .addTo(compositeDisposable)
   }
 
@@ -146,7 +157,7 @@ constructor(
   ) {
     sendMessageUseCase(Message.Hidden)
 
-    _mapPosition.value = position to false
+    _mapPositionUpdate.value = MapPositionUpdate(position = position, shouldUpdate = false)
 
     boundsRelay.accept(
       CenteredGridBounds(

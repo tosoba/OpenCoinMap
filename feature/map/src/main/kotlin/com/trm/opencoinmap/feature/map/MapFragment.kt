@@ -69,12 +69,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     addMapListener(
       object : MapListener {
         override fun onScroll(event: ScrollEvent?): Boolean {
-          Timber.tag("MAP_POS").e("onScroll")
+          Timber.tag("MAP_INTERACTION").e("onScroll")
           return onMapInteraction()
         }
 
         override fun onZoom(event: ZoomEvent?): Boolean {
-          Timber.tag("MAP_POS").e("onZoom")
+          Timber.tag("MAP_INTERACTION").e("onZoom")
           return onMapInteraction()
         }
 
