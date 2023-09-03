@@ -17,6 +17,7 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -40,9 +41,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
     fun MapViewModel.onMapUpdated() {
+      val pos = position
+      Timber.tag("MAP_POS").e(pos.toString())
+
       onMapUpdated(
         boundingBox = boundingBox,
-        position = position,
+        position = pos,
         latDivisor = latDivisor,
         lonDivisor = lonDivisor
       )
@@ -50,8 +54,14 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addMapListener(
       object : MapListener {
-        override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
-        override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
+        override fun onScroll(event: ScrollEvent?): Boolean {
+          Timber.tag("MAP_POS").e("onScroll")
+          return onMapInteraction()
+        }
+        override fun onZoom(event: ZoomEvent?): Boolean {
+          Timber.tag("MAP_POS").e("onZoom")
+          return onMapInteraction()
+        }
 
         fun onMapInteraction(): Boolean {
           viewModel.onMapUpdated()
