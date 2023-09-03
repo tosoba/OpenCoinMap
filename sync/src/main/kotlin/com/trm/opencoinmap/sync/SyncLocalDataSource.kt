@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 class SyncLocalDataSource @Inject constructor() : SyncDataSource {
-  private val syncRunning = BehaviorRelay.createDefault(false)
+  private val syncRunning = BehaviorRelay.createDefault(true)
 
   override var isRunning: Boolean
     get() = syncRunning.value ?: false

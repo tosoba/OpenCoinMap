@@ -159,7 +159,7 @@ constructor(
   ): Single<List<MapMarker>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
     val (latSouth, latNorth, lonWest, lonEast) = bounds
-    return waitUntilSyncCompleted()
+    return waitUntilAnyVenuesExitsOrSyncCompleted()
       .andThen(
         boundsDao
           .selectExistsBounds(
@@ -250,12 +250,18 @@ constructor(
       )
   }
 
-  private fun waitUntilSyncCompleted(): Completable =
-    syncDataSource
-      .isRunningObservable()
-      .filter { isRunning -> !isRunning }
-      .firstOrError()
-      .ignoreElement()
+  private fun waitUntilAnyVenuesExitsOrSyncCompleted(): Completable =
+    venueDao.selectCount().flatMapCompletable {
+      if (it > 0) {
+        Completable.complete().doOnComplete { syncDataSource.isRunning = false }
+      } else {
+        syncDataSource
+          .isRunningObservable()
+          .filter { isRunning -> !isRunning }
+          .firstOrError()
+          .ignoreElement()
+      }
+    }
 
   private fun selectCellMarkers(
     gridCells: List<MapBounds>,

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.view.getLiveData
@@ -76,9 +75,6 @@ constructor(
 
     val coalescedBounds =
       boundsRelay
-        .debounce(250L, TimeUnit.MILLISECONDS)
-        .distinctUntilChanged()
-        .doOnNext { Timber.tag("MAP_BOUNDS").e(it.toString()) }
         .flatMap {
           saveMapCenterUseCase(
               MapCenter(latitude = it.centerLat, longitude = it.centerLon, zoom = it.zoom)
@@ -98,6 +94,7 @@ constructor(
         Triple(bounds, query, categories)
       }
       .debounce(500L, TimeUnit.MILLISECONDS)
+      .doOnNext { Timber.tag("MAP_BOUNDS").e(it.toString()) }
       .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
       .switchMap { (bounds, query, categories) ->
         getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)

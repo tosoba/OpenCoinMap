@@ -11,6 +11,8 @@ import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface VenueDao {
+  @Query("SELECT COUNT(*) FROM venue") fun selectCount(): Single<Int>
+
   @Upsert fun upsert(entities: List<VenueEntity>)
 
   @Query(SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS)
@@ -92,13 +94,13 @@ interface VenueDao {
 
   @Query(
     "SELECT * FROM " +
-        "(SELECT category, COUNT(*) AS count FROM venue " +
-        "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
-        "GROUP BY category " +
-        "UNION " +
-        "SELECT category, 0 AS count FROM venue " +
-        "WHERE category NOT IN (SELECT category FROM venue WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon)) " +
-        "ORDER BY category"
+      "(SELECT category, COUNT(*) AS count FROM venue " +
+      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "GROUP BY category " +
+      "UNION " +
+      "SELECT category, 0 AS count FROM venue " +
+      "WHERE category NOT IN (SELECT category FROM venue WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon)) " +
+      "ORDER BY category"
   )
   fun selectCategoriesWithCountInBounds(
     minLat: Double,
@@ -109,16 +111,16 @@ interface VenueDao {
 
   @Query(
     "SELECT * FROM " +
-        "(SELECT category, COUNT(*) AS count FROM venue " +
-        "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
-        "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
-        "GROUP BY category " +
-        "UNION " +
-        "SELECT category, 0 AS count FROM venue " +
-        "WHERE category NOT IN (SELECT category FROM venue " +
-        "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
-        "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)))) " +
-        "ORDER BY category"
+      "(SELECT category, COUNT(*) AS count FROM venue " +
+      "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
+      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
+      "GROUP BY category " +
+      "UNION " +
+      "SELECT category, 0 AS count FROM venue " +
+      "WHERE category NOT IN (SELECT category FROM venue " +
+      "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
+      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)))) " +
+      "ORDER BY category"
   )
   fun selectCategoriesWithCountIn2Bounds(
     minLat1: Double,
