@@ -54,8 +54,8 @@ constructor(
   private val boundsRelay = PublishRelay.create<CenteredGridBounds>()
   private val retryRelay = PublishRelay.create<Unit>()
 
-  private val _mapPosition by savedStateHandle.getLiveData(initialValue = MapPosition())
-  val mapPosition: LiveData<MapPosition> = _mapPosition
+  private val _mapPosition by savedStateHandle.getLiveData(initialValue = MapPosition() to true)
+  val mapPosition: LiveData<Pair<MapPosition, Boolean>> = _mapPosition
 
   private val _isLoading = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
@@ -66,7 +66,7 @@ constructor(
   init {
     getInitialMapCenterUseCase()
       .map { (latitude, longitude, zoom) ->
-        MapPosition(latitude = latitude, longitude = longitude, zoom = zoom)
+        MapPosition(latitude = latitude, longitude = longitude, zoom = zoom) to true
       }
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
@@ -75,7 +75,7 @@ constructor(
 
     val coalescedBounds =
       boundsRelay
-        .flatMap {
+        .concatMap {
           saveMapCenterUseCase(
               MapCenter(latitude = it.centerLat, longitude = it.centerLon, zoom = it.zoom)
             )
@@ -117,8 +117,8 @@ constructor(
         MapPosition(
           latitude = it.lat,
           longitude = it.lon,
-          zoom = _mapPosition.value?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
-        )
+          zoom = _mapPosition.value?.first?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
+        ) to true
       }
       .subscribeBy(onNext = _mapPosition::setValue, onError = Timber.Forest::e)
       .addTo(compositeDisposable)
@@ -146,7 +146,7 @@ constructor(
   ) {
     sendMessageUseCase(Message.Hidden)
 
-    _mapPosition.value = position
+    _mapPosition.value = position to false
 
     boundsRelay.accept(
       CenteredGridBounds(
