@@ -63,14 +63,13 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
       insets
     }
 
-    with(binding.venuesDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
+    with(venuesDragHandleView) { setPadding(paddingLeft, 0, paddingRight, 0) }
 
-    binding.root.viewTreeObserver.addOnGlobalLayoutListener(
+    root.viewTreeObserver.addOnGlobalLayoutListener(
       object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
-          binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
-          val columnsCount =
-            max((binding.root.width.toFloat().toDp(requireContext()) / 220).toInt(), 1)
+          root.viewTreeObserver.removeOnGlobalLayoutListener(this)
+          val columnsCount = max((root.width.toFloat().toDp(requireContext()) / 220).toInt(), 1)
           loadingProgressItemsLayout.root.init(columnsCount)
           venuesRecyclerView.init(columnsCount)
         }
