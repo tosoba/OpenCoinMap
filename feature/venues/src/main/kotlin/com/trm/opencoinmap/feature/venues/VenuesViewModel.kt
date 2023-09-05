@@ -5,6 +5,8 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.rxjava3.cachedIn
 import com.hadilq.liveevent.LiveEvent
@@ -51,19 +53,25 @@ constructor(
   private val _pagingData = MutableLiveData(PagingData.empty<Venue>())
   val pagingData: LiveData<PagingData<Venue>> = _pagingData
 
-  private val _isLoadingProgressLayoutVisible = MutableLiveData(true)
-  val isLoadingProgressLayoutVisible: LiveData<Boolean> = _isLoadingProgressLayoutVisible
+  private val _isLoadingVisible = MutableLiveData(true)
+  val isLoadingVisible: LiveData<Boolean> = _isLoadingVisible
 
-  private val _loadingForNewBoundsFailed = MutableLiveData(false)
-  val loadingForNewBoundsFailed: LiveData<Boolean> = _loadingForNewBoundsFailed
+  private val _isErrorVisible = MutableLiveData(false)
+  val isErrorVisible: LiveData<Boolean> = _isErrorVisible
+
+  private val _isEmptyViewVisible = MutableLiveData(false)
+  val isEmptyViewVisible: LiveData<Boolean> = _isEmptyViewVisible
 
   private val _isVenuesListVisible =
     MediatorLiveData<Boolean>().apply {
-      addSource(_isLoadingProgressLayoutVisible) {
-        value = !it && _loadingForNewBoundsFailed.value == false
+      addSource(_isLoadingVisible) {
+        value = !it && _isErrorVisible.value == false && _isEmptyViewVisible.value == false
       }
-      addSource(_loadingForNewBoundsFailed) {
-        value = !it && _isLoadingProgressLayoutVisible.value == false
+      addSource(_isErrorVisible) {
+        value = !it && _isLoadingVisible.value == false && _isEmptyViewVisible.value == false
+      }
+      addSource(_isEmptyViewVisible) {
+        value = !it && _isLoadingVisible.value == false && _isErrorVisible.value == false
       }
     }
   val isVenuesListVisible: LiveData<Boolean> = _isVenuesListVisible
@@ -108,9 +116,9 @@ constructor(
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
-        _isLoadingProgressLayoutVisible.value = status is MarkersLoadingStatus.InProgress
+        _isLoadingVisible.value = status is MarkersLoadingStatus.InProgress
 
-        _loadingForNewBoundsFailed.value = status is MarkersLoadingStatus.Error
+        _isErrorVisible.value = status is MarkersLoadingStatus.Error
         if (status is MarkersLoadingStatus.Error) Timber.e(status.throwable)
 
         _pagingData.value = pagingData
@@ -130,5 +138,9 @@ constructor(
   override fun onCleared() {
     super.onCleared()
     compositeDisposable.clear()
+  }
+
+  fun onLoadStatesChange(loadStates: CombinedLoadStates, itemCount: Int) {
+    _isEmptyViewVisible.value = loadStates.refresh is LoadState.NotLoading && itemCount == 0
   }
 }

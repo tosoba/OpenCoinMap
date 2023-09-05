@@ -107,9 +107,9 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun RecyclerView.init(columnsCount: Int) {
     layoutManager = GridLayoutManager(requireContext(), columnsCount, RecyclerView.VERTICAL, false)
     adapter = venuesAdapter
-
     addOnScrollIdleListener { binding.toggleScrollUpButtonVisibility() }
     venuesAdapter.addOnPagesUpdatedListener { binding.toggleScrollUpButtonVisibility() }
+    venuesAdapter.addLoadStateListener { viewModel.onLoadStatesChange(it, venuesAdapter.itemCount) }
   }
 
   private fun FragmentVenuesBinding.toggleScrollUpButtonVisibility() {
@@ -119,10 +119,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   }
 
   private fun VenuesViewModel.observeState() {
-    isLoadingProgressLayoutVisible.observe(
-      viewLifecycleOwner,
-      binding.loadingProgressLayout::isVisible::set
-    )
+    isLoadingVisible.observe(viewLifecycleOwner, binding.loadingProgressLayout::isVisible::set)
 
     isVenuesListVisible.observe(viewLifecycleOwner, binding.venuesRecyclerView::isVisible::set)
 
