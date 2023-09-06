@@ -84,7 +84,7 @@ constructor(
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { isRunning ->
         if (isRunning) {
-          Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.InProgress)
+          Flowable.just(PagingData.empty())
         } else {
           Flowable.combineLatest(
               receiveMapBoundsUseCase().toFlowable(BackpressureStrategy.LATEST),
@@ -107,12 +107,10 @@ constructor(
                 )
                 .cachedIn(viewModelScope)
             }
-            .combineLatest(
-              receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST)
-            )
-            .debounce(500L, TimeUnit.MILLISECONDS)
         }
       }
+      .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
+      .debounce(500L, TimeUnit.MILLISECONDS)
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->

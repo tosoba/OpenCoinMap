@@ -24,6 +24,7 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
 import com.trm.opencoinmap.core.common.ext.requireAs
@@ -140,7 +141,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           if (currentPageUrl != request.url.toString()) return
           updateViewsOnWebViewError(
             R.string.error_occurred_try_to_open_in_browser,
-            R.drawable.error
+            commonR.drawable.error
           )
         }
       }
@@ -206,7 +207,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     if (viewState is VenueDetailsViewModel.ViewState.Loaded) {
       viewState.websiteUrl?.let(venueDetailsWebView::loadUrl)
         ?: run {
-          updateViewsOnWebViewError(R.string.no_website, R.drawable.error)
+          updateViewsOnWebViewError(R.string.no_website, commonR.drawable.error)
           expandedGoBackButton.isEnabled = false
           expandedRefreshButton.isEnabled = false
           collapsedGoBackButton.isEnabled = false

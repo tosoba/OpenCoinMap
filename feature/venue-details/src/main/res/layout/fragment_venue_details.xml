@@ -125,6 +125,7 @@
         android:id="@+id/expanded_error_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
         android:text="@string/error_occurred_try_to_open_in_browser"
         android:textAlignment="center"
         android:textSize="20sp"

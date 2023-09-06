@@ -55,6 +55,8 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
       findParentFragmentOfType<BottomSheetController>()
         ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
         ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
+          binding.updateErrorGroupsAlpha(bottomSheetSlideOffset)
+
           if (searchViewsHeightPx != null) {
             updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
           }
@@ -120,8 +122,11 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
   private fun VenuesViewModel.observeState() {
     isLoadingVisible.observe(viewLifecycleOwner, binding.loadingProgressLayout::isVisible::set)
-
     isVenuesListVisible.observe(viewLifecycleOwner, binding.venuesRecyclerView::isVisible::set)
+    isErrorVisible.observe(viewLifecycleOwner) {
+      binding.venuesCollapsedErrorGroup.isVisible = it
+      binding.venuesExpandedErrorGroup.isVisible = it
+    }
 
     pagingData.observe(viewLifecycleOwner) {
       venuesAdapter.submitData(viewLifecycleOwner.lifecycle, it)
@@ -130,6 +135,8 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
 
   private fun VenuesViewModel.observeEvents() {
     sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
+      binding.updateErrorGroupsAlpha(offset)
+
       val searchBarHeightPx =
         findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx
           ?: return@observe
@@ -145,5 +152,14 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
       venuesContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
         topMargin = (((systemWindowTopInsetPx ?: 0) + searchBarHeightPx) * offset).roundToInt()
       }
+  }
+
+  private fun FragmentVenuesBinding.updateErrorGroupsAlpha(bottomSheetSlideOffset: Float) {
+    venuesCollapsedErrorGroup.referencedIds.forEach {
+      binding.root.findViewById<View>(it).alpha = 1f - bottomSheetSlideOffset
+    }
+    venuesExpandedErrorGroup.referencedIds.forEach {
+      binding.root.findViewById<View>(it).alpha = bottomSheetSlideOffset
+    }
   }
 }
