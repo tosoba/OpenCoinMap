@@ -46,15 +46,15 @@
     </com.facebook.shimmer.ShimmerFrameLayout>
 
     <androidx.constraintlayout.widget.Group
-        android:id="@+id/venues_collapsed_error_group"
+        android:id="@+id/venues_collapsed_info_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="collapsed_error_image_view,collapsed_error_text_view"
+        app:constraint_referenced_ids="collapsed_info_image_view,collapsed_info_text_view"
         tools:visibility="visible" />
 
     <ImageView
-        android:id="@+id/collapsed_error_image_view"
+        android:id="@+id/collapsed_info_image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
@@ -66,7 +66,7 @@
         app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_view" />
 
     <TextView
-        android:id="@+id/collapsed_error_text_view"
+        android:id="@+id/collapsed_info_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -74,34 +74,34 @@
         android:layout_marginEnd="15dp"
         android:text="@string/venues_error_occurred"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/collapsed_error_image_view"
+        app:layout_constraintBottom_toBottomOf="@id/collapsed_info_image_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/collapsed_error_image_view"
-        app:layout_constraintTop_toTopOf="@id/collapsed_error_image_view" />
+        app:layout_constraintStart_toEndOf="@id/collapsed_info_image_view"
+        app:layout_constraintTop_toTopOf="@id/collapsed_info_image_view" />
 
     <androidx.constraintlayout.widget.Group
-        android:id="@+id/venues_expanded_error_group"
+        android:id="@+id/venues_expanded_info_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="expanded_error_image_view,expanded_error_text_view"
+        app:constraint_referenced_ids="expanded_info_image_view,expanded_info_text_view"
         tools:visibility="visible" />
 
     <ImageView
-        android:id="@+id/expanded_error_image_view"
+        android:id="@+id/expanded_info_image_view"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginBottom="10dp"
         android:contentDescription="@string/error_occurred"
         android:src="@drawable/error"
-        app:layout_constraintBottom_toTopOf="@id/expanded_error_text_view"
+        app:layout_constraintBottom_toTopOf="@id/expanded_info_text_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/venues_drag_handle_view"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:id="@+id/expanded_error_text_view"
+        android:id="@+id/expanded_info_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
@@ -111,7 +111,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expanded_error_image_view" />
+        app:layout_constraintTop_toBottomOf="@id/expanded_info_image_view" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/scroll_up_button"

@@ -6,12 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.GridLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.addOnScrollIdleListener
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
@@ -55,7 +57,7 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
       findParentFragmentOfType<BottomSheetController>()
         ?.run { bottomSheetContainerTopMarginPx to bottomSheetSlideOffset }
         ?.let { (searchViewsHeightPx, bottomSheetSlideOffset) ->
-          binding.updateErrorGroupsAlpha(bottomSheetSlideOffset)
+          binding.updateInfoGroupsAlpha(bottomSheetSlideOffset)
 
           if (searchViewsHeightPx != null) {
             updateContainerLayoutParams(searchViewsHeightPx, bottomSheetSlideOffset)
@@ -123,19 +125,43 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun VenuesViewModel.observeState() {
     isLoadingVisible.observe(viewLifecycleOwner, binding.loadingProgressLayout::isVisible::set)
     isVenuesListVisible.observe(viewLifecycleOwner, binding.venuesRecyclerView::isVisible::set)
-    isErrorVisible.observe(viewLifecycleOwner) {
-      binding.venuesCollapsedErrorGroup.isVisible = it
-      binding.venuesExpandedErrorGroup.isVisible = it
-    }
+    isErrorVisible.observe(viewLifecycleOwner) { binding.onErrorVisibleChanged(it) }
+    isEmptyViewVisible.observe(viewLifecycleOwner) { binding.onEmptyViewVisibleChanged(it) }
 
     pagingData.observe(viewLifecycleOwner) {
       venuesAdapter.submitData(viewLifecycleOwner.lifecycle, it)
     }
   }
 
+  private fun FragmentVenuesBinding.onErrorVisibleChanged(isVisible: Boolean) {
+    venuesCollapsedInfoGroup.isVisible = isVisible
+    venuesExpandedInfoGroup.isVisible = isVisible
+    collapsedInfoImageView.setImageDrawable(
+      ContextCompat.getDrawable(requireContext(), commonR.drawable.error)
+    )
+    expandedInfoImageView.setImageDrawable(
+      ContextCompat.getDrawable(requireContext(), commonR.drawable.error)
+    )
+    collapsedInfoTextView.setText(R.string.venues_error_occurred)
+    expandedInfoTextView.setText(R.string.venues_error_occurred)
+  }
+
+  private fun FragmentVenuesBinding.onEmptyViewVisibleChanged(isVisible: Boolean) {
+    venuesCollapsedInfoGroup.isVisible = isVisible
+    venuesExpandedInfoGroup.isVisible = isVisible
+    collapsedInfoImageView.setImageDrawable(
+      ContextCompat.getDrawable(requireContext(), commonR.drawable.no_results)
+    )
+    expandedInfoImageView.setImageDrawable(
+      ContextCompat.getDrawable(requireContext(), commonR.drawable.no_results)
+    )
+    collapsedInfoTextView.setText(R.string.no_venues_found)
+    expandedInfoTextView.setText(R.string.no_venues_found)
+  }
+
   private fun VenuesViewModel.observeEvents() {
     sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
-      binding.updateErrorGroupsAlpha(offset)
+      binding.updateInfoGroupsAlpha(offset)
 
       val searchBarHeightPx =
         findParentFragmentOfType<BottomSheetController>()?.bottomSheetContainerTopMarginPx
@@ -154,11 +180,11 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
       }
   }
 
-  private fun FragmentVenuesBinding.updateErrorGroupsAlpha(bottomSheetSlideOffset: Float) {
-    venuesCollapsedErrorGroup.referencedIds.forEach {
+  private fun FragmentVenuesBinding.updateInfoGroupsAlpha(bottomSheetSlideOffset: Float) {
+    venuesCollapsedInfoGroup.referencedIds.forEach {
       binding.root.findViewById<View>(it).alpha = 1f - bottomSheetSlideOffset
     }
-    venuesExpandedErrorGroup.referencedIds.forEach {
+    venuesExpandedInfoGroup.referencedIds.forEach {
       binding.root.findViewById<View>(it).alpha = bottomSheetSlideOffset
     }
   }

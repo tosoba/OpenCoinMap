@@ -59,7 +59,20 @@ constructor(
   private val _isErrorVisible = MutableLiveData(false)
   val isErrorVisible: LiveData<Boolean> = _isErrorVisible
 
-  private val _isEmptyViewVisible = MutableLiveData(false)
+  private val _isPagingEmpty = MutableLiveData(false)
+
+  private val _isEmptyViewVisible =
+    MediatorLiveData<Boolean>().apply {
+      addSource(_isLoadingVisible) {
+        value = !it && _isErrorVisible.value == false && _isPagingEmpty.value == true
+      }
+      addSource(_isErrorVisible) {
+        value = !it && _isLoadingVisible.value == false && _isPagingEmpty.value == true
+      }
+      addSource(_isPagingEmpty) {
+        value = it && _isLoadingVisible.value == false && _isErrorVisible.value == false
+      }
+    }
   val isEmptyViewVisible: LiveData<Boolean> = _isEmptyViewVisible
 
   private val _isVenuesListVisible =
@@ -70,8 +83,8 @@ constructor(
       addSource(_isErrorVisible) {
         value = !it && _isLoadingVisible.value == false && _isEmptyViewVisible.value == false
       }
-      addSource(_isEmptyViewVisible) {
-        value = !it && _isLoadingVisible.value == false && _isErrorVisible.value == false
+      addSource(_isPagingEmpty) {
+        value = !it && _isLoadingVisible.value == false && _isPagingEmpty.value == false
       }
     }
   val isVenuesListVisible: LiveData<Boolean> = _isVenuesListVisible
@@ -139,6 +152,6 @@ constructor(
   }
 
   fun onLoadStatesChange(loadStates: CombinedLoadStates, itemCount: Int) {
-    _isEmptyViewVisible.value = loadStates.refresh is LoadState.NotLoading && itemCount == 0
+    _isPagingEmpty.value = loadStates.refresh is LoadState.NotLoading && itemCount == 0
   }
 }
