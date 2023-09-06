@@ -34,9 +34,6 @@ constructor(
   private val _viewState = MutableLiveData<ViewState>(ViewState.Loading)
   val viewState: LiveData<ViewState> = _viewState
 
-  val venueWebsite: String?
-    get() = viewState.value?.safeAs<ViewState.Loaded>()?.websiteUrl
-
   private val _sheetSlideOffset = LiveEvent<Float>()
   val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
 
