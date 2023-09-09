@@ -56,35 +56,55 @@ constructor(
   private val _isLoadingVisible = MutableLiveData(true)
   val isLoadingVisible: LiveData<Boolean> = _isLoadingVisible
 
-  private val _isErrorVisible = MutableLiveData(false)
-  val isErrorVisible: LiveData<Boolean> = _isErrorVisible
-
+  private val _loadingErrorOccurred = MutableLiveData(false)
   private val _isPagingEmpty = MutableLiveData(false)
 
-  private val _isEmptyViewVisible =
-    MediatorLiveData<Boolean>().apply {
+  private val _venuesInfoState =
+    MediatorLiveData<VenuesInfoState>(VenuesInfoState.Hidden).apply {
       addSource(_isLoadingVisible) {
-        value = !it && _isErrorVisible.value == false && _isPagingEmpty.value == true
+        value =
+          when {
+            _loadingErrorOccurred.value == true -> VenuesInfoState.Error
+            !it && _isPagingEmpty.value == true -> VenuesInfoState.Empty
+            else -> VenuesInfoState.Hidden
+          }
       }
-      addSource(_isErrorVisible) {
-        value = !it && _isLoadingVisible.value == false && _isPagingEmpty.value == true
+      addSource(_loadingErrorOccurred) {
+        value =
+          when {
+            it -> VenuesInfoState.Error
+            _isLoadingVisible.value == false && _isPagingEmpty.value == true ->
+              VenuesInfoState.Empty
+            else -> VenuesInfoState.Hidden
+          }
       }
       addSource(_isPagingEmpty) {
-        value = it && _isLoadingVisible.value == false && _isErrorVisible.value == false
+        value =
+          when {
+            _isLoadingVisible.value == false && it -> VenuesInfoState.Empty
+            _loadingErrorOccurred.value == true -> VenuesInfoState.Error
+            else -> VenuesInfoState.Hidden
+          }
       }
     }
-  val isEmptyViewVisible: LiveData<Boolean> = _isEmptyViewVisible
+  val venuesInfoState: LiveData<VenuesInfoState> = _venuesInfoState
 
   private val _isVenuesListVisible =
     MediatorLiveData<Boolean>().apply {
       addSource(_isLoadingVisible) {
-        value = !it && _isErrorVisible.value == false && _isEmptyViewVisible.value == false
+        value =
+          !it &&
+            _loadingErrorOccurred.value == false &&
+            _venuesInfoState.value == VenuesInfoState.Hidden
       }
-      addSource(_isErrorVisible) {
-        value = !it && _isLoadingVisible.value == false && _isEmptyViewVisible.value == false
+      addSource(_loadingErrorOccurred) {
+        value =
+          !it &&
+            _isLoadingVisible.value == false &&
+            _venuesInfoState.value == VenuesInfoState.Hidden
       }
       addSource(_isPagingEmpty) {
-        value = !it && _isLoadingVisible.value == false && _isPagingEmpty.value == false
+        value = !it && _isLoadingVisible.value == false && _loadingErrorOccurred.value == false
       }
     }
   val isVenuesListVisible: LiveData<Boolean> = _isVenuesListVisible
@@ -97,7 +117,7 @@ constructor(
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { isRunning ->
         if (isRunning) {
-          Flowable.just(PagingData.empty())
+          Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.InProgress)
         } else {
           Flowable.combineLatest(
               receiveMapBoundsUseCase().toFlowable(BackpressureStrategy.LATEST),
@@ -120,16 +140,18 @@ constructor(
                 )
                 .cachedIn(viewModelScope)
             }
+            .combineLatest(
+              receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST)
+            )
         }
       }
-      .combineLatest(receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST))
       .debounce(500L, TimeUnit.MILLISECONDS)
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy { (pagingData, status) ->
         _isLoadingVisible.value = status is MarkersLoadingStatus.InProgress
 
-        _isErrorVisible.value = status is MarkersLoadingStatus.Error
+        _loadingErrorOccurred.value = status is MarkersLoadingStatus.Error
         if (status is MarkersLoadingStatus.Error) Timber.e(status.throwable)
 
         _pagingData.value = pagingData

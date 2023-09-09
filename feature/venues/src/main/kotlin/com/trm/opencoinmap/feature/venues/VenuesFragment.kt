@@ -13,7 +13,6 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.addOnScrollIdleListener
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
@@ -125,38 +124,21 @@ class VenuesFragment : Fragment(R.layout.fragment_venues) {
   private fun VenuesViewModel.observeState() {
     isLoadingVisible.observe(viewLifecycleOwner, binding.loadingProgressLayout::isVisible::set)
     isVenuesListVisible.observe(viewLifecycleOwner, binding.venuesRecyclerView::isVisible::set)
-    isErrorVisible.observe(viewLifecycleOwner) { binding.onErrorVisibleChanged(it) }
-    isEmptyViewVisible.observe(viewLifecycleOwner) { binding.onEmptyViewVisibleChanged(it) }
-
+    venuesInfoState.observe(viewLifecycleOwner) { binding.onVenueInfoStateChanged(it) }
     pagingData.observe(viewLifecycleOwner) {
       venuesAdapter.submitData(viewLifecycleOwner.lifecycle, it)
     }
   }
 
-  private fun FragmentVenuesBinding.onErrorVisibleChanged(isVisible: Boolean) {
-    venuesCollapsedInfoGroup.isVisible = isVisible
-    venuesExpandedInfoGroup.isVisible = isVisible
-    collapsedInfoImageView.setImageDrawable(
-      ContextCompat.getDrawable(requireContext(), commonR.drawable.error)
-    )
-    expandedInfoImageView.setImageDrawable(
-      ContextCompat.getDrawable(requireContext(), commonR.drawable.error)
-    )
-    collapsedInfoTextView.setText(R.string.venues_error_occurred)
-    expandedInfoTextView.setText(R.string.venues_error_occurred)
-  }
-
-  private fun FragmentVenuesBinding.onEmptyViewVisibleChanged(isVisible: Boolean) {
-    venuesCollapsedInfoGroup.isVisible = isVisible
-    venuesExpandedInfoGroup.isVisible = isVisible
-    collapsedInfoImageView.setImageDrawable(
-      ContextCompat.getDrawable(requireContext(), commonR.drawable.no_results)
-    )
-    expandedInfoImageView.setImageDrawable(
-      ContextCompat.getDrawable(requireContext(), commonR.drawable.no_results)
-    )
-    collapsedInfoTextView.setText(R.string.no_venues_found)
-    expandedInfoTextView.setText(R.string.no_venues_found)
+  private fun FragmentVenuesBinding.onVenueInfoStateChanged(venuesInfoState: VenuesInfoState) {
+    venuesCollapsedInfoGroup.isVisible = venuesInfoState.isVisible
+    venuesExpandedInfoGroup.isVisible = venuesInfoState.isVisible
+    ContextCompat.getDrawable(requireContext(), venuesInfoState.drawableRes).also {
+      collapsedInfoImageView.setImageDrawable(it)
+      expandedInfoImageView.setImageDrawable(it)
+    }
+    collapsedInfoTextView.setText(venuesInfoState.textRes)
+    expandedInfoTextView.setText(venuesInfoState.textRes)
   }
 
   private fun VenuesViewModel.observeEvents() {
