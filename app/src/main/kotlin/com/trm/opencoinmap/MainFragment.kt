@@ -1,11 +1,14 @@
 package com.trm.opencoinmap
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
@@ -33,6 +36,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -141,12 +145,20 @@ class MainFragment :
 
   private val viewModel: MainViewModel by viewModels()
 
+  private val requestLocationPermissionsLauncher =
+    registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+      // Handle Permission granted/rejected
+      permissions.values.all { it }
+    }
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
     binding.showPlacesSheetFab.setOnClickListener {
       sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
     }
+
+    binding.userLocationFab.setOnClickListener { onUserLocationClick() }
 
     initBottomSheet(savedInstanceState)
     binding.initSearchViews()
@@ -334,6 +346,37 @@ class MainFragment :
     webViewScrollableUpwards.observe(viewLifecycleOwner) { isScrollable ->
       bottomSheetBehavior.isLocked =
         if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) isScrollable else false
+    }
+  }
+
+  private fun onUserLocationClick() {
+    when {
+      ContextCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.ACCESS_COARSE_LOCATION
+      ) == PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(
+          requireContext(),
+          Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED -> {
+        // You can use the API that requires the permission.
+      }
+      shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) ||
+        shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+        // In an educational UI, explain to the user why your app requires this
+        // permission for a specific feature to behave as expected, and what
+        // features are disabled if it's declined. In this UI, include a
+        // "cancel" or "no thanks" button that lets the user continue
+        // using your app without granting the permission.
+      }
+      else -> {
+        requestLocationPermissionsLauncher.launch(
+          arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+          )
+        )
+      }
     }
   }
 }
