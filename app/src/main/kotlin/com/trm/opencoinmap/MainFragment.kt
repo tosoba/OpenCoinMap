@@ -147,8 +147,11 @@ class MainFragment :
 
   private val requestLocationPermissionsLauncher =
     registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-      // Handle Permission granted/rejected
-      permissions.values.all { it }
+      if (permissions.values.all { it }) {
+        viewModel.onLocationPermissionGranted()
+      } else {
+        // TODO: show snackbar with go to settings button
+      }
     }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -359,10 +362,11 @@ class MainFragment :
           requireContext(),
           Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED -> {
-        // You can use the API that requires the permission.
+        viewModel.onLocationPermissionGranted()
       }
       shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) ||
         shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+        // TODO: show a snackbar with rationale
         // In an educational UI, explain to the user why your app requires this
         // permission for a specific feature to behave as expected, and what
         // features are disabled if it's declined. In this UI, include a

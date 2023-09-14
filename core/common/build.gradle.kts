@@ -11,6 +11,7 @@ dependencies {
   implementation(libs.google.material)
 
   implementation(libs.osmdroid)
+  implementation(libs.play.services.location)
 
   api(libs.rx.android)
   api(libs.rx.java)

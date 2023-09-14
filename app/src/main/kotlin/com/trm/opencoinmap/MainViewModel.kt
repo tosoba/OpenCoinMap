@@ -153,6 +153,8 @@ constructor(
     _bottomSheetVenueName.value = venueName
   }
 
+  fun onLocationPermissionGranted() {}
+
   override fun onCleared() {
     super.onCleared()
     searchQuery.removeObserver(searchQueryObserver)
