@@ -63,7 +63,7 @@ interface VenueDao {
     "SELECT * FROM venue " +
       "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
       "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
-      "AND (:query = '' OR LOWER(name) LIKE :query) " +
+      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
       "AND (:categoriesCount = 0 OR category IN (:categories)) " +
       "ORDER BY CASE WHEN LOWER(name) LIKE LOWER(:query) || '%' THEN 1 ELSE 2 END, LOWER(name)"
   )
