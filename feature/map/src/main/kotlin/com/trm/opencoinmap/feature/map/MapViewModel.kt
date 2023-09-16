@@ -12,6 +12,7 @@ import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetInitialMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveUserLocationUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueQueryUseCase
 import com.trm.opencoinmap.core.domain.usecase.SaveMapCenterUseCase
@@ -48,6 +49,7 @@ constructor(
   private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
   receiveCategoriesUseCase: ReceiveCategoriesUseCase,
+  receiveUserLocationUseCase: ReceiveUserLocationUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
@@ -66,6 +68,9 @@ constructor(
 
   private val _markersInBounds = MutableLiveData(emptyList<MapMarker>())
   val markersInBounds: LiveData<List<MapMarker>> = _markersInBounds
+
+  private val _userLocation = MutableLiveData<LatLng>()
+  val userLocation: LiveData<LatLng> = _userLocation
 
   init {
     getInitialMapCenterUseCase()
@@ -132,6 +137,10 @@ constructor(
         )
       }
       .subscribeBy(onNext = _mapPositionUpdate::setValue, onError = Timber.Forest::e)
+      .addTo(compositeDisposable)
+
+    receiveUserLocationUseCase()
+      .subscribeBy(onNext = _userLocation::setValue)
       .addTo(compositeDisposable)
   }
 

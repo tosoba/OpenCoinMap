@@ -1,8 +1,11 @@
 package com.trm.opencoinmap
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -147,10 +150,9 @@ class MainFragment :
 
   private val requestLocationPermissionsLauncher =
     registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-      if (permissions.values.all { it }) {
-        viewModel.onLocationPermissionGranted()
-      } else {
-        // TODO: show snackbar with go to settings button
+      viewModel.run {
+        if (permissions.values.all { it }) onLocationPermissionGranted()
+        else onLocationPermissionDenied()
       }
     }
 
@@ -161,8 +163,6 @@ class MainFragment :
       sheetController.setState(BottomSheetBehavior.STATE_COLLAPSED)
     }
 
-    binding.userLocationFab.setOnClickListener { onUserLocationClick() }
-
     initBottomSheet(savedInstanceState)
     binding.initSearchViews()
 
@@ -170,6 +170,8 @@ class MainFragment :
 
     lifecycle.addObserver(snackbarMessageObserver)
     viewModel.observeEvents()
+
+    binding.userLocationFab.setOnClickListener { onUserLocationClick() }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -350,6 +352,15 @@ class MainFragment :
       bottomSheetBehavior.isLocked =
         if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) isScrollable else false
     }
+
+    isLocationLoading.observe(viewLifecycleOwner) { binding.userLocationFab.isEnabled = !it }
+
+    goToAppSettings.observe(viewLifecycleOwner) {
+      startActivity(
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+          .setData(Uri.fromParts("package", requireContext().packageName, null))
+      )
+    }
   }
 
   private fun onUserLocationClick() {
@@ -366,12 +377,7 @@ class MainFragment :
       }
       shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) ||
         shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-        // TODO: show a snackbar with rationale
-        // In an educational UI, explain to the user why your app requires this
-        // permission for a specific feature to behave as expected, and what
-        // features are disabled if it's declined. In this UI, include a
-        // "cancel" or "no thanks" button that lets the user continue
-        // using your app without granting the permission.
+        viewModel.onLocationPermissionDenied()
       }
       else -> {
         requestLocationPermissionsLauncher.launch(

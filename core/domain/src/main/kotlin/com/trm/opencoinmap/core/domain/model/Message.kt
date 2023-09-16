@@ -2,7 +2,7 @@ package com.trm.opencoinmap.core.domain.model
 
 sealed interface Message {
   object Hidden : Message
-  data class Shown(val textResId: Int, val length: Length, val action: Action?) : Message
+  data class Shown(val textResId: Int, val length: Length, val action: Action? = null) : Message
 
   enum class Length {
     SHORT,

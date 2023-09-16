@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
+import com.trm.opencoinmap.core.domain.model.LatLng
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
 import com.trm.opencoinmap.feature.map.util.*
@@ -17,7 +18,7 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
-import timber.log.Timber
+import org.osmdroid.views.overlay.Marker
 
 @AndroidEntryPoint
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -56,11 +57,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     val (latDivisor, lonDivisor) = resources.configuration.calculateLatLonDivisors()
     fun MapViewModel.onMapUpdated() {
-      val pos = position
-      Timber.tag("MAP_POS").e(pos.toString())
       onMapUpdated(
         boundingBox = boundingBox,
-        position = pos,
+        position = position,
         latDivisor = latDivisor,
         lonDivisor = lonDivisor
       )
@@ -68,15 +67,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     addMapListener(
       object : MapListener {
-        override fun onScroll(event: ScrollEvent?): Boolean {
-          Timber.tag("MAP_INTERACTION").e("onScroll")
-          return onMapInteraction()
-        }
-
-        override fun onZoom(event: ZoomEvent?): Boolean {
-          Timber.tag("MAP_INTERACTION").e("onZoom")
-          return onMapInteraction()
-        }
+        override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
+        override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
         fun onMapInteraction(): Boolean {
           viewModel.onMapUpdated()
@@ -93,8 +85,33 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       firstPosition = false
     }
 
-    val venueDrawable =
-      requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
+    var userLocation: LatLng? = null
+    val userLocationMarkerDrawable by
+      lazy(LazyThreadSafetyMode.NONE) {
+        requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.user_location_marker))
+      }
+
+    fun MapView.userLocationMarker(location: LatLng): Marker =
+      userLocationMarker(location, userLocationMarkerDrawable)
+
+    viewModel.userLocation.observe(viewLifecycleOwner) { location ->
+      userLocation = location
+      overlays.add(
+        userLocationMarker(location).also { marker ->
+          overlays.add(marker)
+          controller.animateTo(
+            marker.position,
+            maxOf(MapDefaults.VENUE_LOCATION_ZOOM, zoomLevelDouble),
+            MapDefaults.ANIMATION_DURATION_MS
+          )
+        }
+      )
+    }
+
+    val venueDrawable by
+      lazy(LazyThreadSafetyMode.NONE) {
+        requireNotNull(ContextCompat.getDrawable(requireContext(), R.drawable.venue_marker))
+      }
     viewModel.markersInBounds.observe(viewLifecycleOwner) { markers ->
       markerClusterer.items.clear()
       markerClusterer.invalidate()
@@ -122,6 +139,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         }
       }
       overlays.add(markerClusterer)
+      userLocation?.let { overlays.add(userLocationMarker(it)) }
       addCopyrightOverlay()
 
       invalidate()

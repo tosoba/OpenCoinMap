@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import com.trm.opencoinmap.core.common.ext.toPx
+import com.trm.opencoinmap.core.domain.model.LatLng
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
@@ -83,6 +84,18 @@ internal var MapView.position: MapPosition
       orientation = mapOrientation
     )
 
+internal fun MapView.userLocationMarker(latLng: LatLng, drawable: Drawable): Marker =
+  NonDefaultClickableMarker(this).apply {
+    position = GeoPoint(latLng.latitude, latLng.longitude)
+    icon = drawable
+    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+    infoWindow = null
+    setOnMarkerClickListener { _, _ ->
+      controller.animateTo(position, zoomLevelDouble, MapDefaults.ANIMATION_DURATION_MS)
+      true
+    }
+  }
+
 internal fun MapView.venueMarker(
   marker: MapMarker.SingleVenue,
   drawable: Drawable,
@@ -94,11 +107,7 @@ internal fun MapView.venueMarker(
     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     infoWindow = null
     setOnMarkerClickListener { _, _ ->
-      controller.animateTo(
-        GeoPoint(marker.venue.lat, marker.venue.lon),
-        zoomLevelDouble,
-        MapDefaults.ANIMATION_DURATION_MS
-      )
+      controller.animateTo(position, zoomLevelDouble, MapDefaults.ANIMATION_DURATION_MS)
       onClick(marker.venue)
       true
     }

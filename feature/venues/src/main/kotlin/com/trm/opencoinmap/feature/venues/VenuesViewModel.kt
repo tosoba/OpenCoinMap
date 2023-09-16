@@ -1,5 +1,6 @@
 package com.trm.opencoinmap.feature.venues
 
+import android.location.Location
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,8 +9,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
+import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
 import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.domain.model.LatLng
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
@@ -18,6 +21,7 @@ import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
+import com.trm.opencoinmap.core.domain.usecase.ReceiveUserLocationUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueQueryUseCase
 import com.trm.opencoinmap.core.domain.usecase.SendVenueClickedEventUseCase
 import com.trm.opencoinmap.core.domain.util.RxSchedulers
@@ -46,12 +50,13 @@ constructor(
   private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
   receiveCategoriesUseCase: ReceiveCategoriesUseCase,
+  receiveUserLocationUseCase: ReceiveUserLocationUseCase,
   schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
-  private val _pagingData = MutableLiveData(PagingData.empty<Venue>())
-  val pagingData: LiveData<PagingData<Venue>> = _pagingData
+  private val _pagingData = MutableLiveData(PagingData.empty<VenueListItem>())
+  val pagingData: LiveData<PagingData<VenueListItem>> = _pagingData
 
   private val _isLoadingVisible = MutableLiveData(true)
   val isLoadingVisible: LiveData<Boolean> = _isLoadingVisible
@@ -117,10 +122,11 @@ constructor(
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { isRunning ->
         if (isRunning) {
-          Flowable.just(PagingData.empty<Venue>() to MarkersLoadingStatus.InProgress)
+          Flowable.just(PagingData.empty<VenueListItem>() to MarkersLoadingStatus.InProgress)
         } else {
-          Flowable.combineLatest(
-              receiveMapBoundsUseCase().toFlowable(BackpressureStrategy.LATEST),
+          receiveMapBoundsUseCase()
+            .toFlowable(BackpressureStrategy.LATEST)
+            .combineLatest(
               receiveVenueQueryUseCase()
                 .startWithItem("")
                 .distinctUntilChanged()
@@ -128,17 +134,39 @@ constructor(
               receiveCategoriesUseCase()
                 .startWithItem(emptyList())
                 .distinctUntilChanged()
-                .toFlowable(BackpressureStrategy.LATEST),
-            ) { bounds, query, categories ->
-              Triple(bounds, query, categories)
-            }
+                .toFlowable(BackpressureStrategy.LATEST)
+            )
             .switchMap { (bounds, query, categories) ->
-              getVenuesPagingInBoundsUseCase(
-                  mapBounds = bounds,
-                  query = query,
-                  categories = categories
-                )
-                .cachedIn(viewModelScope)
+              Flowable.combineLatest(
+                getVenuesPagingInBoundsUseCase(bounds, query, categories).cachedIn(viewModelScope),
+                receiveUserLocationUseCase()
+                  .map<UserLocation>(UserLocation::Found)
+                  .startWithItem(UserLocation.Empty)
+                  .toFlowable(BackpressureStrategy.LATEST)
+              ) { paging, userLocation ->
+                paging.map { venue ->
+                  VenueListItem(
+                    venue = venue,
+                    distanceMeters =
+                      when (userLocation) {
+                        UserLocation.Empty -> {
+                          null
+                        }
+                        is UserLocation.Found -> {
+                          val results = FloatArray(1)
+                          Location.distanceBetween(
+                            venue.lat,
+                            venue.lon,
+                            userLocation.location.latitude,
+                            userLocation.location.longitude,
+                            results
+                          )
+                          results.firstOrNull()
+                        }
+                      }?.toDouble()
+                  )
+                }
+              }
             }
             .combineLatest(
               receiveMarkersLoadingStatusUseCase().toFlowable(BackpressureStrategy.LATEST)
@@ -148,13 +176,13 @@ constructor(
       .debounce(500L, TimeUnit.MILLISECONDS)
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
-      .subscribeBy { (pagingData, status) ->
+      .subscribeBy { (paging, status) ->
         _isLoadingVisible.value = status is MarkersLoadingStatus.InProgress
 
         _loadingErrorOccurred.value = status is MarkersLoadingStatus.Error
         if (status is MarkersLoadingStatus.Error) Timber.e(status.throwable)
 
-        _pagingData.value = pagingData
+        _pagingData.value = paging
       }
       .addTo(compositeDisposable)
 
@@ -175,5 +203,10 @@ constructor(
 
   fun onLoadStatesChange(loadStates: CombinedLoadStates, itemCount: Int) {
     _isPagingEmpty.value = loadStates.refresh is LoadState.NotLoading && itemCount == 0
+  }
+
+  sealed interface UserLocation {
+    object Empty : UserLocation
+    data class Found(val location: LatLng) : UserLocation
   }
 }

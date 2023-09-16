@@ -9,13 +9,13 @@ import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.feature.venues.databinding.ItemVenueBinding
 
 internal class VenuesAdapter(private val onItemClick: (Venue) -> Unit) :
-  PagingDataAdapter<Venue, VenuesAdapter.ViewHolder>(
+  PagingDataAdapter<VenueListItem, VenuesAdapter.ViewHolder>(
     diffCallback =
-      object : DiffUtil.ItemCallback<Venue>() {
-        override fun areItemsTheSame(oldItem: Venue, newItem: Venue): Boolean =
-          oldItem.id == newItem.id
+      object : DiffUtil.ItemCallback<VenueListItem>() {
+        override fun areItemsTheSame(oldItem: VenueListItem, newItem: VenueListItem): Boolean =
+          oldItem.venue.id == newItem.venue.id
 
-        override fun areContentsTheSame(oldItem: Venue, newItem: Venue): Boolean =
+        override fun areContentsTheSame(oldItem: VenueListItem, newItem: VenueListItem): Boolean =
           oldItem == newItem
       }
   ) {
@@ -29,12 +29,17 @@ internal class VenuesAdapter(private val onItemClick: (Venue) -> Unit) :
   inner class ViewHolder(
     private val binding: ItemVenueBinding,
   ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(venue: Venue) {
+    fun bind(item: VenueListItem) {
       with(binding) {
-        venueLetterIcon.letter = venue.name.first().toString()
-        venueNameTextView.text = venue.name
-        venueCategoryTextView.text = venue.category
-        root.setOnClickListener { onItemClick(venue) }
+        venueLetterIcon.letter = item.venue.name.first().toString()
+        venueNameTextView.text = item.venue.name
+        venueCategoryTextView.text = item.venue.category
+        item.distanceMeters?.let {
+          venueDistanceTextView.text =
+            if (it > 1_000.0) "${String.format("%.1f", it / 1_000.0)} km\naway"
+            else "${String.format("%.0f", it)} m\naway"
+        }
+        root.setOnClickListener { onItemClick(item.venue) }
       }
     }
   }

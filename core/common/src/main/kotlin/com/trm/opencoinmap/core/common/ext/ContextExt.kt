@@ -36,5 +36,6 @@ fun Context.getCurrentUserLocation(): Maybe<Location> {
       .addOnSuccessListener(emitter::onSuccess)
       .addOnCanceledListener(emitter::onComplete)
       .addOnFailureListener(emitter::onError)
+      .addOnCompleteListener { emitter.onComplete() }
   }
 }
