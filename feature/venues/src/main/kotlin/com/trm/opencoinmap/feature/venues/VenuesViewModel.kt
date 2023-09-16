@@ -120,6 +120,7 @@ constructor(
   init {
     isVenuesSyncRunningUseCase()
       .toFlowable(BackpressureStrategy.LATEST)
+      .distinctUntilChanged()
       .switchMap { isRunning ->
         if (isRunning) {
           Flowable.just(PagingData.empty<VenueListItem>() to MarkersLoadingStatus.InProgress)
