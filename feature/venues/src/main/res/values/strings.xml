@@ -3,4 +3,6 @@
     <string name="scroll_to_top">Scroll to top</string>
     <string name="venues_error_occurred">Error occurred when loading venues.</string>
     <string name="no_venues_found">No venues found.</string>
+    <string name="venue_distance_meters">%1$.0f m\naway</string>
+    <string name="venue_distance_kilometers">%1$.1f km\naway</string>
 </resources>

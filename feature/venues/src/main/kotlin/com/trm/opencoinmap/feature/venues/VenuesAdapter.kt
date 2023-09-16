@@ -36,8 +36,11 @@ internal class VenuesAdapter(private val onItemClick: (Venue) -> Unit) :
         venueCategoryTextView.text = item.venue.category
         item.distanceMeters?.let {
           venueDistanceTextView.text =
-            if (it > 1_000.0) "${String.format("%.1f", it / 1_000.0)} km\naway"
-            else "${String.format("%.0f", it)} m\naway"
+            binding.root.context.getString(
+              if (it > 1_000.0) R.string.venue_distance_kilometers
+              else R.string.venue_distance_meters,
+              if (it > 1_000.0) it / 1_000.0 else it
+            )
         }
         root.setOnClickListener { onItemClick(item.venue) }
       }
