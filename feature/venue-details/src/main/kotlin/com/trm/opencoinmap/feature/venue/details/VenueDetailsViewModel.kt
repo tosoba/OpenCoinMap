@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.hadilq.liveevent.LiveEvent
-import com.trm.opencoinmap.core.common.ext.safeAs
 import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.usecase.GetVenueDetailsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
@@ -85,6 +84,9 @@ constructor(
 
       val websiteUrl: String?
         get() = venueDetails.website?.takeIf(String::isNotBlank)?.replace("http:", "https:")
+
+      val navigateVisible: Boolean
+        get() = venueDetails.run { lat != null && lon != null }
 
       val phoneVisible: Boolean
         get() = !venueDetails.phone.isNullOrBlank()

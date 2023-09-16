@@ -223,6 +223,16 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     viewState.websiteUrl?.let { url ->
       addView(actionChip(R.string.open_in_browser, R.drawable.browser) { goToUrlInBrowser(url) })
     }
+    if (viewState.navigateVisible) {
+      addView(
+        actionChip(R.string.navigate, R.drawable.navigation) {
+          goToGoogleMapsNavigate(
+            lat = requireNotNull(viewState.venueDetails.lat),
+            lon = requireNotNull(viewState.venueDetails.lon)
+          )
+        }
+      )
+    }
     if (viewState.phoneVisible) {
       addView(actionChip(R.string.call, R.drawable.phone) {})
     }
@@ -257,6 +267,22 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
   private fun goToUrlInBrowser(url: String) {
     try {
       startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (ex: ActivityNotFoundException) {
+      Toast.makeText(
+          requireContext(),
+          getString(R.string.browser_app_was_not_found),
+          Toast.LENGTH_SHORT
+        )
+        .show()
+    }
+  }
+
+  private fun goToGoogleMapsNavigate(lat: Double, lon: Double) {
+    try {
+      startActivity(
+        Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=$lat,$lon"))
+          .setPackage("com.google.android.apps.maps")
+      )
     } catch (ex: ActivityNotFoundException) {
       Toast.makeText(
           requireContext(),
