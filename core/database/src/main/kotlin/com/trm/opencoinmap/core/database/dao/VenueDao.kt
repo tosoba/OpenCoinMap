@@ -96,10 +96,16 @@ interface VenueDao {
     "SELECT * FROM " +
       "(SELECT category, COUNT(*) AS count FROM venue " +
       "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
       "GROUP BY category " +
       "UNION " +
       "SELECT category, 0 AS count FROM venue " +
-      "WHERE category NOT IN (SELECT category FROM venue WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon)) " +
+      "WHERE category NOT IN " +
+      "(SELECT category FROM venue " +
+      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
+      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%')" +
+      ")" +
+      ") " +
       "ORDER BY category"
   )
   fun selectCategoriesWithCountInBounds(
@@ -107,6 +113,7 @@ interface VenueDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
+    query: String
   ): Flowable<List<VenueCategoryCountResult>>
 
   @Query(
@@ -114,12 +121,17 @@ interface VenueDao {
       "(SELECT category, COUNT(*) AS count FROM venue " +
       "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
       "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
+      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
       "GROUP BY category " +
       "UNION " +
       "SELECT category, 0 AS count FROM venue " +
-      "WHERE category NOT IN (SELECT category FROM venue " +
+      "WHERE category NOT IN " +
+      "(SELECT category FROM venue " +
       "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
-      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)))) " +
+      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
+      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%')" +
+      ")" +
+      ") " +
       "ORDER BY category"
   )
   fun selectCategoriesWithCountIn2Bounds(
@@ -131,6 +143,7 @@ interface VenueDao {
     maxLat2: Double,
     minLon2: Double,
     maxLon2: Double,
+    query: String
   ): Flowable<List<VenueCategoryCountResult>>
 
   companion object {

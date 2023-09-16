@@ -7,6 +7,6 @@ import io.reactivex.rxjava3.core.Flowable
 import javax.inject.Inject
 
 class GetCategoriesWithCountInBoundsUseCase @Inject constructor(private val repo: VenueRepo) {
-  operator fun invoke(mapBounds: List<MapBounds>): Flowable<List<VenueCategoryCount>> =
-    repo.getCategoriesWithCountInBounds(mapBounds)
+  operator fun invoke(mapBounds: List<MapBounds>, query: String): Flowable<List<VenueCategoryCount>> =
+    repo.getCategoriesWithCountInBounds(mapBounds, query)
 }

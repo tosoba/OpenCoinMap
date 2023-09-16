@@ -103,7 +103,8 @@ constructor(
       .map { it.map(VenueEntity::asDomainModel) }
 
   override fun getCategoriesWithCountInBounds(
-    mapBounds: List<MapBounds>
+    mapBounds: List<MapBounds>,
+    query: String
   ): Flowable<List<VenueCategoryCount>> =
     Flowable.defer {
         when (mapBounds.size) {
@@ -114,6 +115,7 @@ constructor(
               maxLat = latNorth,
               minLon = lonWest,
               maxLon = lonEast,
+              query = query
             )
           }
           2 -> {
@@ -128,6 +130,7 @@ constructor(
               maxLat2 = latNorth2,
               minLon2 = lonWest2,
               maxLon2 = lonEast2,
+              query = query
             )
           }
           else -> throw IllegalArgumentException("Invalid map bounds.")
