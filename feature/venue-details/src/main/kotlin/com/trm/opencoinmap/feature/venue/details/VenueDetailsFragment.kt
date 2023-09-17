@@ -248,17 +248,25 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       )
     }
     if (viewState.facebookVisible) {
-      addView(actionChip(R.string.facebook, R.drawable.facebook) {})
+      addView(
+        actionChip(R.string.facebook, R.drawable.facebook) {
+          goToFacebook(name = requireNotNull(viewState.venueDetails.facebook))
+        }
+      )
     }
     if (viewState.twitterVisible) {
       addView(
         actionChip(R.string.twitter, R.drawable.twitter) {
-          goToTwitter(requireNotNull(viewState.venueDetails.twitter))
+          goToTwitter(name = requireNotNull(viewState.venueDetails.twitter))
         }
       )
     }
     if (viewState.instagramVisible) {
-      addView(actionChip(R.string.instagram, R.drawable.instagram) {})
+      addView(
+        actionChip(R.string.instagram, R.drawable.instagram) {
+          goToInstagram(name = requireNotNull(viewState.venueDetails.instagram))
+        }
+      )
     }
   }
 
@@ -313,6 +321,30 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       )
     } catch (ex: ActivityNotFoundException) {
       showAppNotFoundToast(R.string.mail_app_was_not_found)
+    }
+  }
+
+  private fun goToFacebook(name: String) {
+    try {
+      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("fb://page/$name")))
+    } catch (ex: ActivityNotFoundException) {
+      try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/$name")))
+      } catch (ex: ActivityNotFoundException) {
+        showAppNotFoundToast(R.string.facebook_app_was_not_found)
+      }
+    }
+  }
+
+  private fun goToInstagram(name: String) {
+    try {
+      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/_u/$name")))
+    } catch (ex: ActivityNotFoundException) {
+      try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/$name")))
+      } catch (ex: ActivityNotFoundException) {
+        showAppNotFoundToast(R.string.instagram_app_was_not_found)
+      }
     }
   }
 
