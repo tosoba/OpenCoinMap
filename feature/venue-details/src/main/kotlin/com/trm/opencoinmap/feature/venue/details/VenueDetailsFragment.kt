@@ -251,7 +251,11 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       addView(actionChip(R.string.facebook, R.drawable.facebook) {})
     }
     if (viewState.twitterVisible) {
-      addView(actionChip(R.string.twitter, R.drawable.twitter) {})
+      addView(
+        actionChip(R.string.twitter, R.drawable.twitter) {
+          goToTwitter(requireNotNull(viewState.venueDetails.twitter))
+        }
+      )
     }
     if (viewState.instagramVisible) {
       addView(actionChip(R.string.instagram, R.drawable.instagram) {})
@@ -309,6 +313,18 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       )
     } catch (ex: ActivityNotFoundException) {
       showAppNotFoundToast(R.string.mail_app_was_not_found)
+    }
+  }
+
+  private fun goToTwitter(name: String) {
+    try {
+      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("twitter://user?screen_name=$name")))
+    } catch (ex: ActivityNotFoundException) {
+      try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/#!/$name")))
+      } catch (ex: ActivityNotFoundException) {
+        showAppNotFoundToast(R.string.twitter_app_was_not_found)
+      }
     }
   }
 
