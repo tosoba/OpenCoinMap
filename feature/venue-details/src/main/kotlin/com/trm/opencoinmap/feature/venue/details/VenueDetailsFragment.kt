@@ -234,10 +234,18 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       )
     }
     if (viewState.phoneVisible) {
-      addView(actionChip(R.string.call, R.drawable.phone) {})
+      addView(
+        actionChip(R.string.call, R.drawable.phone) {
+          goToDial(number = requireNotNull(viewState.venueDetails.phone))
+        }
+      )
     }
     if (viewState.emailVisible) {
-      addView(actionChip(R.string.email, R.drawable.email) {})
+      addView(
+        actionChip(R.string.email, R.drawable.email) {
+          goToMail(address = requireNotNull(viewState.venueDetails.email))
+        }
+      )
     }
     if (viewState.facebookVisible) {
       addView(actionChip(R.string.facebook, R.drawable.facebook) {})
@@ -268,12 +276,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     try {
       startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     } catch (ex: ActivityNotFoundException) {
-      Toast.makeText(
-          requireContext(),
-          getString(R.string.browser_app_was_not_found),
-          Toast.LENGTH_SHORT
-        )
-        .show()
+      showAppNotFoundToast(R.string.browser_app_was_not_found)
     }
   }
 
@@ -284,12 +287,32 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           .setPackage("com.google.android.apps.maps")
       )
     } catch (ex: ActivityNotFoundException) {
-      Toast.makeText(
-          requireContext(),
-          getString(R.string.browser_app_was_not_found),
-          Toast.LENGTH_SHORT
-        )
-        .show()
+      showAppNotFoundToast(R.string.google_maps_app_was_not_found)
     }
+  }
+
+  private fun goToDial(number: String) {
+    try {
+      startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", number, null)))
+    } catch (ex: ActivityNotFoundException) {
+      showAppNotFoundToast(R.string.phone_app_was_not_found)
+    }
+  }
+
+  private fun goToMail(address: String) {
+    try {
+      startActivity(
+        Intent.createChooser(
+          Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null)),
+          null
+        )
+      )
+    } catch (ex: ActivityNotFoundException) {
+      showAppNotFoundToast(R.string.mail_app_was_not_found)
+    }
+  }
+
+  private fun showAppNotFoundToast(@StringRes messageRes: Int) {
+    Toast.makeText(requireContext(), getString(messageRes), Toast.LENGTH_SHORT).show()
   }
 }
