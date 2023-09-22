@@ -213,6 +213,6 @@ constructor(
   }
 
   companion object {
-    private const val MIN_QUERY_LENGTH = 3
+    private const val MIN_QUERY_LENGTH = 1
   }
 }
