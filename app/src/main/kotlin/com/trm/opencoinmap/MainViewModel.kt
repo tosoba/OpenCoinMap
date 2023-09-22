@@ -189,7 +189,7 @@ constructor(
         },
         onComplete = { _isLocationLoading.value = false },
         onSuccess = {
-          sendUserLocationUseCase.invoke(it)
+          sendUserLocationUseCase(it)
           _isLocationLoading.value = false
         }
       )
