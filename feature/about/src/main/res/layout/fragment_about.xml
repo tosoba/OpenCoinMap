@@ -12,30 +12,38 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="90dp"
             android:background="@android:color/white"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            android:weightSum="1">
+            android:padding="10dp">
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:layout_width="wrap_content"
+                android:id="@+id/about_app_icon"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:src="@drawable/open_coin_map_placeholder"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/about_app_name"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
 
             <TextView
+                android:id="@+id/about_app_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
                 android:text="OpenCoinMap"
-                android:textAppearance="?attr/textAppearanceHeadlineLarge" />
+                android:textAlignment="center"
+                android:textAppearance="?attr/textAppearanceHeadlineLarge"
+                app:layout_constraintBottom_toBottomOf="@id/about_app_icon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/about_app_icon"
+                app:layout_constraintTop_toTopOf="@id/about_app_icon" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ScrollView
             android:layout_width="match_parent"
@@ -47,6 +55,51 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
 
                 <TextView
                     android:layout_width="match_parent"
