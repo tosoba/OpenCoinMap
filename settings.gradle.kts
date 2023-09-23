@@ -34,6 +34,8 @@ include(":core:network")
 
 include(":core:ui")
 
+include(":feature:about")
+
 include(":feature:categories")
 
 include(":feature:map")
