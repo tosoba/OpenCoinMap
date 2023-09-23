@@ -33,7 +33,7 @@
                 android:id="@+id/about_app_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="OpenCoinMap"
+                android:text="@string/open_coin_map_headline"
                 android:textAlignment="center"
                 android:textAppearance="?attr/textAppearanceHeadlineLarge"
                 app:layout_constraintBottom_toBottomOf="@id/about_app_icon"
@@ -50,77 +50,49 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:id="@+id/about_credit_headline"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Credits"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
+                    android:padding="10dp"
+                    android:text="@string/credits_headline"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <View
-                    android:layout_width="match_parent"
+                    android:id="@+id/about_divider"
+                    android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:background="@android:color/darker_gray" />
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/about_credit_headline" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:id="@+id/about_donate_headline"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Donate"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+                    android:padding="10dp"
+                    android:text="@string/donate_headline"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/about_divider" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1TEST 1" />
-
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </ScrollView>
 
     </LinearLayout>
-
 
 </com.google.android.material.card.MaterialCardView>
