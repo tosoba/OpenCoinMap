@@ -62,6 +62,7 @@ import com.trm.opencoinmap.core.common.view.OnBackPressedController
 import com.trm.opencoinmap.core.common.view.SheetController
 import com.trm.opencoinmap.core.common.view.SnackbarMessageObserver
 import com.trm.opencoinmap.databinding.FragmentMainBinding
+import com.trm.opencoinmap.feature.about.AboutFragment
 import com.trm.opencoinmap.feature.venue.details.VenueDetailsArgs
 import com.trm.opencoinmap.feature.venue.details.getVenueName
 import dagger.hilt.android.AndroidEntryPoint
@@ -275,7 +276,9 @@ class MainFragment :
           IconButton(
             onClick = {
               when (it) {
-                MainTrailingBarLeadingIconMode.ABOUT -> {}
+                MainTrailingBarLeadingIconMode.ABOUT -> {
+                  AboutFragment().show(childFragmentManager, null)
+                }
                 MainTrailingBarLeadingIconMode.CLEAR -> {
                   viewModel.searchQuery.value = ""
                 }
