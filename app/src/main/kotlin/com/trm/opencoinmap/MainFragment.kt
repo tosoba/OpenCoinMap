@@ -12,17 +12,19 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -223,8 +225,10 @@ class MainFragment :
       viewModel.searchBarLeadingIconMode.observeAsState(
         initial = MainSearchBarLeadingIconMode.SEARCH
       )
-    val searchBarTrailingIconVisible =
-      viewModel.searchBarTrailingIconVisible.observeAsState(initial = false)
+    val searchBarTrailingIconMode =
+      viewModel.searchBarTrailingIconMode.observeAsState(
+        initial = MainTrailingBarLeadingIconMode.ABOUT
+      )
 
     val focusRequester = remember(::FocusRequester)
     val focusManager = LocalFocusManager.current
@@ -243,31 +247,56 @@ class MainFragment :
       placeholder = { Text(text = stringResource(id = R.string.search)) },
       leadingIcon = {
         Crossfade(targetState = leadingIconMode.value, label = "LeadingIconCrossFade") {
-          when (it) {
-            MainSearchBarLeadingIconMode.SEARCH -> {
-              Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = stringResource(id = R.string.search)
-              )
-            }
-            MainSearchBarLeadingIconMode.BACK -> {
-              Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.back),
-                modifier =
-                  Modifier.clickable { requireActivity().onBackPressedDispatcher.onBackPressed() }
-              )
+          IconButton(
+            enabled = it == MainSearchBarLeadingIconMode.BACK,
+            colors =
+              IconButtonDefaults.iconButtonColors(disabledContentColor = LocalContentColor.current),
+            onClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
+          ) {
+            when (it) {
+              MainSearchBarLeadingIconMode.SEARCH -> {
+                Icon(
+                  imageVector = Icons.Filled.Search,
+                  contentDescription = stringResource(id = R.string.search)
+                )
+              }
+              MainSearchBarLeadingIconMode.BACK -> {
+                Icon(
+                  imageVector = Icons.Filled.ArrowBack,
+                  contentDescription = stringResource(id = R.string.back),
+                )
+              }
             }
           }
         }
       },
       trailingIcon = {
-        AnimatedVisibility(visible = searchBarTrailingIconVisible.value) {
-          Icon(
-            imageVector = Icons.Filled.Clear,
-            contentDescription = stringResource(id = R.string.clear),
-            modifier = Modifier.clickable { viewModel.searchQuery.value = "" }
-          )
+        Crossfade(targetState = searchBarTrailingIconMode.value, label = "TrailingIconCrossFade") {
+          IconButton(
+            onClick = {
+              when (it) {
+                MainTrailingBarLeadingIconMode.ABOUT -> {}
+                MainTrailingBarLeadingIconMode.CLEAR -> {
+                  viewModel.searchQuery.value = ""
+                }
+              }
+            }
+          ) {
+            when (it) {
+              MainTrailingBarLeadingIconMode.ABOUT -> {
+                Icon(
+                  imageVector = Icons.Filled.Info,
+                  contentDescription = stringResource(id = R.string.about)
+                )
+              }
+              MainTrailingBarLeadingIconMode.CLEAR -> {
+                Icon(
+                  imageVector = Icons.Filled.Clear,
+                  contentDescription = stringResource(id = R.string.clear)
+                )
+              }
+            }
+          }
         }
       },
       colors =

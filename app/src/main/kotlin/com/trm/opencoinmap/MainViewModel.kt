@@ -75,16 +75,27 @@ constructor(
     }
   val searchBarLeadingIconMode: LiveData<MainSearchBarLeadingIconMode> = _searchBarLeadingIconMode
 
-  private val _searchBarTrailingIconVisible =
-    MediatorLiveData<Boolean>().apply {
+  private val _searchBarTrailingIconMode =
+    MediatorLiveData<MainTrailingBarLeadingIconMode>().apply {
       addSource(_bottomSheetDestinationId) {
-        value = it == R.id.venues_fragment && !searchQuery.value.isNullOrBlank()
+        value =
+          if (it == R.id.venues_fragment && !searchQuery.value.isNullOrBlank()) {
+            MainTrailingBarLeadingIconMode.CLEAR
+          } else {
+            MainTrailingBarLeadingIconMode.ABOUT
+          }
       }
       addSource(searchQuery) {
-        value = _bottomSheetDestinationId.value == R.id.venues_fragment && !it.isNullOrBlank()
+        value =
+          if (_bottomSheetDestinationId.value == R.id.venues_fragment && !it.isNullOrBlank()) {
+            MainTrailingBarLeadingIconMode.CLEAR
+          } else {
+            MainTrailingBarLeadingIconMode.ABOUT
+          }
       }
     }
-  val searchBarTrailingIconVisible: LiveData<Boolean> = _searchBarTrailingIconVisible
+  val searchBarTrailingIconMode: LiveData<MainTrailingBarLeadingIconMode> =
+    _searchBarTrailingIconMode
 
   private val _searchBarQuery =
     MediatorLiveData<String>().apply {
