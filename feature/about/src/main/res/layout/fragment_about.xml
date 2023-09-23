@@ -136,12 +136,24 @@
                     android:id="@+id/about_donate_headline"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="10dp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingTop="10dp"
                     android:text="@string/donate_headline"
                     android:textAppearance="?attr/textAppearanceHeadlineSmall"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/about_divider" />
+
+                <TextView
+                    android:id="@+id/about_donate_sub_headline"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="10dp"
+                    android:text="@string/about_sub_headline"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/about_donate_headline" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
