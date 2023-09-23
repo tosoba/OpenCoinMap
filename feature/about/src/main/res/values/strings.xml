@@ -3,4 +3,6 @@
     <string name="open_coin_map_headline">OpenCoinMap</string>
     <string name="credits_headline">Credits</string>
     <string name="donate_headline">Donate</string>
+    <string name="open_street_map_creditor">OpenStreetMap</string>
+    <string name="coin_map_org_creditor">coinmap.org</string>
 </resources>
