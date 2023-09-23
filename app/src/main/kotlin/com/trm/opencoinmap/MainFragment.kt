@@ -65,6 +65,7 @@ import com.trm.opencoinmap.databinding.FragmentMainBinding
 import com.trm.opencoinmap.feature.about.AboutFragment
 import com.trm.opencoinmap.feature.venue.details.VenueDetailsArgs
 import com.trm.opencoinmap.feature.venue.details.getVenueName
+import com.trm.opencoinmap.theme.OpenCoinMapComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
@@ -215,7 +216,7 @@ class MainFragment :
       )
     }
 
-    searchBar.setContent { SearchBar() }
+    searchBar.setContent { OpenCoinMapComposeTheme { SearchBar() } }
   }
 
   @Composable
