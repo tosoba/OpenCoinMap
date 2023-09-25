@@ -266,7 +266,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     try {
       startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     } catch (ex: ActivityNotFoundException) {
-      showAppNotFoundToast(R.string.browser_app_was_not_found)
+      showAppNotFoundToast(commonR.string.browser_app_was_not_found)
     }
   }
 

@@ -99,6 +99,14 @@
                     app:barrierDirection="bottom"
                     app:constraint_referenced_ids="about_osm_credit_image,about_osm_credit_label" />
 
+                <androidx.constraintlayout.helper.widget.Layer
+                    android:id="@+id/about_osm_credit_layer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingHorizontal="10dp"
+                    app:constraint_referenced_ids="about_osm_credit_image,about_osm_credit_label" />
+
                 <ImageView
                     android:id="@+id/about_coin_map_credit_image"
                     android:layout_width="35dp"
@@ -121,6 +129,14 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/about_coin_map_credit_image"
                     app:layout_constraintTop_toTopOf="@id/about_coin_map_credit_image" />
+
+                <androidx.constraintlayout.helper.widget.Layer
+                    android:id="@+id/about_coin_map_credit_layer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingHorizontal="10dp"
+                    app:constraint_referenced_ids="about_coin_map_credit_image,about_coin_map_credit_label" />
 
                 <View
                     android:id="@+id/about_divider"

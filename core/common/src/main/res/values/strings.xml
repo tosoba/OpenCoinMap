@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error_occurred">Error occurred.</string>
+    <string name="browser_app_was_not_found">Browser app was not found.</string>
     <string name="retry">Retry</string>
 </resources>
