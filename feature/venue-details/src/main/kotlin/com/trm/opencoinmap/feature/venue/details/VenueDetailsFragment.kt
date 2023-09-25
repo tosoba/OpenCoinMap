@@ -23,7 +23,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
@@ -49,6 +48,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     binding.initViews()
 
     viewModel.viewState.observe(viewLifecycleOwner) { binding.onViewState(it) }
+    viewModel.viewEvent.observe(viewLifecycleOwner, ::onViewEvent)
 
     viewModel.sheetSlideOffset.observe(viewLifecycleOwner) { offset ->
       binding.venueDetailsWebView.interactionDisabled = offset < 1f
@@ -213,76 +213,54 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           collapsedGoBackButton.isEnabled = false
           collapsedRefreshButton.isEnabled = false
         }
-      venueDetailsActionsChipGroup.updateActionChips(viewState)
-      venueDetailsActionsScrollView.isVisible = viewState.actionsScrollViewVisible
+      updateActionsScrollView(viewState)
     }
   }
 
-  private fun ChipGroup.updateActionChips(viewState: VenueDetailsViewModel.ViewState.Loaded) {
-    removeAllViews()
-    viewState.websiteUrl?.let { url ->
-      addView(actionChip(R.string.open_in_browser, R.drawable.browser) { goToUrlInBrowser(url) })
-    }
-    if (viewState.navigateVisible) {
-      addView(
-        actionChip(R.string.navigate, R.drawable.navigation) {
-          goToGoogleMapsNavigate(
-            lat = requireNotNull(viewState.venueDetails.lat),
-            lon = requireNotNull(viewState.venueDetails.lon)
-          )
-        }
-      )
-    }
-    if (viewState.phoneVisible) {
-      addView(
-        actionChip(R.string.call, R.drawable.phone) {
-          goToDial(number = requireNotNull(viewState.venueDetails.phone))
-        }
-      )
-    }
-    if (viewState.emailVisible) {
-      addView(
-        actionChip(R.string.email, R.drawable.email) {
-          goToMail(address = requireNotNull(viewState.venueDetails.email))
-        }
-      )
-    }
-    if (viewState.facebookVisible) {
-      addView(
-        actionChip(R.string.facebook, R.drawable.facebook) {
-          goToFacebook(name = requireNotNull(viewState.venueDetails.facebook))
-        }
-      )
-    }
-    if (viewState.twitterVisible) {
-      addView(
-        actionChip(R.string.twitter, R.drawable.twitter) {
-          goToTwitter(name = requireNotNull(viewState.venueDetails.twitter))
-        }
-      )
-    }
-    if (viewState.instagramVisible) {
-      addView(
-        actionChip(R.string.instagram, R.drawable.instagram) {
-          goToInstagram(name = requireNotNull(viewState.venueDetails.instagram))
-        }
-      )
-    }
+  private fun FragmentVenueDetailsBinding.updateActionsScrollView(
+    viewState: VenueDetailsViewModel.ViewState.Loaded
+  ) {
+    venueDetailsActionsChipGroup.removeAllViews()
+    val actionChips = viewModel.actionChips(viewState)
+    actionChips.map(::actionChip).forEach(venueDetailsActionsChipGroup::addView)
+    venueDetailsActionsScrollView.isVisible = actionChips.isNotEmpty()
   }
 
-  private fun actionChip(
-    @StringRes textRes: Int,
-    @DrawableRes drawableRes: Int,
-    onClick: View.OnClickListener
-  ): Chip =
+  private fun actionChip(action: VenueDetailsChipAction): Chip =
     layoutInflater
       .inflate(R.layout.item_venue_details_action, binding.venueDetailsActionsChipGroup, false)
       .requireAs<Chip>()
       .also {
-        it.setText(textRes)
-        it.setChipIconResource(drawableRes)
-        it.setOnClickListener(onClick)
+        it.setText(action.textRes)
+        it.setChipIconResource(action.drawableRes)
+        it.setOnClickListener(action.onClick)
       }
+
+  private fun onViewEvent(viewEvent: VenueDetailsViewModel.ViewEvent) {
+    when (viewEvent) {
+      is VenueDetailsViewModel.ViewEvent.OpenInBrowser -> {
+        goToUrlInBrowser(viewEvent.url)
+      }
+      is VenueDetailsViewModel.ViewEvent.Navigate -> {
+        goToGoogleMapsNavigate(viewEvent.lat, viewEvent.lon)
+      }
+      is VenueDetailsViewModel.ViewEvent.Dial -> {
+        goToDial(viewEvent.number)
+      }
+      is VenueDetailsViewModel.ViewEvent.Mail -> {
+        goToMail(viewEvent.address)
+      }
+      is VenueDetailsViewModel.ViewEvent.Facebook -> {
+        goToFacebook(viewEvent.name)
+      }
+      is VenueDetailsViewModel.ViewEvent.Twitter -> {
+        goToTwitter(viewEvent.name)
+      }
+      is VenueDetailsViewModel.ViewEvent.Instagram -> {
+        goToInstagram(viewEvent.name)
+      }
+    }
+  }
 
   private fun goToUrlInBrowser(url: String) {
     try {

@@ -33,6 +33,9 @@ constructor(
   private val _viewState = MutableLiveData<ViewState>(ViewState.Loading)
   val viewState: LiveData<ViewState> = _viewState
 
+  private val _viewEvent = LiveEvent<ViewEvent>()
+  val viewEvent: LiveData<ViewEvent> = _viewEvent
+
   private val _sheetSlideOffset = LiveEvent<Float>()
   val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
 
@@ -66,46 +69,79 @@ constructor(
     sendWebViewScrollableUpwardsUseCase(isScrollableUpwards)
   }
 
+  fun actionChips(viewState: ViewState.Loaded): List<VenueDetailsChipAction> = buildList {
+    val (venueDetails) = viewState
+
+    viewState.websiteUrl?.let { url ->
+      add(
+        VenueDetailsChipAction(R.string.open_in_browser, R.drawable.browser) {
+          _viewEvent.value = ViewEvent.OpenInBrowser(url)
+        }
+      )
+    }
+
+    if (venueDetails.run { lat != null && lon != null }) {
+      add(
+        VenueDetailsChipAction(R.string.navigate, R.drawable.navigation) {
+          _viewEvent.value =
+            ViewEvent.Navigate(requireNotNull(venueDetails.lat), requireNotNull(venueDetails.lon))
+        }
+      )
+    }
+
+    venueDetails.phone?.takeIf(String::isNotBlank)?.let { number ->
+      add(
+        VenueDetailsChipAction(R.string.call, R.drawable.phone) {
+          _viewEvent.value = ViewEvent.Dial(number)
+        }
+      )
+    }
+
+    venueDetails.email?.takeIf(String::isNotBlank)?.let { email ->
+      VenueDetailsChipAction(R.string.email, R.drawable.email) {
+        _viewEvent.value = ViewEvent.Mail(email)
+      }
+    }
+
+    venueDetails.facebook?.takeIf(String::isNotBlank)?.let { facebook ->
+      VenueDetailsChipAction(R.string.facebook, R.drawable.facebook) {
+        _viewEvent.value = ViewEvent.Facebook(facebook)
+      }
+    }
+
+    venueDetails.twitter?.takeIf(String::isNotBlank)?.let { twitter ->
+      VenueDetailsChipAction(R.string.twitter, R.drawable.twitter) {
+        _viewEvent.value = ViewEvent.Twitter(twitter)
+      }
+    }
+
+    venueDetails.instagram?.takeIf(String::isNotBlank)?.let { instagram ->
+      VenueDetailsChipAction(R.string.instagram, R.drawable.instagram) {
+        _viewEvent.value = ViewEvent.Instagram(instagram)
+      }
+    }
+  }
+
   sealed interface ViewState {
     object Loading : ViewState
 
     data class Loaded(val venueDetails: VenueDetails) : ViewState {
-      val actionsScrollViewVisible: Boolean
-        get() =
-          openInBrowserVisible ||
-            phoneVisible ||
-            emailVisible ||
-            facebookVisible ||
-            twitterVisible ||
-            instagramVisible
-
-      private val openInBrowserVisible: Boolean
-        get() = !venueDetails.website.isNullOrBlank()
-
       val websiteUrl: String?
         get() = venueDetails.website?.takeIf(String::isNotBlank)?.replace("http:", "https:")
-
-      val navigateVisible: Boolean
-        get() = venueDetails.run { lat != null && lon != null }
-
-      val phoneVisible: Boolean
-        get() = !venueDetails.phone.isNullOrBlank()
-
-      val emailVisible: Boolean
-        get() = !venueDetails.email.isNullOrBlank()
-
-      val facebookVisible: Boolean
-        get() = !venueDetails.facebook.isNullOrBlank()
-
-      val twitterVisible: Boolean
-        get() = !venueDetails.twitter.isNullOrBlank()
-
-      val instagramVisible: Boolean
-        get() = !venueDetails.instagram.isNullOrBlank()
     }
 
     object Error : ViewState
 
     object NotFound : ViewState
+  }
+
+  sealed interface ViewEvent {
+    data class OpenInBrowser(val url: String) : ViewEvent
+    data class Navigate(val lat: Double, val lon: Double) : ViewEvent
+    data class Dial(val number: String) : ViewEvent
+    data class Mail(val address: String) : ViewEvent
+    data class Facebook(val name: String) : ViewEvent
+    data class Twitter(val name: String) : ViewEvent
+    data class Instagram(val name: String) : ViewEvent
   }
 }
