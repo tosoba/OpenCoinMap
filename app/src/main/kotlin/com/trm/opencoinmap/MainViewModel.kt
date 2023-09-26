@@ -79,18 +79,30 @@ constructor(
     MediatorLiveData<MainTrailingBarLeadingIconMode>().apply {
       addSource(_bottomSheetDestinationId) {
         value =
-          if (it == R.id.venues_fragment && !searchQuery.value.isNullOrBlank()) {
-            MainTrailingBarLeadingIconMode.CLEAR
-          } else {
-            MainTrailingBarLeadingIconMode.ABOUT
+          when {
+            it == R.id.venues_fragment && !searchQuery.value.isNullOrBlank() -> {
+              MainTrailingBarLeadingIconMode.CLEAR
+            }
+            it == R.id.venues_fragment -> {
+              MainTrailingBarLeadingIconMode.ABOUT
+            }
+            else -> {
+              MainTrailingBarLeadingIconMode.NONE
+            }
           }
       }
       addSource(searchQuery) {
         value =
-          if (_bottomSheetDestinationId.value == R.id.venues_fragment && !it.isNullOrBlank()) {
-            MainTrailingBarLeadingIconMode.CLEAR
-          } else {
-            MainTrailingBarLeadingIconMode.ABOUT
+          when {
+            _bottomSheetDestinationId.value == R.id.venues_fragment && !it.isNullOrBlank() -> {
+              MainTrailingBarLeadingIconMode.CLEAR
+            }
+            _bottomSheetDestinationId.value == R.id.venues_fragment -> {
+              MainTrailingBarLeadingIconMode.ABOUT
+            }
+            else -> {
+              MainTrailingBarLeadingIconMode.NONE
+            }
           }
       }
     }

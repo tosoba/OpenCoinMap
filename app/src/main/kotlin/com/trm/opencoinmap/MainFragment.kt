@@ -275,6 +275,9 @@ class MainFragment :
       trailingIcon = {
         Crossfade(targetState = searchBarTrailingIconMode.value, label = "TrailingIconCrossFade") {
           IconButton(
+            enabled = it != MainTrailingBarLeadingIconMode.NONE,
+            colors =
+              IconButtonDefaults.iconButtonColors(disabledContentColor = LocalContentColor.current),
             onClick = {
               when (it) {
                 MainTrailingBarLeadingIconMode.ABOUT -> {
@@ -283,6 +286,7 @@ class MainFragment :
                 MainTrailingBarLeadingIconMode.CLEAR -> {
                   viewModel.searchQuery.value = ""
                 }
+                MainTrailingBarLeadingIconMode.NONE -> {}
               }
             }
           ) {
@@ -299,6 +303,7 @@ class MainFragment :
                   contentDescription = stringResource(id = R.string.clear)
                 )
               }
+              MainTrailingBarLeadingIconMode.NONE -> {}
             }
           }
         }
