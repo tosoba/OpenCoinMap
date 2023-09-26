@@ -134,7 +134,7 @@ class MainFragment :
   private val bottomSheetFragmentNavController: NavController by
     lazy(LazyThreadSafetyMode.NONE) {
       childFragmentManager
-        .findFragmentById(R.id.bottom_sheet_container)!!
+        .findFragmentById(R.id.bottom_sheet_container)
         .requireAs<NavHostFragment>()
         .navController
     }
