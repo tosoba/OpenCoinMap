@@ -34,20 +34,22 @@ class AboutFragment : DialogFragment(R.layout.fragment_about) {
   }
 
   private fun FragmentAboutBinding.initViews() {
-    aboutOsmCreditLayer.setOnClickListener { goToUrlInBrowser("https://www.openstreetmap.org/") }
-    aboutCoinMapCreditLayer.setOnClickListener { goToUrlInBrowser("https://coinmap.org/") }
+    aboutOsmCreditLayout.setOnClickListener { goToUrlInBrowser("https://www.openstreetmap.org/") }
+    aboutCoinMapCreditLayout.setOnClickListener { goToUrlInBrowser("https://coinmap.org/") }
 
     aboutBitcoinSupportMeLabel.isSelected = true
     aboutEthereumSupportMeLabel.isSelected = true
     aboutXrpSupportMeLabel.isSelected = true
 
-    aboutBitcoinSupportMeLayer.setOnClickListener {
+    aboutBitcoinSupportMeLayout.setOnClickListener {
       copyToClipboard(addressRes = R.string.bitcoin_address)
     }
-    aboutEthereumSupportMeLayer.setOnClickListener {
+    aboutEthereumSupportMeLayout.setOnClickListener {
       copyToClipboard(addressRes = R.string.ethereum_address)
     }
-    aboutXrpSupportMeLayer.setOnClickListener { copyToClipboard(addressRes = R.string.xrp_address) }
+    aboutXrpSupportMeLayout.setOnClickListener {
+      copyToClipboard(addressRes = R.string.xrp_address)
+    }
   }
 
   private fun copyToClipboard(@StringRes addressRes: Int) {
