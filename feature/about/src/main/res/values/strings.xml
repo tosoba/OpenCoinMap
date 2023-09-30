@@ -13,6 +13,5 @@
     <string name="bitcoin_address">bc1qvhxxjfywzzca86sgwu4fn3m5f7quvwl0xdm8su</string>
     <string name="ethereum_address">0x5524a565299Ad977598952304a76027Bd6C63CBB</string>
     <string name="xrp_address">rhCbapPbr1cAwVYqFR9VZJe1rzTPYe8BNJ</string>
-    <string name="address_label">%1$s address</string>
-    <string name="address_copied">%1$s address copied to clipboard</string>
+    <string name="address_copied">Address copied to clipboard</string>
 </resources>
