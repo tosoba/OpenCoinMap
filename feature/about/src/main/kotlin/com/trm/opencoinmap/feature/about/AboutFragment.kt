@@ -38,6 +38,8 @@ class AboutFragment : DialogFragment(R.layout.fragment_about) {
   }
 
   private fun FragmentAboutBinding.initViews() {
+    aboutClose.setOnClickListener { dismiss() }
+
     aboutOsmCreditLayout.setOnClickListener { goToUrlInBrowser("https://www.openstreetmap.org/") }
     aboutCoinMapCreditLayout.setOnClickListener { goToUrlInBrowser("https://coinmap.org/") }
 

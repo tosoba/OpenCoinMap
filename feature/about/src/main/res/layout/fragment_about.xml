@@ -33,13 +33,27 @@
                 android:id="@+id/about_app_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="5dp"
                 android:text="@string/open_coin_map_headline"
                 android:textAlignment="center"
-                android:textAppearance="?attr/textAppearanceHeadlineLarge"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium"
                 app:layout_constraintBottom_toBottomOf="@id/about_app_icon"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/about_close"
                 app:layout_constraintStart_toEndOf="@id/about_app_icon"
                 app:layout_constraintTop_toTopOf="@id/about_app_icon" />
+
+            <ImageView
+                android:id="@+id/about_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="@string/close"
+                android:focusable="true"
+                android:padding="5dp"
+                android:src="@drawable/close"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
