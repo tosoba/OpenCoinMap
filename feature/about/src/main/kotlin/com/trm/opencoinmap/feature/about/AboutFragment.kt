@@ -10,13 +10,13 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.Window
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.DialogFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.R as commonR
+import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.feature.about.databinding.FragmentAboutBinding
 
 class AboutFragment : DialogFragment(R.layout.fragment_about) {
@@ -24,13 +24,17 @@ class AboutFragment : DialogFragment(R.layout.fragment_about) {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
     super.onCreateDialog(savedInstanceState).apply {
-      requestWindowFeature(Window.FEATURE_NO_TITLE)
       window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     binding.initViews()
+  }
+
+  override fun onResume() {
+    super.onResume()
+    setDialogWindowWidth()
   }
 
   private fun FragmentAboutBinding.initViews() {
@@ -49,6 +53,23 @@ class AboutFragment : DialogFragment(R.layout.fragment_about) {
     }
     aboutXrpSupportMeLayout.setOnClickListener {
       copyToClipboard(addressRes = R.string.xrp_address)
+    }
+  }
+
+  private fun setDialogWindowWidth() {
+    val screenWidthPixels = requireContext().resources.displayMetrics.widthPixels
+    dialog?.window?.apply {
+      attributes =
+        attributes.also {
+          it.width =
+            (screenWidthPixels *
+                when {
+                  screenWidthPixels.toFloat().toDp(requireContext()) <= 600 -> .8
+                  screenWidthPixels.toFloat().toDp(requireContext()) <= 840 -> .5
+                  else -> .3
+                })
+              .toInt()
+        }
     }
   }
 
