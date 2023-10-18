@@ -4,8 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.toBitmap
 import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.Granularity
@@ -39,3 +43,27 @@ fun Context.getCurrentUserLocation(): Maybe<Location> {
       .addOnCompleteListener { emitter.onComplete() }
   }
 }
+
+@SuppressLint("MissingPermission")
+fun Context.isNetworkConnected(): Boolean {
+  val connectivityManager = getSystemService<ConnectivityManager>()!!
+  return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    connectivityManager
+      .getNetworkCapabilities(connectivityManager.activeNetwork)
+      .isNetworkCapabilitiesValid()
+  } else {
+    connectivityManager.activeNetworkInfo?.isConnected == true
+  }
+}
+
+private fun NetworkCapabilities?.isNetworkCapabilitiesValid(): Boolean =
+  when {
+    this == null -> false
+    hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+      hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) &&
+      (hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+        hasTransport(NetworkCapabilities.TRANSPORT_VPN) ||
+        hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+        hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) -> true
+    else -> false
+  }
