@@ -1,10 +1,12 @@
 package com.trm.opencoinmap.core.data.repo
 
+import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.rxjava3.flowable
+import com.trm.opencoinmap.core.common.ext.isNetworkConnected
 import com.trm.opencoinmap.core.data.ext.isValid
 import com.trm.opencoinmap.core.data.mapper.asDomainModel
 import com.trm.opencoinmap.core.data.mapper.asEntity
@@ -24,6 +26,7 @@ import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.core.network.model.VenueDetailsResponseItem
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
@@ -34,6 +37,7 @@ import javax.inject.Inject
 class VenueRepoImpl
 @Inject
 constructor(
+  @ApplicationContext private val context: Context,
   private val coinMapApi: CoinMapApi,
   private val db: OpenCoinMapDatabase,
   private val syncDataSource: SyncDataSource
@@ -255,7 +259,7 @@ constructor(
 
   private fun waitUntilAnyVenuesExitsOrSyncCompleted(): Completable =
     venueDao.selectCount().flatMapCompletable {
-      if (it > 0) {
+      if (it > 0 || !context.isNetworkConnected()) {
         Completable.complete().doOnComplete { syncDataSource.isRunning = false }
       } else {
         syncDataSource
@@ -314,6 +318,7 @@ constructor(
 
   private sealed interface GridCellMarkers {
     data class Venues(val venues: List<Venue>) : GridCellMarkers
+
     data class Cluster(
       val minLat: Double,
       val maxLat: Double,

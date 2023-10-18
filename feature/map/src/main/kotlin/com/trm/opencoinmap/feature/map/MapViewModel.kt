@@ -29,6 +29,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import org.osmdroid.util.BoundingBox
@@ -146,14 +147,22 @@ constructor(
 
   private fun sendMessage(loadable: Loadable<List<MapMarker>>) {
     sendMessageUseCase(
-      if (loadable is Failed) {
-        Message.Shown(
-          textResId = commonR.string.error_occurred,
-          length = Message.Length.LONG,
-          action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
-        )
-      } else {
-        Message.Hidden
+      when (loadable) {
+        is Failed -> {
+          Message.Shown(
+            textResId = commonR.string.error_occurred,
+            length =
+              if (loadable.throwable is IOException) Message.Length.INDEFINITE
+              else Message.Length.LONG,
+            action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
+          )
+        }
+        !is Loading -> {
+          Message.Hidden
+        }
+        else -> {
+          return
+        }
       }
     )
   }
