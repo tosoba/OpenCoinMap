@@ -3,9 +3,12 @@ package com.trm.opencoinmap.core.database.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Upsert
-import com.trm.opencoinmap.core.database.entity.VenueCategoryCountResult
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.trm.opencoinmap.core.database.entity.VenueEntity
+import com.trm.opencoinmap.core.database.result.CountInMultipleBoundsResult
+import com.trm.opencoinmap.core.database.result.VenueCategoryCountResult
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 
@@ -91,6 +94,11 @@ interface VenueDao {
     categories: List<String>,
     categoriesCount: Int
   ): Int
+
+  @RawQuery
+  fun countMatchingQueryInMultipleBounds(
+    query: SupportSQLiteQuery
+  ): Flowable<List<CountInMultipleBoundsResult>>
 
   @Query(
     "SELECT * FROM " +

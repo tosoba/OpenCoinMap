@@ -270,6 +270,38 @@ constructor(
       }
     }
 
+  private fun countMatchingInMultipleBoundsQuery(
+    bounds: List<MapBounds>,
+    query: String,
+    categories: List<String>
+  ): String = buildString {
+    append("SELECT * FROM (")
+    bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
+      append(
+        """(SELECT COUNT(*) FROM venue
+          | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon 
+          | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%') 
+          | AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))
+        |) AS count, $cellMinLat AS minLat, $cellMaxLat AS maxLat, $cellMinLon AS minLon $cellMaxLon AS maxLon"""
+          .trimMargin()
+      )
+      if (index != bounds.lastIndex) {
+        append(" UNION ")
+      }
+    }
+    append(")")
+  }
+
+  private fun selectMatchingInMultipleBoundsQuery(
+    bounds: List<MapBounds>,
+    query: String,
+    categories: List<String>
+  ): String {
+    // TODO: add bound list index to each venue returned from query + maybe try to use @Embedded
+    // venue result with that index
+    return buildString {}
+  }
+
   private fun selectCellMarkers(
     gridCells: List<MapBounds>,
     gridCellLimit: Int,
