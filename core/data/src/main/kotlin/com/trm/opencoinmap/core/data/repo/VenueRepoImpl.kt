@@ -432,6 +432,6 @@ constructor(
     }
 
   companion object {
-    private const val BOUNDS_MARKERS_LIMIT = 10_000
+    private const val BOUNDS_MARKERS_LIMIT = 1_000
   }
 }
