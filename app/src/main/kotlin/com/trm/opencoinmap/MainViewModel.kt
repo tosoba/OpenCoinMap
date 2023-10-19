@@ -27,7 +27,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import timber.log.Timber
 
@@ -161,7 +160,6 @@ constructor(
 
   init {
     receiveMessageUseCase()
-//      .throttleLatest(500L, TimeUnit.MILLISECONDS)
       .subscribeBy(onNext = _snackbarMessage::setValue)
       .addTo(compositeDisposable)
 

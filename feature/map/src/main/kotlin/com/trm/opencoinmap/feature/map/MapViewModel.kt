@@ -147,22 +147,16 @@ constructor(
 
   private fun sendMessage(loadable: Loadable<List<MapMarker>>) {
     sendMessageUseCase(
-      when (loadable) {
-        is Failed -> {
-          Message.Shown(
-            textResId = commonR.string.error_occurred,
-            length =
-              if (loadable.throwable is IOException) Message.Length.INDEFINITE
-              else Message.Length.LONG,
-            action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
-          )
-        }
-        !is Loading -> {
-          Message.Hidden
-        }
-        else -> {
-          return
-        }
+      if (loadable is Failed) {
+        Message.Shown(
+          textResId = commonR.string.error_occurred,
+          length =
+            if (loadable.throwable is IOException) Message.Length.INDEFINITE
+            else Message.Length.LONG,
+          action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
+        )
+      } else {
+        Message.Hidden
       }
     )
   }
