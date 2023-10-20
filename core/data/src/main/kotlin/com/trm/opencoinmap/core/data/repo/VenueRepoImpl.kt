@@ -296,10 +296,25 @@ constructor(
     bounds: List<MapBounds>,
     query: String,
     categories: List<String>
-  ): String {
-    // TODO: add bound list index to each venue returned from query + maybe try to use @Embedded
-    // venue result with that index
-    return buildString {}
+  ): String = buildString {
+    append("SELECT * FROM (")
+    bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
+      append(
+        """SELECT venue.*, $index AS index FROM venue 
+        | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon
+        | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')
+        | AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))
+        | AND EXISTS (
+        | SELECT * FROM bounds WHERE whole = TRUE
+        | UNION
+        | SELECT * FROM bounds WHERE min_lat <= $cellMinLat AND max_lat >= $cellMaxLat AND min_lon <= $cellMinLon AND max_lon >= $cellMaxLon)"""
+          .trimMargin()
+      )
+      if (index != bounds.lastIndex) {
+        append(" UNION ")
+      }
+    }
+    append(")")
   }
 
   private fun selectCellMarkers(

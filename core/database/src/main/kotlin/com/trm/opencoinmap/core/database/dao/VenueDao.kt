@@ -7,8 +7,9 @@ import androidx.room.RawQuery
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.trm.opencoinmap.core.database.entity.VenueEntity
-import com.trm.opencoinmap.core.database.result.CountInMultipleBoundsResult
 import com.trm.opencoinmap.core.database.result.VenueCategoryCountResult
+import com.trm.opencoinmap.core.database.result.VenueCountInBoundsResult
+import com.trm.opencoinmap.core.database.result.VenueInBoundsResult
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 
@@ -98,7 +99,12 @@ interface VenueDao {
   @RawQuery
   fun countMatchingQueryInMultipleBounds(
     query: SupportSQLiteQuery
-  ): Flowable<List<CountInMultipleBoundsResult>>
+  ): Flowable<List<VenueCountInBoundsResult>>
+
+  @RawQuery
+  fun selectMatchingQueryInMultipleBounds(
+    query: SupportSQLiteQuery
+  ): Flowable<List<VenueInBoundsResult>>
 
   @Query(
     "SELECT * FROM " +
