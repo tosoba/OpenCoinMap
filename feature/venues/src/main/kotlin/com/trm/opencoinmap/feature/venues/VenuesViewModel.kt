@@ -119,7 +119,6 @@ constructor(
 
   init {
     isVenuesSyncRunningUseCase()
-      .toFlowable(BackpressureStrategy.LATEST)
       .distinctUntilChanged()
       .switchMap { isRunning ->
         if (isRunning) {
@@ -208,6 +207,7 @@ constructor(
 
   sealed interface UserLocation {
     object Empty : UserLocation
+
     data class Found(val location: LatLng) : UserLocation
   }
 }

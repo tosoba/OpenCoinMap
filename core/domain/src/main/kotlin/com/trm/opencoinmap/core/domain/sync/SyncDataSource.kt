@@ -1,9 +1,7 @@
 package com.trm.opencoinmap.core.domain.sync
 
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Flowable
 
 interface SyncDataSource {
-  var isRunning: Boolean
-
-  fun isRunningObservable(): Observable<Boolean>
+  fun isRunningFlowable(): Flowable<Boolean>
 }

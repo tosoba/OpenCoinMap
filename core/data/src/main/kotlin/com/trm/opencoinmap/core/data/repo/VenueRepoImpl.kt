@@ -1,6 +1,5 @@
 package com.trm.opencoinmap.core.data.repo
 
-import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -8,7 +7,6 @@ import androidx.paging.map
 import androidx.paging.rxjava3.flowable
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.trm.opencoinmap.core.common.ext.isNetworkConnected
 import com.trm.opencoinmap.core.data.ext.isValid
 import com.trm.opencoinmap.core.data.mapper.asDomainModel
 import com.trm.opencoinmap.core.data.mapper.asEntity
@@ -28,7 +26,6 @@ import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
 import com.trm.opencoinmap.core.network.model.VenueDetailsResponseItem
 import com.trm.opencoinmap.core.network.model.VenueResponseItem
 import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
@@ -39,7 +36,6 @@ import javax.inject.Inject
 class VenueRepoImpl
 @Inject
 constructor(
-  @ApplicationContext private val context: Context,
   private val coinMapApi: CoinMapApi,
   private val db: OpenCoinMapDatabase,
   private val syncDataSource: SyncDataSource
@@ -48,11 +44,9 @@ constructor(
   private val boundsDao = db.boundsDao()
   private val venueDetailsDao = db.venueDetailsDao()
 
-  override fun sync(): Completable {
-    syncDataSource.isRunning = true
-    return boundsDao
+  override fun sync(): Completable =
+    boundsDao
       .selectExistsWhole()
-      .doOnSuccess { if (it) syncDataSource.isRunning = false }
       .ignoreElement()
       .andThen(
         coinMapApi
@@ -62,9 +56,7 @@ constructor(
               ?: emptyList()
           }
           .flatMapCompletable(::insertVenuesInWholeBounds)
-          .doAfterTerminate { syncDataSource.isRunning = false }
       )
-  }
 
   override fun getVenuesPagingInBounds(
     mapBounds: List<MapBounds>,
@@ -251,11 +243,11 @@ constructor(
 
   private fun waitUntilAnyVenuesExitsOrSyncCompleted(): Completable =
     venueDao.selectCountSingle().flatMapCompletable {
-      if (it > 0 || !context.isNetworkConnected()) {
-        Completable.complete().doOnComplete { syncDataSource.isRunning = false }
+      if (it > 0) {
+        Completable.complete()
       } else {
         syncDataSource
-          .isRunningObservable()
+          .isRunningFlowable()
           .filter { isRunning -> !isRunning }
           .firstOrError()
           .ignoreElement()
