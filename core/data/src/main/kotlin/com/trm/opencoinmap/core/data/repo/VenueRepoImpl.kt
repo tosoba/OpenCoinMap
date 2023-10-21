@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.rxjava3.flowable
 import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.trm.opencoinmap.core.common.ext.isNetworkConnected
 import com.trm.opencoinmap.core.data.ext.isValid
 import com.trm.opencoinmap.core.data.mapper.asDomainModel
@@ -245,61 +246,6 @@ constructor(
       }
     }
 
-  private fun countMatchingInMultipleBoundsQuery(
-    bounds: List<MapBounds>,
-    query: String,
-    categories: List<String>
-  ): String = buildString {
-    bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
-      append(
-        """SELECT COUNT(*) AS count, 
-          | $cellMinLat AS minLat, $cellMaxLat AS maxLat, $cellMinLon AS minLon, $cellMaxLon AS maxLon 
-          | FROM venue
-          | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon 
-          | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')"""
-          .trimMargin()
-      )
-      if (categories.isNotEmpty()) {
-        append(" AND category IN (${categories.joinToString(",") { "'$it'" }})")
-      }
-      if (index != bounds.lastIndex) {
-        append(" UNION ")
-      }
-    }
-  }
-
-  private fun selectMatchingInMultipleBoundsQuery(
-    bounds: List<MapBounds>,
-    query: String,
-    categories: List<String>
-  ): String = buildString {
-    append("SELECT * FROM (")
-    bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
-      append(
-        """SELECT * FROM venue 
-        | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon
-        | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')"""
-          .trimMargin()
-      )
-      if (categories.isNotEmpty()) {
-        append(
-          " AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))"
-        )
-      }
-      append(
-        """ AND EXISTS (
-        | SELECT * FROM bounds WHERE whole = TRUE
-        | UNION
-        | SELECT * FROM bounds WHERE min_lat <= $cellMinLat AND max_lat >= $cellMaxLat AND min_lon <= $cellMinLon AND max_lon >= $cellMaxLon)"""
-          .trimMargin()
-      )
-      if (index != bounds.lastIndex) {
-        append(" UNION ")
-      }
-    }
-    append(")")
-  }
-
   private fun selectCellMarkersFlowable(
     gridCells: List<MapBounds>,
     gridCellLimit: Int,
@@ -308,7 +254,7 @@ constructor(
   ): Flowable<List<MapMarker>> =
     venueDao
       .countMatchingQueryInMultipleBounds(
-        SimpleSQLiteQuery(countMatchingInMultipleBoundsQuery(gridCells, query, categories))
+        countMatchingInMultipleBoundsQuery(gridCells, query, categories)
       )
       .switchMap {
         val (selectVenueResults, clusterResults) = it.partition { (count) -> count < gridCellLimit }
@@ -322,77 +268,82 @@ constructor(
               size = count
             )
           }
-
-        val bounds =
-          selectVenueResults.map { (_, minLat, maxLat, minLon, maxLon) ->
-            MapBounds(minLat, maxLat, minLon, maxLon)
-          }
         venueDao
           .selectMatchingQueryInMultipleBounds(
-            SimpleSQLiteQuery(selectMatchingInMultipleBoundsQuery(bounds, query, categories))
+            selectMatchingInMultipleBoundsQuery(
+              bounds =
+                selectVenueResults.map { (_, minLat, maxLat, minLon, maxLon) ->
+                  MapBounds(minLat, maxLat, minLon, maxLon)
+                },
+              query = query,
+              categories = categories
+            )
           )
           .map { venues ->
             venues.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } + venuesClusters
           }
       }
 
-  private fun selectCellMarkers(
-    gridCells: List<MapBounds>,
-    gridCellLimit: Int,
+  private fun countMatchingInMultipleBoundsQuery(
+    bounds: List<MapBounds>,
     query: String,
     categories: List<String>
-  ): List<GridCellMarkers> =
-    db.runInTransaction(
-      Callable {
-        gridCells.map { (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
-          val countInCell =
-            venueDao.countMatchingQueryInBounds(
-              minLat = cellMinLat,
-              maxLat = cellMaxLat,
-              minLon = cellMinLon,
-              maxLon = cellMaxLon,
-              query = query,
-              categories = categories,
-              categoriesCount = categories.size
-            )
-          if (countInCell > gridCellLimit) {
-            GridCellMarkers.Cluster(
-              minLat = cellMinLat,
-              maxLat = cellMaxLat,
-              minLon = cellMinLon,
-              maxLon = cellMaxLon,
-              count = countInCell
-            )
-          } else {
-            GridCellMarkers.Venues(
-              venueDao
-                .selectMatchingQueryInBounds(
-                  minLat = cellMinLat,
-                  maxLat = cellMaxLat,
-                  minLon = cellMinLon,
-                  maxLon = cellMaxLon,
-                  query = query,
-                  categories = categories,
-                  categoriesCount = categories.size,
-                )
-                .map(VenueEntity::asDomainModel)
-            )
+  ): SupportSQLiteQuery =
+    SimpleSQLiteQuery(
+      buildString {
+        bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
+          append(
+            """SELECT COUNT(*) AS count, 
+          | $cellMinLat AS minLat, $cellMaxLat AS maxLat, $cellMinLon AS minLon, $cellMaxLon AS maxLon 
+          | FROM venue
+          | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon 
+          | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')"""
+              .trimMargin()
+          )
+          if (categories.isNotEmpty()) {
+            append(" AND category IN (${categories.joinToString(",") { "'$it'" }})")
+          }
+          if (index != bounds.lastIndex) {
+            append(" UNION ")
           }
         }
       }
     )
 
-  private sealed interface GridCellMarkers {
-    data class Venues(val venues: List<Venue>) : GridCellMarkers
-
-    data class Cluster(
-      val minLat: Double,
-      val maxLat: Double,
-      val minLon: Double,
-      val maxLon: Double,
-      val count: Int
-    ) : GridCellMarkers
-  }
+  private fun selectMatchingInMultipleBoundsQuery(
+    bounds: List<MapBounds>,
+    query: String,
+    categories: List<String>
+  ): SupportSQLiteQuery =
+    SimpleSQLiteQuery(
+      buildString {
+        append("SELECT * FROM (")
+        bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
+          append(
+            """SELECT * FROM venue 
+        | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon
+        | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')"""
+              .trimMargin()
+          )
+          if (categories.isNotEmpty()) {
+            append(
+              " AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))"
+            )
+          }
+          append(
+            """ AND EXISTS (
+        | SELECT * FROM bounds WHERE whole = TRUE
+        | UNION
+        | SELECT * FROM bounds WHERE min_lat <= $cellMinLat AND max_lat >= $cellMaxLat AND min_lon <= $cellMinLon AND max_lon >= $cellMaxLon)"""
+              .trimMargin()
+          )
+          if (index != bounds.lastIndex) {
+            append(" UNION ")
+          }
+        }
+        append(")")
+      }
+    )
 
   private fun divideBoundsIntoGrid(
     latDivisor: Int,
