@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.rxjava3.flowable
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.trm.opencoinmap.core.common.ext.isNetworkConnected
 import com.trm.opencoinmap.core.data.ext.isValid
 import com.trm.opencoinmap.core.data.mapper.asDomainModel
@@ -300,7 +301,7 @@ constructor(
     append("SELECT * FROM (")
     bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
       append(
-        """SELECT venue.*, $index AS index FROM venue 
+        """SELECT * FROM venue 
         | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon
         | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')
         | AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))
@@ -316,6 +317,42 @@ constructor(
     }
     append(")")
   }
+
+  private fun selectCellMarkersFlowable(
+    gridCells: List<MapBounds>,
+    gridCellLimit: Int,
+    query: String,
+    categories: List<String>
+  ): Flowable<List<MapMarker>> =
+    venueDao
+      .countMatchingQueryInMultipleBounds(
+        SimpleSQLiteQuery(countMatchingInMultipleBoundsQuery(gridCells, query, categories))
+      )
+      .switchMap {
+        val (selectVenueResults, clusterResults) = it.partition { (count) -> count < gridCellLimit }
+        val venuesClusters =
+          clusterResults.map { (count, minLat, maxLat, minLon, maxLon) ->
+            MapMarker.VenuesCluster(
+              latSouth = minLat,
+              latNorth = maxLat,
+              lonWest = minLon,
+              lonEast = maxLon,
+              size = count
+            )
+          }
+
+        val bounds =
+          selectVenueResults.map { (_, minLat, maxLat, minLon, maxLon) ->
+            MapBounds(minLat, maxLat, minLon, maxLon)
+          }
+        venueDao
+          .selectMatchingQueryInMultipleBounds(
+            SimpleSQLiteQuery(selectMatchingInMultipleBoundsQuery(bounds, query, categories))
+          )
+          .map { venues ->
+            venues.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } + venuesClusters
+          }
+      }
 
   private fun selectCellMarkers(
     gridCells: List<MapBounds>,
