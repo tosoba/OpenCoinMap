@@ -209,6 +209,7 @@ constructor(
               action = Message.Action(R.string.try_again, ::onLocationPermissionGranted)
             )
           )
+          _isLocationLoading.value = false
         },
         onComplete = { _isLocationLoading.value = false },
         onSuccess = {
