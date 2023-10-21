@@ -10,6 +10,7 @@ dependencies {
 
   implementation(libs.google.material)
 
+  implementation(libs.timber)
   implementation(libs.osmdroid)
   implementation(libs.play.services.location)
 

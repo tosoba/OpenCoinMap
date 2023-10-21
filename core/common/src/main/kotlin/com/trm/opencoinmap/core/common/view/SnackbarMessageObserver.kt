@@ -35,7 +35,6 @@ class SnackbarMessageObserver(
             .addCallback(
               object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                  snackbar = null
                   onDismissed()
                 }
 
