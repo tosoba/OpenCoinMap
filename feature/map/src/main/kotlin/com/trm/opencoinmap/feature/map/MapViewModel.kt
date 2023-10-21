@@ -160,7 +160,9 @@ constructor(
     sendMessageUseCase(
       if (loadable is Failed) {
         Message.Shown(
-          textResId = commonR.string.error_occurred,
+          textResId =
+            if (loadable.throwable is IOException) commonR.string.no_internet_connection
+            else commonR.string.error_occurred,
           length =
             if (loadable.throwable is IOException) Message.Length.INDEFINITE
             else Message.Length.LONG,
