@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.trm.opencoinmap.core.database.entity.BoundsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
 import com.trm.opencoinmap.core.database.result.VenueCategoryCountResult
 import com.trm.opencoinmap.core.database.result.VenueCountInBoundsResult
@@ -19,7 +20,7 @@ interface VenueDao {
   @Upsert fun upsert(entities: List<VenueEntity>)
 
   @Query(SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS)
-  fun selectMatchingQueryInBoundsSingle(
+  fun selectMatchingQueryInBoundsFlowable(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
@@ -27,7 +28,7 @@ interface VenueDao {
     query: String,
     categories: List<String>,
     categoriesCount: Int
-  ): Single<List<VenueEntity>>
+  ): Flowable<List<VenueEntity>>
 
   @Query(COUNT_MATCHING_QUERY_IN_BOUNDS)
   fun countMatchingQueryInBoundsSingle(
@@ -95,15 +96,13 @@ interface VenueDao {
     categoriesCount: Int
   ): Int
 
-  @RawQuery
+  @RawQuery(observedEntities = [VenueEntity::class, BoundsEntity::class])
   fun countMatchingQueryInMultipleBounds(
     query: SupportSQLiteQuery
   ): Flowable<List<VenueCountInBoundsResult>>
 
-  @RawQuery
-  fun selectMatchingQueryInMultipleBounds(
-    query: SupportSQLiteQuery
-  ): Flowable<List<VenueEntity>>
+  @RawQuery(observedEntities = [VenueEntity::class, BoundsEntity::class])
+  fun selectMatchingQueryInMultipleBounds(query: SupportSQLiteQuery): Flowable<List<VenueEntity>>
 
   @Query(
     "SELECT * FROM " +

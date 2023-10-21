@@ -25,6 +25,7 @@ import com.trm.opencoinmap.feature.map.model.MapPositionUpdate
 import com.trm.opencoinmap.feature.map.util.MapDefaults
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -109,6 +110,7 @@ constructor(
       .debounce(500L, TimeUnit.MILLISECONDS)
       .doOnNext { Timber.tag("MAP_BOUNDS").e(it.toString()) }
       .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
+      .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { (bounds, query, categories) ->
         getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
       }

@@ -2,8 +2,7 @@ package com.trm.opencoinmap.core.domain.usecase
 
 import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.Flowable
 import javax.inject.Inject
 
 class GetMarkersInBoundsUseCase
@@ -16,8 +15,8 @@ constructor(
     bounds: List<GridMapBounds>,
     query: String,
     categories: List<String>,
-  ): Observable<Loadable<List<MapMarker>>> =
-    Single.zip(
+  ): Flowable<Loadable<List<MapMarker>>> =
+    Flowable.zip(
         bounds.map {
           repo.getVenueMarkersInLatLngBounds(
             gridMapBounds = it,
@@ -29,7 +28,6 @@ constructor(
         result.filterIsInstance<List<MapMarker>>().flatten()
       }
       .map(List<MapMarker>::asLoadable)
-      .toObservable()
       .startWithItem(LoadingFirst)
       .onErrorReturn(::FailedFirst)
       .doOnNext {

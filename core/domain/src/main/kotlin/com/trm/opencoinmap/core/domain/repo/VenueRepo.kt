@@ -25,7 +25,7 @@ interface VenueRepo {
     gridMapBounds: GridMapBounds,
     query: String,
     categories: List<String>
-  ): Single<List<MapMarker>>
+  ): Flowable<List<MapMarker>>
 
   fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>, query: String): Flowable<List<VenueCategoryCount>>
 

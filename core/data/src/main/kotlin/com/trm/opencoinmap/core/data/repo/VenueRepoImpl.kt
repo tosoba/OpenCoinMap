@@ -164,7 +164,7 @@ constructor(
     gridMapBounds: GridMapBounds,
     query: String,
     categories: List<String>
-  ): Single<List<MapMarker>> {
+  ): Flowable<List<MapMarker>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
     val (latSouth, latNorth, lonWest, lonEast) = bounds
     return waitUntilAnyVenuesExitsOrSyncCompleted()
@@ -198,10 +198,11 @@ constructor(
               )
             }
           }
+          .toFlowable()
           .flatMap { count ->
             if (count < BOUNDS_MARKERS_LIMIT) {
               venueDao
-                .selectMatchingQueryInBoundsSingle(
+                .selectMatchingQueryInBoundsFlowable(
                   minLat = latSouth,
                   maxLat = latNorth,
                   minLon = lonWest,
@@ -212,47 +213,20 @@ constructor(
                 )
                 .map { it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } }
             } else {
-              val latInc = (latNorth - latSouth) / latDivisor
-              val lonInc = (lonEast - lonWest) / lonDivisor
-              val gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor)
-              val gridCells =
-                divideBoundsIntoGrid(
-                  latDivisor = latDivisor,
-                  lonDivisor = lonDivisor,
-                  minLat = latSouth,
-                  latInc = latInc,
-                  minLon = lonWest,
-                  lonInc = lonInc
-                )
-
-              Single.fromCallable {
-                  selectCellMarkers(
-                    gridCells = gridCells,
-                    gridCellLimit = gridCellLimit,
-                    query = query,
-                    categories = categories,
-                  )
-                }
-                .map { cells ->
-                  cells.flatMap { cell ->
-                    when (cell) {
-                      is GridCellMarkers.Cluster -> {
-                        listOf(
-                          MapMarker.VenuesCluster(
-                            latSouth = cell.minLat,
-                            latNorth = cell.maxLat,
-                            lonEast = cell.minLon,
-                            lonWest = cell.maxLon,
-                            size = cell.count
-                          )
-                        )
-                      }
-                      is GridCellMarkers.Venues -> {
-                        cell.venues.map(MapMarker::SingleVenue)
-                      }
-                    }
-                  }
-                }
+              selectCellMarkersFlowable(
+                gridCells =
+                  divideBoundsIntoGrid(
+                    latDivisor = latDivisor,
+                    lonDivisor = lonDivisor,
+                    minLat = latSouth,
+                    latInc = (latNorth - latSouth) / latDivisor,
+                    minLon = lonWest,
+                    lonInc = (lonEast - lonWest) / lonDivisor
+                  ),
+                gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor),
+                query = query,
+                categories = categories
+              )
             }
           }
       )
@@ -276,21 +250,22 @@ constructor(
     query: String,
     categories: List<String>
   ): String = buildString {
-    append("SELECT * FROM (")
     bounds.forEachIndexed { index, (cellMinLat, cellMaxLat, cellMinLon, cellMaxLon) ->
       append(
-        """(SELECT COUNT(*) FROM venue
+        """SELECT COUNT(*) AS count, 
+          | $cellMinLat AS minLat, $cellMaxLat AS maxLat, $cellMinLon AS minLon, $cellMaxLon AS maxLon 
+          | FROM venue
           | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon 
-          | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%') 
-          | AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))
-        |) AS count, $cellMinLat AS minLat, $cellMaxLat AS maxLat, $cellMinLon AS minLon $cellMaxLon AS maxLon"""
+          | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')"""
           .trimMargin()
       )
+      if (categories.isNotEmpty()) {
+        append(" AND category IN (${categories.joinToString(",") { "'$it'" }})")
+      }
       if (index != bounds.lastIndex) {
         append(" UNION ")
       }
     }
-    append(")")
   }
 
   private fun selectMatchingInMultipleBoundsQuery(
@@ -303,9 +278,16 @@ constructor(
       append(
         """SELECT * FROM venue 
         | WHERE lat >= $cellMinLat AND lat <= $cellMaxLat AND lon >= $cellMinLon AND lon <= $cellMaxLon
-        | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')
-        | AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))
-        | AND EXISTS (
+        | AND ('$query' = '' OR LOWER(name) LIKE '%' || LOWER('$query') || '%')"""
+          .trimMargin()
+      )
+      if (categories.isNotEmpty()) {
+        append(
+          " AND (${categories.size} = 0 OR category IN (${categories.joinToString(",") { "'$it'" }}))"
+        )
+      }
+      append(
+        """ AND EXISTS (
         | SELECT * FROM bounds WHERE whole = TRUE
         | UNION
         | SELECT * FROM bounds WHERE min_lat <= $cellMinLat AND max_lat >= $cellMaxLat AND min_lon <= $cellMinLon AND max_lon >= $cellMaxLon)"""
