@@ -247,8 +247,10 @@ constructor(
       )
   }
 
+  override fun anyVenuesExist(): Flowable<Boolean> = venueDao.selectCountFlowable().map { it > 0 }
+
   private fun waitUntilAnyVenuesExitsOrSyncCompleted(): Completable =
-    venueDao.selectCount().flatMapCompletable {
+    venueDao.selectCountSingle().flatMapCompletable {
       if (it > 0 || !context.isNetworkConnected()) {
         Completable.complete().doOnComplete { syncDataSource.isRunning = false }
       } else {

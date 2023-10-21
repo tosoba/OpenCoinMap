@@ -2,7 +2,6 @@ package com.trm.opencoinmap.core.domain.repo
 
 import androidx.paging.PagingData
 import com.trm.opencoinmap.core.domain.model.GridMapBounds
-import com.trm.opencoinmap.core.domain.model.Loadable
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
@@ -11,7 +10,6 @@ import com.trm.opencoinmap.core.domain.model.VenueDetails
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.core.Single
 
 interface VenueRepo {
   fun sync(): Completable
@@ -28,9 +26,14 @@ interface VenueRepo {
     categories: List<String>
   ): Flowable<Result<List<MapMarker>>>
 
-  fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>, query: String): Flowable<List<VenueCategoryCount>>
+  fun getCategoriesWithCountInBounds(
+    mapBounds: List<MapBounds>,
+    query: String
+  ): Flowable<List<VenueCategoryCount>>
 
   fun getVenueDetails(id: Long): Maybe<VenueDetails>
 
   fun deleteVenueDetailsOlderThan(timestamp: Long): Completable
+
+  fun anyVenuesExist(): Flowable<Boolean>
 }

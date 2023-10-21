@@ -15,7 +15,9 @@ import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface VenueDao {
-  @Query("SELECT COUNT(*) FROM venue") fun selectCount(): Single<Int>
+  @Query("SELECT COUNT(*) FROM venue") fun selectCountSingle(): Single<Int>
+
+  @Query("SELECT COUNT(*) FROM venue") fun selectCountFlowable(): Flowable<Int>
 
   @Upsert fun upsert(entities: List<VenueEntity>)
 
