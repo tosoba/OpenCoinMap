@@ -144,7 +144,7 @@ internal fun MapView.animateTo(boundingBox: BoundingBox) {
 }
 
 private fun MapMarker.VenuesCluster.getBoundingBox(): BoundingBox =
-  BoundingBox(latNorth, lonWest, latSouth, lonEast)
+  BoundingBox(latNorth, lonEast, latSouth, lonWest)
 
 internal fun BoundingBox.toBounds(): MapBounds =
   MapBounds(latSouth = latSouth, latNorth = latNorth, lonWest = lonWest, lonEast = lonEast)
