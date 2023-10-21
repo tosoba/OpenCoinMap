@@ -165,7 +165,7 @@ constructor(
     gridMapBounds: GridMapBounds,
     query: String,
     categories: List<String>
-  ): Flowable<List<MapMarker>> {
+  ): Flowable<Result<List<MapMarker>>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
     val (latSouth, latNorth, lonWest, lonEast) = bounds
     return waitUntilAnyVenuesExitsOrSyncCompleted()
@@ -179,56 +179,70 @@ constructor(
           )
           .flatMap { allExist ->
             if (allExist) {
-              venueDao.countMatchingQueryInBoundsSingle(
-                minLat = latSouth,
-                maxLat = latNorth,
-                minLon = lonWest,
-                maxLon = lonEast,
-                query = query,
-                categories = categories,
-                categoriesCount = categories.size
-              )
-            } else {
-              getAndInsertVenuesFromNetwork(
-                minLat = latSouth,
-                maxLat = latNorth,
-                minLon = lonWest,
-                maxLon = lonEast,
-                query = query,
-                categories = categories
-              )
-            }
-          }
-          .toFlowable()
-          .flatMap { count ->
-            if (count < BOUNDS_MARKERS_LIMIT) {
-              venueDao
-                .selectMatchingQueryInBoundsFlowable(
-                  minLat = latSouth,
-                  maxLat = latNorth,
-                  minLon = lonWest,
-                  maxLon = lonEast,
-                  query = query,
-                  categories = categories,
-                  categoriesCount = categories.size,
-                )
-                .map { it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } }
-            } else {
-              selectCellMarkersFlowable(
-                gridCells =
-                  divideBoundsIntoGrid(
-                    latDivisor = latDivisor,
-                    lonDivisor = lonDivisor,
+                venueDao
+                  .countMatchingQueryInBoundsSingle(
                     minLat = latSouth,
-                    latInc = (latNorth - latSouth) / latDivisor,
+                    maxLat = latNorth,
                     minLon = lonWest,
-                    lonInc = (lonEast - lonWest) / lonDivisor
-                  ),
-                gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor),
-                query = query,
-                categories = categories
-              )
-            }
+                    maxLon = lonEast,
+                    query = query,
+                    categories = categories,
+                    categoriesCount = categories.size
+                  )
+                  .map { Result.success(it) }
+              } else {
+                getAndInsertVenuesFromNetwork(
+                    minLat = latSouth,
+                    maxLat = latNorth,
+                    minLon = lonWest,
+                    maxLon = lonEast,
+                    query = query,
+                    categories = categories
+                  )
+                  .map { Result.success(it) }
+                  .onErrorReturn { Result.failure(it) }
+              }
+              .toFlowable()
+          }
+          .flatMap { countResult ->
+            countResult.fold(
+              onSuccess = { count ->
+                if (count < BOUNDS_MARKERS_LIMIT) {
+                  venueDao
+                    .selectMatchingQueryInBoundsFlowable(
+                      minLat = latSouth,
+                      maxLat = latNorth,
+                      minLon = lonWest,
+                      maxLon = lonEast,
+                      query = query,
+                      categories = categories,
+                      categoriesCount = categories.size,
+                    )
+                    .map {
+                      Result.success(
+                        it.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) }
+                      )
+                    }
+                } else {
+                  selectCellMarkersFlowable(
+                      gridCells =
+                        divideBoundsIntoGrid(
+                          latDivisor = latDivisor,
+                          lonDivisor = lonDivisor,
+                          minLat = latSouth,
+                          latInc = (latNorth - latSouth) / latDivisor,
+                          minLon = lonWest,
+                          lonInc = (lonEast - lonWest) / lonDivisor
+                        ),
+                      gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor),
+                      query = query,
+                      categories = categories
+                    )
+                    .map { Result.success(it) }
+                }
+              },
+              onFailure = { Flowable.just(Result.failure(it)) }
+            )
           }
       )
   }

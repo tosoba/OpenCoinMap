@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.trm.opencoinmap.core.database.entity.BoundsEntity
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 
 @Dao
@@ -27,5 +28,5 @@ interface BoundsDao {
     maxLat: Double,
     minLon: Double,
     maxLon: Double
-  ): Single<Boolean>
+  ): Flowable<Boolean>
 }

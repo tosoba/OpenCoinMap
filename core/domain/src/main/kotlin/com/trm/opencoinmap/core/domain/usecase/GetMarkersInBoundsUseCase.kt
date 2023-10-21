@@ -24,10 +24,14 @@ constructor(
             categories = categories
           )
         }
-      ) { result ->
-        result.filterIsInstance<List<MapMarker>>().flatten()
+      ) {
+        val results = it.filterIsInstance<Result<List<MapMarker>>>()
+        if (results.all { result -> result.isSuccess }) {
+          results.map { result -> result.getOrThrow() }.flatten().asLoadable()
+        } else {
+          FailedFirst(results.first { result -> result.isFailure }.exceptionOrNull())
+        }
       }
-      .map(List<MapMarker>::asLoadable)
       .startWithItem(LoadingFirst)
       .onErrorReturn(::FailedFirst)
       .doOnNext {

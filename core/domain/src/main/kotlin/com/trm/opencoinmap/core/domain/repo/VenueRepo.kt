@@ -2,6 +2,7 @@ package com.trm.opencoinmap.core.domain.repo
 
 import androidx.paging.PagingData
 import com.trm.opencoinmap.core.domain.model.GridMapBounds
+import com.trm.opencoinmap.core.domain.model.Loadable
 import com.trm.opencoinmap.core.domain.model.MapBounds
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.core.domain.model.Venue
@@ -25,7 +26,7 @@ interface VenueRepo {
     gridMapBounds: GridMapBounds,
     query: String,
     categories: List<String>
-  ): Flowable<List<MapMarker>>
+  ): Flowable<Result<List<MapMarker>>>
 
   fun getCategoriesWithCountInBounds(mapBounds: List<MapBounds>, query: String): Flowable<List<VenueCategoryCount>>
 
