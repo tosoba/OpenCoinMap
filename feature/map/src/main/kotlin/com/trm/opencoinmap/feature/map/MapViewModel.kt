@@ -11,6 +11,7 @@ import com.trm.opencoinmap.core.domain.model.*
 import com.trm.opencoinmap.core.domain.usecase.CoalesceGridMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetInitialMapCenterUseCase
 import com.trm.opencoinmap.core.domain.usecase.GetMarkersInBoundsUseCase
+import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningAndNoVenuesExistUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveUserLocationUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveVenueClickedEventUseCase
@@ -26,6 +27,7 @@ import com.trm.opencoinmap.feature.map.util.MapDefaults
 import com.trm.opencoinmap.feature.map.util.toBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -42,6 +44,7 @@ internal class MapViewModel
 constructor(
   savedStateHandle: SavedStateHandle,
   getInitialMapCenterUseCase: GetInitialMapCenterUseCase,
+  isVenuesSyncRunningAndNoVenuesExistUseCase: IsVenuesSyncRunningAndNoVenuesExistUseCase,
   saveMapCenterUseCase: SaveMapCenterUseCase,
   private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
   private val coalesceGridMapBoundsUseCase: CoalesceGridMapBoundsUseCase,
@@ -112,10 +115,16 @@ constructor(
       .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { (bounds, query, categories) ->
-        getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
+        isVenuesSyncRunningAndNoVenuesExistUseCase().switchMap {
+          if (it) {
+            Flowable.just(LoadingFirst)
+          } else {
+            getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
+              .subscribeOn(schedulers.io)
+          }
+        }
       }
       .doOnNext { if (it is Failed) Timber.e(it.throwable) }
-      .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy(
         onNext = {
