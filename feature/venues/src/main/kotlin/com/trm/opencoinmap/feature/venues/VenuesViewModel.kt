@@ -16,7 +16,7 @@ import com.trm.opencoinmap.core.domain.model.LatLng
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.usecase.GetVenuesPagingInBoundsUseCase
-import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningUseCase
+import com.trm.opencoinmap.core.domain.usecase.IsVenuesSyncRunningAndNoVenuesExistUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveCategoriesUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMapBoundsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveMarkersLoadingStatusUseCase
@@ -46,7 +46,7 @@ constructor(
   private val getVenuesPagingInBoundsUseCase: GetVenuesPagingInBoundsUseCase,
   receiveMarkersLoadingStatusUseCase: ReceiveMarkersLoadingStatusUseCase,
   receiveSheetSlideOffsetUseCase: ReceiveSheetSlideOffsetUseCase,
-  isVenuesSyncRunningUseCase: IsVenuesSyncRunningUseCase,
+  isVenuesSyncRunningAndNoVenuesExistUseCase: IsVenuesSyncRunningAndNoVenuesExistUseCase,
   private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
   receiveCategoriesUseCase: ReceiveCategoriesUseCase,
@@ -118,7 +118,7 @@ constructor(
   val sheetSlideOffset: LiveData<Float> = _sheetSlideOffset
 
   init {
-    isVenuesSyncRunningUseCase()
+    isVenuesSyncRunningAndNoVenuesExistUseCase()
       .distinctUntilChanged()
       .switchMap { isRunning ->
         if (isRunning) {
