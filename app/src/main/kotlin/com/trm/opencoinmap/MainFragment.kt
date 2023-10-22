@@ -53,7 +53,9 @@ import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.trm.opencoinmap.core.common.R as commonR
+import com.trm.opencoinmap.core.common.ext.hideAnimated
 import com.trm.opencoinmap.core.common.ext.requireAs
+import com.trm.opencoinmap.core.common.ext.showAnimated
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.core.common.ext.toPx
 import com.trm.opencoinmap.core.common.view.BottomSheetController
@@ -78,8 +80,8 @@ class MainFragment :
     lazy(LazyThreadSafetyMode.NONE) {
       SnackbarMessageObserver(
         view = binding.coordinatorLayout,
-        onShown = { binding.fabsLayout.isVisible = false },
-        onDismissed = { binding.fabsLayout.isVisible = true }
+        onShown = binding.fabsLayout::hideAnimated,
+        onDismissed = binding.fabsLayout::showAnimated
       )
     }
 
@@ -145,8 +147,10 @@ class MainFragment :
         as LockableBottomSheetBehavior<FragmentContainerView>
 
   override var bottomSheetContainerTopMarginPx: Int? = null
+
   override val bottomSheetSlideOffset: Float
     get() = if (sheetController.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+
   override val bottomSheetExpanded: Boolean
     get() = sheetController.state == BottomSheetBehavior.STATE_EXPANDED
 
