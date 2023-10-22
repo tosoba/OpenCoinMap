@@ -80,7 +80,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     addOnFirstLayoutListener { _, _, _, _, _ -> viewModel.onMapUpdated() }
 
     var firstPosition = true
-    viewModel.mapPosition.observe(viewLifecycleOwner) { (mapPosition, shouldUpdate) ->
+    viewModel.mapPositionUpdate.observe(viewLifecycleOwner) { (mapPosition, shouldUpdate) ->
       if (shouldUpdate || firstPosition) position = mapPosition
       firstPosition = false
     }

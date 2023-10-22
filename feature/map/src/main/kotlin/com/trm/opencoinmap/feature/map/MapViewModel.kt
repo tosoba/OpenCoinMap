@@ -44,18 +44,19 @@ internal class MapViewModel
 constructor(
   savedStateHandle: SavedStateHandle,
   getInitialMapCenterUseCase: GetInitialMapCenterUseCase,
-  isVenuesSyncRunningAndNoVenuesExistUseCase: IsVenuesSyncRunningAndNoVenuesExistUseCase,
-  saveMapCenterUseCase: SaveMapCenterUseCase,
+  private val isVenuesSyncRunningAndNoVenuesExistUseCase:
+    IsVenuesSyncRunningAndNoVenuesExistUseCase,
+  private val saveMapCenterUseCase: SaveMapCenterUseCase,
   private val getMarkersInBoundsUseCase: GetMarkersInBoundsUseCase,
   private val coalesceGridMapBoundsUseCase: CoalesceGridMapBoundsUseCase,
   private val sendMessageUseCase: SendMessageUseCase,
   private val sendMapBoundsUseCase: SendMapBoundsUseCase,
   receiveVenueClickedEventUseCase: ReceiveVenueClickedEventUseCase,
   private val sendVenueClickedEventUseCase: SendVenueClickedEventUseCase,
-  receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
-  receiveCategoriesUseCase: ReceiveCategoriesUseCase,
+  private val receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
+  private val receiveCategoriesUseCase: ReceiveCategoriesUseCase,
   receiveUserLocationUseCase: ReceiveUserLocationUseCase,
-  schedulers: RxSchedulers
+  private val schedulers: RxSchedulers
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -66,7 +67,7 @@ constructor(
     savedStateHandle.getLiveData(
       initialValue = MapPositionUpdate(position = MapPosition(), shouldUpdate = true)
     )
-  val mapPosition: LiveData<MapPositionUpdate> = _mapPositionUpdate
+  val mapPositionUpdate: LiveData<MapPositionUpdate> = _mapPositionUpdate
 
   private val _isLoading = MutableLiveData(false)
   val isLoading: LiveData<Boolean> = _isLoading
@@ -85,13 +86,38 @@ constructor(
           shouldUpdate = true
         )
       }
+      .defaultIfEmpty(MapPositionUpdate(position = MapPosition(), shouldUpdate = true))
       .subscribeOn(schedulers.io)
       .observeOn(schedulers.main)
       .subscribeBy(onSuccess = _mapPositionUpdate::setValue)
       .addTo(compositeDisposable)
 
+    observeMapBounds()
+
+    receiveVenueClickedEventUseCase()
+      .map {
+        MapPositionUpdate(
+          position =
+            MapPosition(
+              latitude = it.lat,
+              longitude = it.lon,
+              zoom = _mapPositionUpdate.value?.position?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
+            ),
+          shouldUpdate = true
+        )
+      }
+      .subscribeBy(onNext = _mapPositionUpdate::setValue, onError = Timber.Forest::e)
+      .addTo(compositeDisposable)
+
+    receiveUserLocationUseCase()
+      .subscribeBy(onNext = _userLocation::setValue)
+      .addTo(compositeDisposable)
+  }
+
+  private fun observeMapBounds() {
     val coalescedBounds =
       boundsRelay
+        .skip(1L)
         .concatMap {
           saveMapCenterUseCase(
               MapCenter(latitude = it.centerLat, longitude = it.centerLon, zoom = it.zoom)
@@ -134,25 +160,6 @@ constructor(
         },
         onError = Timber.Forest::e
       )
-      .addTo(compositeDisposable)
-
-    receiveVenueClickedEventUseCase()
-      .map {
-        MapPositionUpdate(
-          position =
-            MapPosition(
-              latitude = it.lat,
-              longitude = it.lon,
-              zoom = _mapPositionUpdate.value?.position?.zoom ?: MapDefaults.VENUE_LOCATION_ZOOM
-            ),
-          shouldUpdate = true
-        )
-      }
-      .subscribeBy(onNext = _mapPositionUpdate::setValue, onError = Timber.Forest::e)
-      .addTo(compositeDisposable)
-
-    receiveUserLocationUseCase()
-      .subscribeBy(onNext = _userLocation::setValue)
       .addTo(compositeDisposable)
   }
 
