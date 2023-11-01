@@ -162,7 +162,7 @@
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/about_sub_headline"
+                    android:text="@string/support_me_sub_headline"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 <LinearLayout
