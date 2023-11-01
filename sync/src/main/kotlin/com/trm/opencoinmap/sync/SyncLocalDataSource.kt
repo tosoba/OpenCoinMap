@@ -1,6 +1,8 @@
 package com.trm.opencoinmap.sync
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.trm.opencoinmap.core.domain.sync.SyncDataSource
@@ -19,9 +21,11 @@ constructor(
   private val isRunning = BehaviorProcessor.createDefault(true)
 
   init {
-    WorkManager.getInstance(context)
-      .getWorkInfosForUniqueWorkLiveData(SyncWorker.WORK_NAME)
-      .observeForever { isRunning.onNext(it.firstOrNull()?.state == WorkInfo.State.RUNNING) }
+    Handler(Looper.getMainLooper()).post {
+      WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkLiveData(SyncWorker.WORK_NAME)
+        .observeForever { isRunning.onNext(it.firstOrNull()?.state == WorkInfo.State.RUNNING) }
+    }
   }
 
   override fun isRunningFlowable(): Flowable<Boolean> = isRunning
