@@ -14,6 +14,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.DialogFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.trm.opencoinmap.core.common.R as commonR
@@ -39,6 +40,11 @@ class AboutFragment : DialogFragment(R.layout.fragment_about) {
   }
 
   private fun FragmentAboutBinding.initViews() {
+    TextViewCompat.setAutoSizeTextTypeWithDefaults(
+      aboutAppName,
+      TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM
+    )
+
     aboutClose.setOnClickListener { dismiss() }
 
     aboutOsmCreditLayout.setOnClickListener { goToUrlInBrowser("https://www.openstreetmap.org/") }
