@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -237,10 +236,9 @@ class MainFragment :
       )
 
     val focusRequester = remember(::FocusRequester)
-    val focusManager = LocalFocusManager.current
     val focused = viewModel.searchFocused.observeAsState(initial = false)
     LaunchedEffect(focused.value) {
-      if (focused.value) focusRequester.requestFocus() else focusManager.clearFocus()
+      if (focused.value) focusRequester.requestFocus() else focusRequester.freeFocus()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
