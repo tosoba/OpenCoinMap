@@ -20,23 +20,23 @@
                 android:id="@+id/about_app_icon"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:src="@drawable/open_coin_map_placeholder"
+                android:src="@drawable/open_coin_map"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toStartOf="@id/about_app_name"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/about_app_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="5dp"
+                android:paddingHorizontal="10dp"
                 android:text="@string/open_coin_map_headline"
                 android:textAlignment="center"
-                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/about_app_icon"
                 app:layout_constraintEnd_toStartOf="@id/about_close"
                 app:layout_constraintStart_toEndOf="@id/about_app_icon"
