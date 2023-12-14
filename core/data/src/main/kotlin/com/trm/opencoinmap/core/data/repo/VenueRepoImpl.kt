@@ -262,7 +262,7 @@ constructor(
   ): Flowable<List<MapMarker>> =
     venueDao
       .countMatchingQueryInMultipleBounds(
-        countMatchingInMultipleBoundsQuery(gridCells, query, categories)
+        buildCountMatchingInMultipleBoundsQuery(gridCells, query, categories)
       )
       .switchMap {
         val (selectVenueResults, clusterResults) = it.partition { (count) -> count < gridCellLimit }
@@ -276,23 +276,27 @@ constructor(
               size = count
             )
           }
-        venueDao
-          .selectMatchingQueryInMultipleBounds(
-            selectMatchingInMultipleBoundsQuery(
-              bounds =
-                selectVenueResults.map { (_, minLat, maxLat, minLon, maxLon) ->
-                  MapBounds(minLat, maxLat, minLon, maxLon)
-                },
-              query = query,
-              categories = categories
+        if (selectVenueResults.isEmpty()) {
+          Flowable.just(venuesClusters)
+        } else {
+          venueDao
+            .selectMatchingQueryInMultipleBounds(
+              buildSelectMatchingInMultipleBoundsQuery(
+                bounds =
+                  selectVenueResults.map { (_, minLat, maxLat, minLon, maxLon) ->
+                    MapBounds(minLat, maxLat, minLon, maxLon)
+                  },
+                query = query,
+                categories = categories
+              )
             )
-          )
-          .map { venues ->
-            venues.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } + venuesClusters
-          }
+            .map { venues ->
+              venues.map { venue -> MapMarker.SingleVenue(venue.asDomainModel()) } + venuesClusters
+            }
+        }
       }
 
-  private fun countMatchingInMultipleBoundsQuery(
+  private fun buildCountMatchingInMultipleBoundsQuery(
     bounds: List<MapBounds>,
     query: String,
     categories: List<String>
@@ -318,7 +322,7 @@ constructor(
       }
     )
 
-  private fun selectMatchingInMultipleBoundsQuery(
+  private fun buildSelectMatchingInMultipleBoundsQuery(
     bounds: List<MapBounds>,
     query: String,
     categories: List<String>
