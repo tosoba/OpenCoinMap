@@ -108,14 +108,14 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           venueDetailsWebView.isVisible = true
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
           venueDetailsWebsiteExpandedErrorGroup.isVisible = false
-          venueDetailsWebsiteCollapsedErrorGroup.isVisible = false
+          venueDetailsWebsiteCollapsedErrorGroup?.isVisible = false
         }
 
         override fun onPageFinished(view: WebView, url: String) {
           Timber.tag("WEB_VIEW").e("Finished $url")
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
           expandedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
-          collapsedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
+          collapsedGoBackButton?.isEnabled = venueDetailsWebView.canGoBack()
         }
 
         override fun onReceivedError(
@@ -173,15 +173,15 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
     venueDetailsWebView.isVisible = false
     val drawable = ContextCompat.getDrawable(requireContext(), errorDrawableRes)
-    collapsedErrorImageView.setImageDrawable(drawable)
+    collapsedErrorImageView?.setImageDrawable(drawable)
     expandedErrorImageView.setImageDrawable(drawable)
     expandedErrorTextView.setText(errorMessageRes)
     venueDetailsWebsiteExpandedErrorGroup.isVisible = true
-    venueDetailsWebsiteCollapsedErrorGroup.isVisible = true
+    venueDetailsWebsiteCollapsedErrorGroup?.isVisible = true
   }
 
   private fun FragmentVenueDetailsBinding.updateErrorGroupsAlpha(bottomSheetSlideOffset: Float) {
-    venueDetailsWebsiteCollapsedErrorGroup.referencedIds.forEach {
+    venueDetailsWebsiteCollapsedErrorGroup?.referencedIds?.forEach {
       binding.root.findViewById<View>(it).alpha = 1f - bottomSheetSlideOffset
     }
     venueDetailsWebsiteExpandedErrorGroup.referencedIds.forEach {
@@ -210,8 +210,8 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           updateViewsOnWebViewError(R.string.no_website, commonR.drawable.error)
           expandedGoBackButton.isEnabled = false
           expandedRefreshButton.isEnabled = false
-          collapsedGoBackButton.isEnabled = false
-          collapsedRefreshButton.isEnabled = false
+          collapsedGoBackButton?.isEnabled = false
+          collapsedRefreshButton?.isEnabled = false
         }
       updateActionsScrollView(viewState)
     }
