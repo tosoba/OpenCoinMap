@@ -95,10 +95,9 @@
         android:id="@+id/collapsed_bottom_barrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
         app:barrierMargin="167dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view" />
+        app:constraint_referenced_ids="venue_details_actions_scroll_view" />
 
     <com.trm.opencoinmap.feature.venue.details.VenueDetailsWebView
         android:id="@+id/venue_details_web_view"
