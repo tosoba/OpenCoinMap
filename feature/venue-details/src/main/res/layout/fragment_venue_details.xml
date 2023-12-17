@@ -112,26 +112,50 @@
         app:layout_constraintStart_toEndOf="@id/expanded_go_back_button"
         app:layout_constraintTop_toTopOf="@id/expanded_go_back_button" />
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/venue_details_progress_indicator"
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/collapsed_venue_details_error_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:constraint_referenced_ids="collapsed_venue_details_error_image_view,collapsed_venue_details_error_text_view,collapsed_venue_details_retry_button" />
+
+    <ImageView
+        android:id="@+id/collapsed_venue_details_error_image_view"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:contentDescription="@string/error_occurred"
+        android:src="@drawable/error"
+        app:layout_constraintEnd_toStartOf="@id/collapsed_venue_details_error_text_view"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/venue_details_drag_handle_view" />
+
+    <TextView
+        android:id="@+id/collapsed_venue_details_error_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/no_internet_connection"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/collapsed_venue_details_error_image_view"
+        app:layout_constraintEnd_toStartOf="@id/collapsed_venue_details_retry_button"
+        app:layout_constraintStart_toEndOf="@id/collapsed_venue_details_error_image_view"
+        app:layout_constraintTop_toTopOf="@id/collapsed_venue_details_error_image_view" />
 
     <Button
-        android:id="@+id/venue_details_retry_button"
+        android:id="@+id/collapsed_venue_details_retry_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_marginEnd="10dp"
         android:text="@string/retry"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/collapsed_venue_details_error_image_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/collapsed_venue_details_error_text_view"
+        app:layout_constraintTop_toTopOf="@id/collapsed_venue_details_error_image_view"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

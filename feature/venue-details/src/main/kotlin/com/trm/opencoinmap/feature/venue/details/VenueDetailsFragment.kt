@@ -33,7 +33,6 @@ import com.trm.opencoinmap.core.common.view.ScrollDirection
 import com.trm.opencoinmap.feature.venue.details.databinding.FragmentVenueDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
-import timber.log.Timber
 
 @AndroidEntryPoint
 class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
@@ -103,7 +102,6 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         var currentPageUrl: String? = null
 
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-          Timber.tag("WEB_VIEW").e("Started $url")
           currentPageUrl = url
           venueDetailsWebView.isVisible = true
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = true
@@ -112,7 +110,6 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         }
 
         override fun onPageFinished(view: WebView, url: String) {
-          Timber.tag("WEB_VIEW").e("Finished $url")
           venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
           expandedGoBackButton.isEnabled = venueDetailsWebView.canGoBack()
           collapsedGoBackButton?.isEnabled = venueDetailsWebView.canGoBack()
@@ -137,7 +134,6 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         }
 
         private fun onWebViewError(request: WebResourceRequest) {
-          Timber.tag("WEB_VIEW").e("Error occurred for ${request.url}")
           if (currentPageUrl != request.url.toString()) return
           updateViewsOnWebViewError(
             R.string.error_occurred_try_to_open_in_browser,
@@ -163,7 +159,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       }
     }
 
-    venueDetailsRetryButton.setOnClickListener { viewModel.onRetryClick() }
+    collapsedVenueDetailsRetryButton.setOnClickListener { viewModel.onRetryClick() }
   }
 
   private fun FragmentVenueDetailsBinding.updateViewsOnWebViewError(
@@ -187,6 +183,9 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     venueDetailsWebsiteExpandedErrorGroup.referencedIds.forEach {
       binding.root.findViewById<View>(it).alpha = bottomSheetSlideOffset
     }
+    collapsedVenueDetailsErrorGroup.referencedIds.forEach {
+      binding.root.findViewById<View>(it).alpha = 1f - bottomSheetSlideOffset
+    }
   }
 
   private fun FragmentVenueDetailsBinding.updateContainerLayoutParams(
@@ -200,9 +199,10 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
   }
 
   private fun FragmentVenueDetailsBinding.onViewState(viewState: VenueDetailsViewModel.ViewState) {
-    venueDetailsProgressIndicator.isVisible = viewState is VenueDetailsViewModel.ViewState.Loading
+    venueDetailsWebsiteLoadingProgressIndicator.isVisible =
+      viewState is VenueDetailsViewModel.ViewState.Loading
     venueDetailsWebView.isVisible = viewState is VenueDetailsViewModel.ViewState.Loaded
-    venueDetailsRetryButton.isVisible = viewState is VenueDetailsViewModel.ViewState.Error
+    collapsedVenueDetailsErrorGroup.isVisible = viewState is VenueDetailsViewModel.ViewState.Error
 
     if (viewState is VenueDetailsViewModel.ViewState.Loaded) {
       viewState.websiteUrl?.let(venueDetailsWebView::loadUrl)
