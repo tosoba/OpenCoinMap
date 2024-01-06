@@ -168,10 +168,14 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
   ) {
     venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
     venueDetailsWebView.isVisible = false
+
     val drawable = ContextCompat.getDrawable(requireContext(), errorDrawableRes)
     collapsedErrorImageView?.setImageDrawable(drawable)
     expandedErrorImageView.setImageDrawable(drawable)
+
+    collapsedErrorTextView?.setText(errorMessageRes)
     expandedErrorTextView.setText(errorMessageRes)
+
     venueDetailsWebsiteExpandedErrorGroup.isVisible = true
     venueDetailsWebsiteCollapsedErrorGroup?.isVisible = true
   }

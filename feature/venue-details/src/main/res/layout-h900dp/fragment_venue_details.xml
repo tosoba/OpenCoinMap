@@ -46,7 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="collapsed_error_image_view,collapsed_go_back_button,collapsed_refresh_button"
+        app:constraint_referenced_ids="collapsed_error_image_view,collapsed_error_text_view,collapsed_go_back_button,collapsed_refresh_button"
         tools:visibility="visible" />
 
     <ImageView
@@ -63,6 +63,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view" />
 
+    <TextView
+        android:id="@+id/collapsed_error_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:text="@string/error_occurred_try_to_open_in_browser"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/collapsed_go_back_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/collapsed_error_image_view"
+        app:layout_constraintTop_toBottomOf="@id/venue_details_actions_scroll_view"
+        app:layout_constraintVertical_chainStyle="packed" />
+
     <Button
         android:id="@+id/collapsed_go_back_button"
         android:layout_width="0dp"
@@ -72,24 +87,23 @@
         android:layout_marginEnd="5dp"
         android:ellipsize="end"
         android:text="@string/go_back"
-        app:layout_constraintBottom_toBottomOf="@id/collapsed_error_image_view"
+        app:layout_constraintBottom_toTopOf="@id/collapsed_bottom_barrier"
         app:layout_constraintEnd_toStartOf="@id/collapsed_refresh_button"
         app:layout_constraintStart_toEndOf="@id/collapsed_error_image_view"
-        app:layout_constraintTop_toTopOf="@id/collapsed_error_image_view" />
+        app:layout_constraintTop_toBottomOf="@id/collapsed_error_text_view" />
 
     <Button
         android:id="@+id/collapsed_refresh_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
         android:layout_marginEnd="10dp"
         android:ellipsize="end"
         android:text="@string/refresh"
-        app:layout_constraintBottom_toBottomOf="@id/collapsed_error_image_view"
+        app:layout_constraintBottom_toBottomOf="@id/collapsed_go_back_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/collapsed_go_back_button"
-        app:layout_constraintTop_toTopOf="@id/collapsed_error_image_view" />
+        app:layout_constraintTop_toTopOf="@id/collapsed_go_back_button" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/collapsed_bottom_barrier"
@@ -196,7 +210,6 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@string/no_internet_connection"
-        android:textAlignment="center"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/collapsed_venue_details_error_image_view"
         app:layout_constraintEnd_toStartOf="@id/collapsed_venue_details_retry_button"
