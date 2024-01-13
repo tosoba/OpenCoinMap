@@ -174,7 +174,7 @@ interface VenueDao {
         "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
         "AND (:categoriesCount = 0 OR category IN (:categories)) " +
         "AND EXISTS (" +
-        "SELECT * FROM bounds WHERE whole = TRUE " +
+        "SELECT * FROM bounds WHERE whole = 1 " +
         "UNION " +
         "SELECT * FROM bounds WHERE min_lat <= :minLat AND max_lat >= :maxLat AND min_lon <= :minLon AND max_lon >= :maxLon" +
         ")"

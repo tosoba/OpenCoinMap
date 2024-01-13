@@ -344,7 +344,7 @@ constructor(
           }
           append(
             """ AND EXISTS (
-        | SELECT * FROM bounds WHERE whole = TRUE
+        | SELECT * FROM bounds WHERE whole = 1
         | UNION
         | SELECT * FROM bounds WHERE min_lat <= $cellMinLat AND max_lat >= $cellMaxLat AND min_lon <= $cellMinLon AND max_lon >= $cellMaxLon)"""
               .trimMargin()
