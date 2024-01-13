@@ -141,42 +141,52 @@ constructor(
       .doOnNext { (bounds) -> sendMapBoundsUseCase(bounds.map(GridMapBounds::bounds)) }
       .toFlowable(BackpressureStrategy.LATEST)
       .switchMap { (bounds, query, categories) ->
-        isVenuesSyncRunningAndNoVenuesExistUseCase().switchMap {
-          if (it) {
-            Flowable.just(LoadingFirst)
-          } else {
-            getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
-              .subscribeOn(schedulers.io)
-          }
+        isVenuesSyncRunningAndNoVenuesExistUseCase().switchMap { syncAndNoVenues ->
+          if (syncAndNoVenues) {
+              Flowable.just(LoadingFirst)
+            } else {
+              getMarkersInBoundsUseCase(bounds = bounds, query = query, categories = categories)
+                .subscribeOn(schedulers.io)
+            }
+            .map { it to syncAndNoVenues }
         }
       }
-      .doOnNext { if (it is Failed) Timber.e(it.throwable) }
+      .doOnNext { (markers) -> if (markers is Failed) Timber.e(markers.throwable) }
       .observeOn(schedulers.main)
       .subscribeBy(
-        onNext = {
-          _isLoading.value = it is Loading
-          if (it is WithData) _markersInBounds.value = it.data
-          sendMessage(it)
+        onNext = { (markers, syncAndNoVenues) ->
+          _isLoading.value = markers is Loading
+          if (markers is WithData) _markersInBounds.value = markers.data
+          sendMessage(markers, syncAndNoVenues)
         },
         onError = Timber.Forest::e
       )
       .addTo(compositeDisposable)
   }
 
-  private fun sendMessage(loadable: Loadable<List<MapMarker>>) {
+  private fun sendMessage(loadable: Loadable<List<MapMarker>>, syncAndNoVenues: Boolean) {
     sendMessageUseCase(
-      if (loadable is Failed) {
-        Message.Shown(
-          textResId =
-            if (loadable.throwable is IOException) commonR.string.no_internet_connection
-            else commonR.string.error_occurred,
-          length =
-            if (loadable.throwable is IOException) Message.Length.INDEFINITE
-            else Message.Length.LONG,
-          action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
-        )
-      } else {
-        Message.Hidden
+      when {
+        loadable is Failed -> {
+          Message.Shown(
+            textResId =
+              if (loadable.throwable is IOException) commonR.string.no_internet_connection
+              else commonR.string.error_occurred,
+            length =
+              if (loadable.throwable is IOException) Message.Length.INDEFINITE
+              else Message.Length.LONG,
+            action = Message.Action(commonR.string.retry) { retryRelay.accept(Unit) }
+          )
+        }
+        syncAndNoVenues -> {
+          Message.Shown(
+            textResId = commonR.string.initial_sync_running,
+            length = Message.Length.INDEFINITE
+          )
+        }
+        else -> {
+          Message.Hidden
+        }
       }
     )
   }

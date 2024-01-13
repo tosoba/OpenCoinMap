@@ -4,4 +4,5 @@
     <string name="error_occurred">Error occurred.</string>
     <string name="browser_app_was_not_found">Browser app was not found.</string>
     <string name="retry">Retry</string>
+    <string name="initial_sync_running">Downloading venues. It will take a few seconds…</string>
 </resources>
