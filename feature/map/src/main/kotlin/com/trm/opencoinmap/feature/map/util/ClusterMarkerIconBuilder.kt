@@ -7,12 +7,14 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.MainThread
+import androidx.core.graphics.createBitmap
 import com.trm.opencoinmap.core.common.ext.lazyBitmapResource
 import com.trm.opencoinmap.feature.map.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.FragmentScoped
 import javax.inject.Inject
 import org.osmdroid.views.overlay.Marker
+import androidx.core.graphics.drawable.toDrawable
 
 @FragmentScoped
 internal class ClusterMarkerIconBuilder
@@ -40,10 +42,10 @@ constructor(@ApplicationContext private val context: Context) {
     val densityDpi = context.resources.displayMetrics.densityDpi
     val bitmap = getBitmapForSize(size)
     val icon =
-      Bitmap.createBitmap(
+      createBitmap(
         bitmap.getScaledWidth(densityDpi),
         bitmap.getScaledHeight(densityDpi),
-        bitmap.config
+        requireNotNull(bitmap.config),
       )
     val iconCanvas = Canvas(icon)
     iconCanvas.drawBitmap(bitmap, 0f, 0f, null)
@@ -53,9 +55,9 @@ constructor(@ApplicationContext private val context: Context) {
       size.toString(),
       Marker.ANCHOR_CENTER * icon.width,
       Marker.ANCHOR_CENTER * icon.height - textHeight / 2,
-      whiteClusterSizeTextPaint
+      whiteClusterSizeTextPaint,
     )
-    return BitmapDrawable(context.resources, icon)
+    return icon.toDrawable(context.resources)
   }
 
   private fun getBitmapForSize(size: Int): Bitmap =

@@ -15,14 +15,17 @@ enum class FlavorDimension {
 // purposes, or from a production backend server which supplies up-to-date, real content.
 // These two product flavors reflect this behaviour.
 @Suppress("EnumEntryName")
-enum class OpenCoinMapFlavor(val dimension: FlavorDimension, val applicationIdSuffix: String? = null) {
+enum class OpenCoinMapFlavor(
+  val dimension: FlavorDimension,
+  val applicationIdSuffix: String? = null,
+) {
   demo(FlavorDimension.contentType),
-  prod(FlavorDimension.contentType, ".prod")
+  prod(FlavorDimension.contentType, ".prod"),
 }
 
 fun Project.configureFlavors(
-  commonExtension: CommonExtension<*, *, *, *>,
-  flavorConfigurationBlock: ProductFlavor.(flavor: OpenCoinMapFlavor) -> Unit = {}
+  commonExtension: CommonExtension<*, *, *, *, *, *>,
+  flavorConfigurationBlock: ProductFlavor.(flavor: OpenCoinMapFlavor) -> Unit = {},
 ) {
   commonExtension.apply {
     flavorDimensions += FlavorDimension.contentType.name
