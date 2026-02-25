@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -18,12 +17,12 @@ import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
-import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.findParentFragmentOfType
 import com.trm.opencoinmap.core.common.ext.getSystemWindowTopInsetPx
 import com.trm.opencoinmap.core.common.ext.requireAs
@@ -33,6 +32,7 @@ import com.trm.opencoinmap.core.common.view.ScrollDirection
 import com.trm.opencoinmap.feature.venue.details.databinding.FragmentVenueDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
+import com.trm.opencoinmap.core.common.R as commonR
 
 @AndroidEntryPoint
 class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
@@ -90,12 +90,10 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
     viewModel.onWebViewScrolled(
       venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction)
     )
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      venueDetailsWebView.setOnScrollChangeListener { _, _, _, _, _ ->
-        viewModel.onWebViewScrolled(
-          venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction)
-        )
-      }
+    venueDetailsWebView.setOnScrollChangeListener { _, _, _, _, _ ->
+      viewModel.onWebViewScrolled(
+        venueDetailsWebView.canScrollVertically(ScrollDirection.UPWARDS.direction)
+      )
     }
     venueDetailsWebView.webViewClient =
       object : WebViewClient() {
@@ -118,7 +116,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         override fun onReceivedError(
           view: WebView,
           request: WebResourceRequest,
-          error: WebResourceError
+          error: WebResourceError,
         ) {
           super.onReceivedError(view, request, error)
           onWebViewError(request)
@@ -127,7 +125,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
         override fun onReceivedHttpError(
           view: WebView,
           request: WebResourceRequest,
-          errorResponse: WebResourceResponse
+          errorResponse: WebResourceResponse,
         ) {
           super.onReceivedHttpError(view, request, errorResponse)
           onWebViewError(request)
@@ -137,7 +135,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
           if (currentPageUrl != request.url.toString()) return
           updateViewsOnWebViewError(
             R.string.error_occurred_try_to_open_in_browser,
-            commonR.drawable.error
+            commonR.drawable.error,
           )
         }
       }
@@ -164,7 +162,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun FragmentVenueDetailsBinding.updateViewsOnWebViewError(
     @StringRes errorMessageRes: Int,
-    @DrawableRes errorDrawableRes: Int
+    @DrawableRes errorDrawableRes: Int,
   ) {
     venueDetailsWebsiteLoadingProgressIndicator.isVisible = false
     venueDetailsWebView.isVisible = false
@@ -194,7 +192,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun FragmentVenueDetailsBinding.updateContainerLayoutParams(
     searchBarHeightPx: Int,
-    offset: Float
+    offset: Float,
   ) {
     venueDetailsContainer.layoutParams =
       venueDetailsContainer.layoutParams.requireAs<ViewGroup.MarginLayoutParams>().apply {
@@ -268,7 +266,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun goToUrlInBrowser(url: String) {
     try {
-      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+      startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     } catch (ex: ActivityNotFoundException) {
       showAppNotFoundToast(commonR.string.browser_app_was_not_found)
     }
@@ -277,7 +275,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
   private fun goToGoogleMapsNavigate(lat: Double, lon: Double) {
     try {
       startActivity(
-        Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=$lat,$lon"))
+        Intent(Intent.ACTION_VIEW, "google.navigation:q=$lat,$lon".toUri())
           .setPackage("com.google.android.apps.maps")
       )
     } catch (ex: ActivityNotFoundException) {
@@ -298,7 +296,7 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
       startActivity(
         Intent.createChooser(
           Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null)),
-          null
+          null,
         )
       )
     } catch (ex: ActivityNotFoundException) {
@@ -308,10 +306,10 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun goToFacebook(name: String) {
     try {
-      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("fb://page/$name")))
+      startActivity(Intent(Intent.ACTION_VIEW, "fb://page/$name".toUri()))
     } catch (ex: ActivityNotFoundException) {
       try {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/$name")))
+        startActivity(Intent(Intent.ACTION_VIEW, "https://www.facebook.com/$name".toUri()))
       } catch (ex: ActivityNotFoundException) {
         showAppNotFoundToast(R.string.facebook_app_was_not_found)
       }
@@ -320,10 +318,10 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun goToInstagram(name: String) {
     try {
-      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/_u/$name")))
+      startActivity(Intent(Intent.ACTION_VIEW, "https://instagram.com/_u/$name".toUri()))
     } catch (ex: ActivityNotFoundException) {
       try {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/$name")))
+        startActivity(Intent(Intent.ACTION_VIEW, "https://instagram.com/$name".toUri()))
       } catch (ex: ActivityNotFoundException) {
         showAppNotFoundToast(R.string.instagram_app_was_not_found)
       }
@@ -332,10 +330,10 @@ class VenueDetailsFragment : Fragment(R.layout.fragment_venue_details) {
 
   private fun goToTwitter(name: String) {
     try {
-      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("twitter://user?screen_name=$name")))
+      startActivity(Intent(Intent.ACTION_VIEW, "twitter://user?screen_name=$name".toUri()))
     } catch (ex: ActivityNotFoundException) {
       try {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/#!/$name")))
+        startActivity(Intent(Intent.ACTION_VIEW, "https://twitter.com/#!/$name".toUri()))
       } catch (ex: ActivityNotFoundException) {
         showAppNotFoundToast(R.string.twitter_app_was_not_found)
       }

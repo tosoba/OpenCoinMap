@@ -16,19 +16,11 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         apply("opencoinmap.android.hilt")
       }
 
-      //      extensions.configure<LibraryExtension> {
-      //        defaultConfig {
-      //          testInstrumentationRunner =
-      // "com.trm.opencoinmap.core.testing.OpenCoinMapTestRunner"
-      //        }
-      //      }
-
       extensions.configure<LibraryExtension> { configureKotlinAndroid(this) }
 
       val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
       dependencies {
-        add("implementation", project(":core:ui"))
         add("implementation", project(":core:data"))
         add("implementation", project(":core:common"))
         add("implementation", project(":core:domain"))

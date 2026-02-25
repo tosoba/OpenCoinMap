@@ -32,8 +32,6 @@ include(":core:database")
 
 include(":core:network")
 
-include(":core:ui")
-
 include(":feature:about")
 
 include(":feature:categories")

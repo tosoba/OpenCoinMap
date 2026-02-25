@@ -42,7 +42,6 @@ dependencies {
   implementation(project(":core:datastore"))
   implementation(project(":core:domain"))
   implementation(project(":core:network"))
-  implementation(project(":core:ui"))
 
   implementation(project(":feature:about"))
   implementation(project(":feature:categories"))

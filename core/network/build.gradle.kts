@@ -21,7 +21,4 @@ dependencies {
   implementation(libs.retrofit.rxjava.adapter)
 
   api(libs.junit4)
-
-  testImplementation(libs.dagger.dagger)
-  kspTest(libs.dagger.compiler)
 }

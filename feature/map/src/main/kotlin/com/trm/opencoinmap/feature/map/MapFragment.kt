@@ -11,14 +11,22 @@ import com.trm.opencoinmap.core.common.ext.calculateLatLonDivisors
 import com.trm.opencoinmap.core.domain.model.LatLng
 import com.trm.opencoinmap.core.domain.model.MapMarker
 import com.trm.opencoinmap.feature.map.databinding.FragmentMapBinding
-import com.trm.opencoinmap.feature.map.util.*
+import com.trm.opencoinmap.feature.map.util.ClusterMarkerIconBuilder
+import com.trm.opencoinmap.feature.map.util.MapDefaults
+import com.trm.opencoinmap.feature.map.util.RadiusMarkerSizeClusterer
+import com.trm.opencoinmap.feature.map.util.addCopyrightOverlay
+import com.trm.opencoinmap.feature.map.util.clusterMarker
+import com.trm.opencoinmap.feature.map.util.position
+import com.trm.opencoinmap.feature.map.util.setDefaultConfig
+import com.trm.opencoinmap.feature.map.util.userLocationMarker
+import com.trm.opencoinmap.feature.map.util.venueMarker
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -61,13 +69,14 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         boundingBox = boundingBox,
         position = position,
         latDivisor = latDivisor,
-        lonDivisor = lonDivisor
+        lonDivisor = lonDivisor,
       )
     }
 
     addMapListener(
       object : MapListener {
         override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
+
         override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
 
         fun onMapInteraction(): Boolean {
@@ -102,7 +111,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
           controller.animateTo(
             marker.position,
             maxOf(MapDefaults.VENUE_LOCATION_ZOOM, zoomLevelDouble),
-            MapDefaults.ANIMATION_DURATION_MS
+            MapDefaults.ANIMATION_DURATION_MS,
           )
         }
       )
@@ -117,14 +126,14 @@ class MapFragment : Fragment(R.layout.fragment_map) {
       markerClusterer.invalidate()
 
       overlays.clear()
-      markers.map { marker ->
+      markers.forEach { marker ->
         when (marker) {
           is MapMarker.SingleVenue -> {
             markerClusterer.add(
               venueMarker(
                 marker = marker,
                 drawable = venueDrawable,
-                onClick = viewModel::onVenueMarkerClick
+                onClick = viewModel::onVenueMarkerClick,
               )
             )
           }
@@ -132,7 +141,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
             overlays.add(
               clusterMarker(
                 marker = marker,
-                drawable = clusterMarkerIconBuilder.build(size = marker.size)
+                drawable = clusterMarkerIconBuilder.build(size = marker.size),
               )
             )
           }
