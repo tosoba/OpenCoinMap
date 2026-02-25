@@ -8,6 +8,7 @@ import androidx.paging.rxjava3.flowable
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.trm.opencoinmap.core.data.ext.isValid
+import com.trm.opencoinmap.core.data.mapper.asDetailsEntity
 import com.trm.opencoinmap.core.data.mapper.asDomainModel
 import com.trm.opencoinmap.core.data.mapper.asEntity
 import com.trm.opencoinmap.core.database.OpenCoinMapDatabase
@@ -23,22 +24,27 @@ import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.repo.VenueRepo
 import com.trm.opencoinmap.core.domain.sync.SyncDataSource
 import com.trm.opencoinmap.core.domain.util.MapBoundsLimit
-import com.trm.opencoinmap.core.network.model.VenueDetailsResponseItem
-import com.trm.opencoinmap.core.network.model.VenueResponseItem
-import com.trm.opencoinmap.core.network.retrofit.CoinMapApi
+import com.trm.opencoinmap.core.network.model.BtcMapPlace
+import com.trm.opencoinmap.core.network.retrofit.BtcMapApi
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 import java.util.concurrent.Callable
 import javax.inject.Inject
+import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class VenueRepoImpl
 @Inject
 constructor(
-  private val coinMapApi: CoinMapApi,
+  private val btcMapApi: BtcMapApi,
   private val db: OpenCoinMapDatabase,
-  private val syncDataSource: SyncDataSource
+  private val syncDataSource: SyncDataSource,
 ) : VenueRepo {
   private val venueDao = db.venueDao()
   private val boundsDao = db.boundsDao()
@@ -49,19 +55,16 @@ constructor(
       .selectExistsWhole()
       .ignoreElement()
       .andThen(
-        coinMapApi
-          .getVenues()
-          .map { response ->
-            response.venues?.filter(VenueResponseItem::isValid)?.map(VenueResponseItem::asEntity)
-              ?: emptyList()
-          }
+        btcMapApi
+          .getPlaces()
+          .map { response -> response.filter(BtcMapPlace::isValid).map(BtcMapPlace::asEntity) }
           .flatMapCompletable(::insertVenuesInWholeBounds)
       )
 
   override fun getVenuesPagingInBounds(
     mapBounds: List<MapBounds>,
     query: String,
-    categories: List<String>
+    categories: List<String>,
   ): Flowable<PagingData<Venue>> =
     Pager(config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50)) {
         when (mapBounds.size) {
@@ -74,7 +77,7 @@ constructor(
               maxLon = lonEast,
               query = query,
               categories = categories,
-              categoriesCount = categories.size
+              categoriesCount = categories.size,
             )
           }
           2 -> {
@@ -91,7 +94,7 @@ constructor(
               maxLon2 = lonEast2,
               query = query,
               categories = categories,
-              categoriesCount = categories.size
+              categoriesCount = categories.size,
             )
           }
           else -> throw IllegalArgumentException("Invalid map bounds.")
@@ -102,7 +105,7 @@ constructor(
 
   override fun getCategoriesWithCountInBounds(
     mapBounds: List<MapBounds>,
-    query: String
+    query: String,
   ): Flowable<List<VenueCategoryCount>> =
     Flowable.defer {
         when (mapBounds.size) {
@@ -113,7 +116,7 @@ constructor(
               maxLat = latNorth,
               minLon = lonWest,
               maxLon = lonEast,
-              query = query
+              query = query,
             )
           }
           2 -> {
@@ -128,7 +131,7 @@ constructor(
               maxLat2 = latNorth2,
               minLon2 = lonWest2,
               maxLon2 = lonEast2,
-              query = query
+              query = query,
             )
           }
           else -> throw IllegalArgumentException("Invalid map bounds.")
@@ -140,11 +143,10 @@ constructor(
     venueDetailsDao
       .selectById(id)
       .switchIfEmpty(
-        coinMapApi
-          .getVenue(id)
-          .flatMapMaybe { (venue) ->
-            venue?.takeIf(VenueDetailsResponseItem::isValid)?.let { Maybe.just(it.asEntity()) }
-              ?: Maybe.empty()
+        btcMapApi
+          .getPlace(id)
+          .flatMapMaybe { venue ->
+            if (venue.isValid()) Maybe.just(venue.asDetailsEntity()) else Maybe.empty()
           }
           .flatMap { venueDetailsDao.upsert(it).andThen(Maybe.just(it)) }
       )
@@ -156,7 +158,7 @@ constructor(
   override fun getVenueMarkersInLatLngBounds(
     gridMapBounds: GridMapBounds,
     query: String,
-    categories: List<String>
+    categories: List<String>,
   ): Flowable<Result<List<MapMarker>>> {
     val (bounds, latDivisor, lonDivisor) = gridMapBounds
     val (latSouth, latNorth, lonWest, lonEast) = bounds
@@ -167,7 +169,7 @@ constructor(
             minLat = latSouth,
             maxLat = latNorth,
             minLon = lonWest,
-            maxLon = lonEast
+            maxLon = lonEast,
           )
           .flatMap { allExist ->
             if (allExist) {
@@ -179,7 +181,7 @@ constructor(
                     maxLon = lonEast,
                     query = query,
                     categories = categories,
-                    categoriesCount = categories.size
+                    categoriesCount = categories.size,
                   )
                   .map { Result.success(it) }
               } else {
@@ -189,7 +191,7 @@ constructor(
                     minLon = lonWest,
                     maxLon = lonEast,
                     query = query,
-                    categories = categories
+                    categories = categories,
                   )
                   .map { Result.success(it) }
                   .onErrorReturn { Result.failure(it) }
@@ -224,16 +226,16 @@ constructor(
                           minLat = latSouth,
                           latInc = (latNorth - latSouth) / latDivisor,
                           minLon = lonWest,
-                          lonInc = (lonEast - lonWest) / lonDivisor
+                          lonInc = (lonEast - lonWest) / lonDivisor,
                         ),
                       gridCellLimit = BOUNDS_MARKERS_LIMIT / (latDivisor * lonDivisor),
                       query = query,
-                      categories = categories
+                      categories = categories,
                     )
                     .map { Result.success(it) }
                 }
               },
-              onFailure = { Flowable.just(Result.failure(it)) }
+              onFailure = { Flowable.just(Result.failure(it)) },
             )
           }
       )
@@ -258,7 +260,7 @@ constructor(
     gridCells: List<MapBounds>,
     gridCellLimit: Int,
     query: String,
-    categories: List<String>
+    categories: List<String>,
   ): Flowable<List<MapMarker>> =
     venueDao
       .countMatchingQueryInMultipleBounds(
@@ -273,7 +275,7 @@ constructor(
               latNorth = maxLat,
               lonWest = minLon,
               lonEast = maxLon,
-              size = count
+              size = count,
             )
           }
         if (selectVenueResults.isEmpty()) {
@@ -287,7 +289,7 @@ constructor(
                     MapBounds(minLat, maxLat, minLon, maxLon)
                   },
                 query = query,
-                categories = categories
+                categories = categories,
               )
             )
             .map { venues ->
@@ -299,7 +301,7 @@ constructor(
   private fun buildCountMatchingInMultipleBoundsQuery(
     bounds: List<MapBounds>,
     query: String,
-    categories: List<String>
+    categories: List<String>,
   ): SupportSQLiteQuery =
     SimpleSQLiteQuery(
       buildString {
@@ -325,7 +327,7 @@ constructor(
   private fun buildSelectMatchingInMultipleBoundsQuery(
     bounds: List<MapBounds>,
     query: String,
-    categories: List<String>
+    categories: List<String>,
   ): SupportSQLiteQuery =
     SimpleSQLiteQuery(
       buildString {
@@ -363,7 +365,7 @@ constructor(
     minLat: Double,
     latInc: Double,
     minLon: Double,
-    lonInc: Double
+    lonInc: Double,
   ): List<MapBounds> {
     val gridCellBounds = ArrayList<MapBounds>(latDivisor * lonDivisor)
     repeat(latDivisor) { latMultiplier ->
@@ -377,7 +379,7 @@ constructor(
             latSouth = cellMinLat,
             latNorth = cellMaxLat,
             lonWest = cellMinLon,
-            lonEast = cellMaxLon
+            lonEast = cellMaxLon,
           )
         )
       }
@@ -392,10 +394,19 @@ constructor(
     maxLon: Double,
     query: String,
     categories: List<String>,
-  ): Single<Int> =
-    coinMapApi
-      .getVenues(minLat = minLat, maxLat = maxLat, minLon = minLon, maxLon = maxLon)
-      .map { it.venues?.map(VenueResponseItem::asDomainModel) ?: emptyList() }
+  ): Single<Int> {
+    val centerLat = (minLat + maxLat) / 2
+    val centerLon = (minLon + maxLon) / 2
+    val radiusKm = calculateDistanceInKm(centerLat, centerLon, maxLat, maxLon)
+
+    return btcMapApi
+      .searchPlaces(
+        lat = centerLat,
+        lon = centerLon,
+        radiusKm = radiusKm,
+        name = query.takeIf { it.isNotEmpty() },
+      )
+      .map { response -> response.map(BtcMapPlace::asDomainModel) }
       .flatMap { venues ->
         insertVenuesInBounds(
           venues = venues.map(Venue::asEntity),
@@ -407,6 +418,22 @@ constructor(
           categories = categories,
         )
       }
+  }
+
+  private fun calculateDistanceInKm(
+    lat1: Double,
+    lon1: Double,
+    lat2: Double,
+    lon2: Double,
+  ): Double {
+    val r = 6371.0 // Earth radius in km
+    val dLat = (lat2 - lat1) * PI / 180.0
+    val dLon = (lon2 - lon1) * PI / 180.0
+    val a =
+      sin(dLat / 2).pow(2) + cos(lat1 * PI / 180.0) * cos(lat2 * PI / 180.0) * sin(dLon / 2).pow(2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return r * c
+  }
 
   private fun insertVenuesInBounds(
     venues: List<VenueEntity>,
@@ -415,7 +442,7 @@ constructor(
     minLon: Double,
     maxLon: Double,
     query: String,
-    categories: List<String>
+    categories: List<String>,
   ): Single<Int> =
     Single.fromCallable {
       db.runInTransaction(
@@ -427,7 +454,7 @@ constructor(
               maxLat = maxLat,
               minLon = minLon,
               maxLon = maxLon,
-              whole = false
+              whole = false,
             )
           )
           venueDao.countMatchingQueryInBounds(
@@ -437,7 +464,7 @@ constructor(
             maxLon = maxLon,
             query = query,
             categories = categories,
-            categoriesCount = categories.size
+            categoriesCount = categories.size,
           )
         }
       )
@@ -454,7 +481,7 @@ constructor(
             maxLat = MapBoundsLimit.MAX_LAT,
             minLon = MapBoundsLimit.MIN_LON,
             maxLon = MapBoundsLimit.MAX_LON,
-            whole = true
+            whole = true,
           )
         )
       }

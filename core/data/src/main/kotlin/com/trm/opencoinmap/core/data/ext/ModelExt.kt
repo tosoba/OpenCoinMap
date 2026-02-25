@@ -1,9 +1,5 @@
 package com.trm.opencoinmap.core.data.ext
 
-import com.trm.opencoinmap.core.network.model.VenueDetailsResponseItem
-import com.trm.opencoinmap.core.network.model.VenueResponseItem
+import com.trm.opencoinmap.core.network.model.BtcMapPlace
 
-fun VenueResponseItem.isValid(): Boolean =
-  id != null && lat != null && lon != null && category != null && name != null && createdOn != null
-
-fun VenueDetailsResponseItem.isValid(): Boolean = id != null
+fun BtcMapPlace.isValid(): Boolean = id != 0L && lat != 0.0 && lon != 0.0

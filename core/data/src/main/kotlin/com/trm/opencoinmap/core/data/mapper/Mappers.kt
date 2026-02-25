@@ -4,17 +4,17 @@ import com.trm.opencoinmap.core.database.entity.VenueDetailsEntity
 import com.trm.opencoinmap.core.database.entity.VenueEntity
 import com.trm.opencoinmap.core.domain.model.Venue
 import com.trm.opencoinmap.core.domain.model.VenueDetails
-import com.trm.opencoinmap.core.network.model.VenueDetailsResponseItem
-import com.trm.opencoinmap.core.network.model.VenueResponseItem
+import com.trm.opencoinmap.core.network.model.BtcMapPlace
+import java.time.Instant
 
-fun VenueResponseItem.asEntity(): VenueEntity =
+fun BtcMapPlace.asEntity(): VenueEntity =
   VenueEntity(
-    id = requireNotNull(id),
-    lat = requireNotNull(lat),
-    lon = requireNotNull(lon),
-    category = requireNotNull(category).trim(),
-    name = requireNotNull(name).trim(),
-    createdOn = requireNotNull(createdOn)
+    id = id,
+    lat = lat,
+    lon = lon,
+    category = icon ?: "unknown",
+    name = name ?: "Unknown",
+    createdOn = createdAt?.let { Instant.parse(it).toEpochMilli() } ?: 0L,
   )
 
 fun VenueEntity.asDomainModel(): Venue =
@@ -27,78 +27,48 @@ fun Venue.asEntity(): VenueEntity =
     lon = lon,
     category = category,
     name = name,
-    createdOn = createdOn
-  )
-
-fun VenueResponseItem.asDomainModel(): Venue =
-  Venue(
-    id = requireNotNull(id),
-    lat = requireNotNull(lat),
-    lon = requireNotNull(lon),
-    category = requireNotNull(category),
-    name = requireNotNull(name),
-    createdOn = requireNotNull(createdOn)
-  )
-
-fun VenueDetailsResponseItem.asDomainModel(): VenueDetails =
-  VenueDetails(
-    category = category,
-    city = city,
-    coins = coins,
-    country = country,
     createdOn = createdOn,
+  )
+
+fun BtcMapPlace.asDomainModel(): Venue =
+  Venue(
+    id = id,
+    lat = lat,
+    lon = lon,
+    category = icon ?: "unknown",
+    name = name ?: "Unknown",
+    createdOn = createdAt?.let { Instant.parse(it).toEpochMilli() } ?: 0L,
+  )
+
+fun BtcMapPlace.asDetailsEntity(): VenueDetailsEntity =
+  VenueDetailsEntity(
+    category = icon,
+    city = null,
+    coins = listOf("BTC"),
+    country = null,
+    createdOn = createdAt?.let { Instant.parse(it).epochSecond.toInt() },
     description = description,
     email = email,
     facebook = facebook,
-    fax = fax,
-    geolocationDegrees = geolocationDegrees,
-    houseNumber = houseNumber,
+    fax = null,
+    geolocationDegrees = null,
+    houseNumber = null,
     id = id,
     instagram = instagram,
     lat = lat,
-    logoUrl = logoUrl,
+    logoUrl = image,
     lon = lon,
     name = name,
-    nameAscii = nameAscii,
+    nameAscii = name,
     phone = phone,
-    postcode = postcode,
-    srcId = srcId,
-    state = state,
-    street = street,
+    postcode = null,
+    srcId = osmId,
+    state = null,
+    street = address,
     twitter = twitter,
-    updatedOn = updatedOn,
-    website = website
-  )
-
-fun VenueDetailsResponseItem.asEntity(): VenueDetailsEntity =
-  VenueDetailsEntity(
-    category = category,
-    city = city,
-    coins = coins,
-    country = country,
-    createdOn = createdOn,
-    description = description,
-    email = email,
-    facebook = facebook,
-    fax = fax,
-    geolocationDegrees = geolocationDegrees,
-    houseNumber = houseNumber,
-    id = requireNotNull(id),
-    instagram = instagram,
-    lat = lat,
-    logoUrl = logoUrl,
-    lon = lon,
-    name = name,
-    nameAscii = nameAscii,
-    phone = phone,
-    postcode = postcode,
-    srcId = srcId,
-    state = state,
-    street = street,
-    twitter = twitter,
-    updatedOn = updatedOn,
+    updatedOn = updatedAt?.let { Instant.parse(it).epochSecond.toInt() },
     website = website,
-    insertedAtTimestamp = System.currentTimeMillis()
+    insertedAtTimestamp = System.currentTimeMillis(),
   )
 
 fun VenueDetailsEntity.asDomainModel(): VenueDetails =
@@ -128,5 +98,5 @@ fun VenueDetailsEntity.asDomainModel(): VenueDetails =
     street = street,
     twitter = twitter,
     updatedOn = updatedOn,
-    website = website
+    website = website,
   )
