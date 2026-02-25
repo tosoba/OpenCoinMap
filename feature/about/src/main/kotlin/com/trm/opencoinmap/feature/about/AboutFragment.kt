@@ -4,25 +4,24 @@ import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.net.toUri
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.DialogFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.trm.opencoinmap.core.common.R as commonR
 import com.trm.opencoinmap.core.common.ext.toDp
 import com.trm.opencoinmap.feature.about.databinding.FragmentAboutBinding
-import androidx.core.net.toUri
+import com.trm.opencoinmap.core.common.R as commonR
 
 class AboutFragment : DialogFragment(R.layout.fragment_about) {
   private val binding by viewBinding(FragmentAboutBinding::bind)
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
     super.onCreateDialog(savedInstanceState).apply {
-      window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+      window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
     }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
