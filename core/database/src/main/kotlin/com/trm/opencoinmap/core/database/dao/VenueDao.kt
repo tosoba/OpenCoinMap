@@ -29,7 +29,7 @@ interface VenueDao {
     maxLon: Double,
     query: String,
     categories: List<String>,
-    categoriesCount: Int
+    categoriesCount: Int,
   ): Flowable<List<VenueEntity>>
 
   @Query(COUNT_MATCHING_QUERY_IN_BOUNDS)
@@ -40,7 +40,7 @@ interface VenueDao {
     maxLon: Double,
     query: String,
     categories: List<String>,
-    categoriesCount: Int
+    categoriesCount: Int,
   ): Single<Int>
 
   @Query(SELECT_MATCHING_QUERY_IN_EXISTING_BOUNDS)
@@ -51,7 +51,7 @@ interface VenueDao {
     maxLon: Double,
     query: String,
     categories: List<String>,
-    categoriesCount: Int
+    categoriesCount: Int,
   ): List<VenueEntity>
 
   @Query(SELECT_MATCHING_QUERY_IN_BOUNDS)
@@ -62,7 +62,7 @@ interface VenueDao {
     maxLon: Double,
     query: String,
     categories: List<String>,
-    categoriesCount: Int
+    categoriesCount: Int,
   ): PagingSource<Int, VenueEntity>
 
   @Query(
@@ -84,7 +84,7 @@ interface VenueDao {
     maxLon2: Double,
     query: String,
     categories: List<String>,
-    categoriesCount: Int
+    categoriesCount: Int,
   ): PagingSource<Int, VenueEntity>
 
   @Query(COUNT_MATCHING_QUERY_IN_BOUNDS)
@@ -95,7 +95,7 @@ interface VenueDao {
     maxLon: Double,
     query: String,
     categories: List<String>,
-    categoriesCount: Int
+    categoriesCount: Int,
   ): Int
 
   @RawQuery(observedEntities = [VenueEntity::class, BoundsEntity::class])
@@ -107,46 +107,27 @@ interface VenueDao {
   fun selectMatchingQueryInMultipleBounds(query: SupportSQLiteQuery): Flowable<List<VenueEntity>>
 
   @Query(
-    "SELECT * FROM " +
-      "(SELECT category, COUNT(*) AS count FROM venue " +
+    "SELECT category, COUNT(*) AS count FROM venue " +
       "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
       "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
       "GROUP BY category " +
-      "UNION " +
-      "SELECT category, 0 AS count FROM venue " +
-      "WHERE category NOT IN " +
-      "(SELECT category FROM venue " +
-      "WHERE lat >= :minLat AND lat <= :maxLat AND lon >= :minLon AND lon <= :maxLon " +
-      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%')" +
-      ")" +
-      ") " +
-      "ORDER BY category"
+      "ORDER BY count DESC, category"
   )
   fun selectCategoriesWithCountInBounds(
     minLat: Double,
     maxLat: Double,
     minLon: Double,
     maxLon: Double,
-    query: String
+    query: String,
   ): Flowable<List<VenueCategoryCountResult>>
 
   @Query(
-    "SELECT * FROM " +
-      "(SELECT category, COUNT(*) AS count FROM venue " +
+    "SELECT category, COUNT(*) AS count FROM venue " +
       "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
       "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
       "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%') " +
       "GROUP BY category " +
-      "UNION " +
-      "SELECT category, 0 AS count FROM venue " +
-      "WHERE category NOT IN " +
-      "(SELECT category FROM venue " +
-      "WHERE ((lat >= :minLat1 AND lat <= :maxLat1 AND lon >= :minLon1 AND lon <= :maxLon1) " +
-      "OR (lat >= :minLat2 AND lat <= :maxLat2 AND lon >= :minLon2 AND lon <= :maxLon2)) " +
-      "AND (:query = '' OR LOWER(name) LIKE '%' || LOWER(:query) || '%')" +
-      ")" +
-      ") " +
-      "ORDER BY category"
+      "ORDER BY count DESC, category"
   )
   fun selectCategoriesWithCountIn2Bounds(
     minLat1: Double,
@@ -157,7 +138,7 @@ interface VenueDao {
     maxLat2: Double,
     minLon2: Double,
     maxLon2: Double,
-    query: String
+    query: String,
   ): Flowable<List<VenueCategoryCountResult>>
 
   companion object {
