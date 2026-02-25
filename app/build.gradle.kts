@@ -1,6 +1,7 @@
 plugins {
   id("opencoinmap.android.application")
   id("opencoinmap.android.hilt")
+  alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -30,10 +31,6 @@ android {
   }
 
   buildFeatures { compose = true }
-
-  composeOptions { kotlinCompilerExtensionVersion = "1.4.3" }
-
-  kotlinOptions { jvmTarget = "17" }
 
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }
@@ -72,8 +69,6 @@ dependencies {
   implementation(libs.androidx.compose.runtime)
   implementation(libs.androidx.compose.runtime.livedata)
   implementation(libs.androidx.compose.ui)
-
-  implementation(libs.liveEvent)
 
   implementation(libs.paging.runtime)
   implementation(libs.paging.rx)

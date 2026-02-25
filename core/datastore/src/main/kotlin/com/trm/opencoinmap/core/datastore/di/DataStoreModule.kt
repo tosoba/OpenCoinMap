@@ -10,5 +10,5 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface DataStoreModule {
-  @Binds fun PreferenceDataSourceImpl.preferenceDataStore(): PreferenceDataSource
+  @Binds fun preferenceDataStore(impl: PreferenceDataSourceImpl): PreferenceDataSource
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.common.util.LiveEvent
 import com.trm.opencoinmap.core.domain.model.VenueDetails
 import com.trm.opencoinmap.core.domain.usecase.GetVenueDetailsUseCase
 import com.trm.opencoinmap.core.domain.usecase.ReceiveSheetSlideOffsetUseCase
@@ -16,8 +16,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
-import javax.inject.Inject
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 internal class VenueDetailsViewModel
@@ -137,11 +137,17 @@ constructor(
 
   sealed interface ViewEvent {
     data class OpenInBrowser(val url: String) : ViewEvent
+
     data class Navigate(val lat: Double, val lon: Double) : ViewEvent
+
     data class Dial(val number: String) : ViewEvent
+
     data class Mail(val address: String) : ViewEvent
+
     data class Facebook(val name: String) : ViewEvent
+
     data class Twitter(val name: String) : ViewEvent
+
     data class Instagram(val name: String) : ViewEvent
   }
 }

@@ -10,5 +10,5 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface SyncModule {
-  @Binds fun SyncLocalDataSource.bind(): SyncDataSource
+  @Binds fun bind(impl: SyncLocalDataSource): SyncDataSource
 }

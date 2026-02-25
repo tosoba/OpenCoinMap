@@ -23,5 +23,5 @@ dependencies {
   api(libs.junit4)
 
   testImplementation(libs.dagger.dagger)
-  kaptTest(libs.dagger.compiler)
+  kspTest(libs.dagger.compiler)
 }

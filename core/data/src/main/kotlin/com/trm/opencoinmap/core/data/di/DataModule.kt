@@ -10,5 +10,5 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface DataModule {
-  @Binds fun VenueRepoImpl.bind(): VenueRepo
+  @Binds fun bind(impl: VenueRepoImpl): VenueRepo
 }

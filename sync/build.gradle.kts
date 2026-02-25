@@ -16,7 +16,7 @@ dependencies {
   implementation(libs.rx.relay)
 
   implementation(libs.hilt.ext.work)
-  kapt(libs.hilt.ext.compiler)
+  ksp(libs.hilt.ext.compiler)
 
   implementation(libs.timber)
 

@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.common.util.LiveEvent
 import com.trm.opencoinmap.core.common.view.getLiveData
 import com.trm.opencoinmap.core.domain.model.Message
 import com.trm.opencoinmap.core.domain.model.Venue
@@ -27,8 +27,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
-import javax.inject.Inject
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 internal class MainViewModel
@@ -44,7 +44,7 @@ constructor(
   getTrimmedQueryOrEmptyUseCase: GetTrimmedQueryOrEmptyUseCase,
   receiveWebViewScrollableUpwardsUseCase: ReceiveWebViewScrollableUpwardsUseCase,
   private val getCurrentUserLocationUseCase: GetCurrentUserLocationUseCase,
-  private val sendUserLocationUseCase: SendUserLocationUseCase
+  private val sendUserLocationUseCase: SendUserLocationUseCase,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -206,7 +206,7 @@ constructor(
             Message.Shown(
               textResId = R.string.location_error,
               length = Message.Length.LONG,
-              action = Message.Action(R.string.try_again, ::onLocationPermissionGranted)
+              action = Message.Action(R.string.try_again, ::onLocationPermissionGranted),
             )
           )
           _isLocationLoading.value = false
@@ -215,7 +215,7 @@ constructor(
         onSuccess = {
           sendUserLocationUseCase(it)
           _isLocationLoading.value = false
-        }
+        },
       )
       .addTo(compositeDisposable)
   }
@@ -225,7 +225,7 @@ constructor(
       Message.Shown(
         textResId = R.string.location_permission_denied,
         length = Message.Length.LONG,
-        action = Message.Action(R.string.settings) { _goToAppSettings.value = Unit }
+        action = Message.Action(R.string.settings) { _goToAppSettings.value = Unit },
       )
     )
   }

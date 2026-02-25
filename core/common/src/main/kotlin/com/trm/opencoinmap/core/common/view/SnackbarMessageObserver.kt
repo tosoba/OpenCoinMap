@@ -20,17 +20,15 @@ class SnackbarMessageObserver(
     snackbar = null
   }
 
-  override fun onChanged(message: Message?) {
-    if (message == null) return
-
+  override fun onChanged(value: Message) {
     snackbar =
-      when (message) {
+      when (value) {
         is Message.Hidden -> {
           snackbar?.dismiss()
           null
         }
         is Message.Shown -> {
-          Snackbar.make(view, message.textResId, message.length.toSnackbarLength())
+          Snackbar.make(view, value.textResId, value.length.toSnackbarLength())
             .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
             .addCallback(
               object : Snackbar.Callback() {
@@ -44,7 +42,7 @@ class SnackbarMessageObserver(
               }
             )
             .run {
-              val action = message.action
+              val action = value.action
               if (action == null) this else setAction(action.labelResId) { action() }
             }
             .apply(Snackbar::show)

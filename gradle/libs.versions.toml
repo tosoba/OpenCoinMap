@@ -1,63 +1,61 @@
 [versions]
-accompanist = "0.28.0"
+accompanist = "0.36.0"
 androidDesugarJdkLibs = "2.1.5"
 androidGradlePlugin = "8.9.0"
-androidxAppCompat = "1.5.1"
-androidxBrowser = "1.4.0"
-androidxComposeBom = "2023.06.01"
-androidxComposeCompiler = "1.4.3"
-androidxCore = "1.9.0"
-androidxCoreSplashscreen = "1.0.1"
-androidxDataStore = "1.0.0"
-androidxEspresso = "3.5.0"
-androidxFragment = "1.3.6"
-androidxLifecycle = "2.6.0-alpha03"
-androidxMacroBenchmark = "1.1.1"
-androidxMetrics = "1.0.0-alpha03"
-androidxNavigation = "2.5.3"
-androidxProfileinstaller = "1.2.1"
-androidxStartup = "1.1.1"
-androidxTestCore = "1.5.0"
-androidxTestExt = "1.1.4"
-androidxTestRules = "1.5.0"
-androidxTestRunner = "1.5.1"
-androidxTracing = "1.1.0"
-androidxUiAutomator = "2.2.0"
-androidxWindowManager = "1.0.0"
-androidxWork = "2.7.1"
-coil = "2.2.2"
-constraintLayout = "2.1.4"
-coroutinesRx = "1.3.9"
+androidxAppCompat = "1.7.1"
+androidxBrowser = "1.9.0"
+androidxComposeBom = "2026.02.00"
+androidxCore = "1.17.0"
+androidxCoreSplashscreen = "1.2.0"
+androidxDataStore = "1.2.0"
+androidxEspresso = "3.7.0"
+androidxFragment = "1.8.9"
+androidxLifecycle = "2.10.0"
+androidxMacroBenchmark = "1.4.1"
+androidxMetrics = "1.0.0"
+androidxNavigation = "2.9.7"
+androidxProfileinstaller = "1.4.1"
+androidxStartup = "1.2.0"
+androidxTestCore = "1.7.0"
+androidxTestExt = "1.3.0"
+androidxTestRules = "1.7.0"
+androidxTestRunner = "1.7.0"
+androidxTracing = "1.3.0"
+androidxUiAutomator = "2.3.0"
+androidxWindowManager = "1.5.1"
+androidxWork = "2.11.1"
+coil = "2.7.0"
+constraintLayout = "2.2.1"
+coroutinesRx = "1.10.2"
 facebookShimmer = "0.5.0"
-hilt = "2.44.2"
-hiltExt = "1.0.0"
+hilt = "2.58"
+hiltExt = "1.3.0"
 junit4 = "4.13.2"
-kotlin = "1.8.10"
-kotlinxDatetime = "0.4.0"
-kotlinxSerializationJson = "1.4.1"
-ksp = "1.8.10-1.0.9"
-lint = "30.3.1"
-liveEvent = "1.3.0"
-material = "1.9.0"
+kotlin = "2.3.10"
+kotlinxDatetime = "0.7.1"
+kotlinxSerializationJson = "1.10.0"
+ksp = "2.3.6"
+lint = "32.0.1"
+material = "1.13.0"
 materialLetterIcon = "0.2.3"
-okhttp = "4.10.0"
-osmdroid = "6.1.14"
+okhttp = "5.3.2"
+osmdroid = "6.1.20"
 osmbonuspack = "6.9.0"
-paging = "3.1.1"
-playServicesLocation = "21.0.1"
-protobuf = "3.21.12"
-protobufPlugin = "0.8.19"
-retrofit = "2.9.0"
-retrofitKotlinxSerializationJson = "0.8.0"
+paging = "3.4.1"
+playServicesLocation = "21.3.0"
+protobuf = "4.33.5"
+protobufPlugin = "0.9.6"
+retrofit = "3.0.0"
+retrofitKotlinxSerializationJson = "1.0.0"
 retrofitRxJavaAdapter = "3.0.0"
-room = "2.5.0"
+room = "2.8.4"
 rxAndroid = "3.0.2"
-rxJava = "3.1.5"
+rxJava = "3.1.12"
 rxKotlin = "3.0.1"
 secrets = "2.0.1"
 timber = "5.0.1"
-turbine = "0.12.1"
-viewBindingPropertyDelegate = "1.5.8"
+turbine = "1.2.1"
+viewBindingPropertyDelegate = "1.5.9"
 
 [libraries]
 accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
@@ -119,7 +117,6 @@ kotlinx-coroutines-rx3 = { group = "org.jetbrains.kotlinx", name = "kotlinx-coro
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lint-api = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
-liveEvent = { group = "com.github.hadilq", name = "live-event", version.ref = "liveEvent" }
 materialLetterIcon = { group = "com.github.ivbaranov", name = "materiallettericon", version.ref = "materialLetterIcon" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
@@ -150,6 +147,7 @@ viewBinding-propertyDelegate = { group = "com.github.kirich1409", name = "viewbi
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -158,6 +156,7 @@ android-test = { id = "com.android.test", version.ref = "androidGradlePlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }

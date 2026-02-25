@@ -13,8 +13,6 @@ dependencies {
   implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-  implementation(libs.liveEvent)
-
   implementation(libs.paging.common)
   implementation(libs.paging.runtime)
   implementation(libs.paging.rx)

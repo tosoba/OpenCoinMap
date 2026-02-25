@@ -11,7 +11,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
-import com.hadilq.liveevent.LiveEvent
+import com.trm.opencoinmap.core.common.util.LiveEvent
 import com.trm.opencoinmap.core.domain.model.LatLng
 import com.trm.opencoinmap.core.domain.model.MarkersLoadingStatus
 import com.trm.opencoinmap.core.domain.model.Venue
@@ -32,10 +32,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -51,7 +51,7 @@ constructor(
   receiveVenueQueryUseCase: ReceiveVenueQueryUseCase,
   receiveCategoriesUseCase: ReceiveCategoriesUseCase,
   receiveUserLocationUseCase: ReceiveUserLocationUseCase,
-  schedulers: RxSchedulers
+  schedulers: RxSchedulers,
 ) : ViewModel() {
   private val compositeDisposable = CompositeDisposable()
 
@@ -134,7 +134,7 @@ constructor(
               receiveCategoriesUseCase()
                 .startWithItem(emptyList())
                 .distinctUntilChanged()
-                .toFlowable(BackpressureStrategy.LATEST)
+                .toFlowable(BackpressureStrategy.LATEST),
             )
             .switchMap { (bounds, query, categories) ->
               Flowable.combineLatest(
@@ -142,7 +142,7 @@ constructor(
                 receiveUserLocationUseCase()
                   .map<UserLocation>(UserLocation::Found)
                   .startWithItem(UserLocation.Empty)
-                  .toFlowable(BackpressureStrategy.LATEST)
+                  .toFlowable(BackpressureStrategy.LATEST),
               ) { paging, userLocation ->
                 paging.map { venue ->
                   VenueListItem(
@@ -159,11 +159,11 @@ constructor(
                             venue.lon,
                             userLocation.location.latitude,
                             userLocation.location.longitude,
-                            results
+                            results,
                           )
                           results.firstOrNull()
                         }
-                      }?.toDouble()
+                      }?.toDouble(),
                   )
                 }
               }

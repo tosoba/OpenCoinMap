@@ -11,7 +11,5 @@ dependencies {
   implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-  implementation(libs.liveEvent)
-
   implementation(libs.timber)
 }

@@ -13,7 +13,7 @@ import javax.inject.Inject
 @Module
 @InstallIn(SingletonComponent::class)
 interface SchedulersModule {
-  @Binds fun AppRxSchedulers.bind(): RxSchedulers
+  @Binds fun bindRxSchedulers(impl: AppRxSchedulers): RxSchedulers
 }
 
 class AppRxSchedulers @Inject constructor() : RxSchedulers {
