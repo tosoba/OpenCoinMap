@@ -3,12 +3,24 @@ package com.trm.opencoinmap.feature.venue.details
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.webkit.CookieManager
 import android.webkit.WebView
 
 class VenueDetailsWebView(context: Context, attrs: AttributeSet?) : WebView(context, attrs) {
   constructor(context: Context) : this(context, null)
 
   var interactionDisabled = false
+
+  init {
+    with(settings) {
+      javaScriptEnabled = true
+      domStorageEnabled = true
+    }
+    with(CookieManager.getInstance()) {
+      setAcceptCookie(true)
+      setAcceptThirdPartyCookies(this@VenueDetailsWebView, true)
+    }
+  }
 
   override fun onTouchEvent(event: MotionEvent?): Boolean {
     if (!interactionDisabled) return super.onTouchEvent(event)
