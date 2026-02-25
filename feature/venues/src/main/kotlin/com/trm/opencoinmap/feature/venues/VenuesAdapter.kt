@@ -26,12 +26,11 @@ internal class VenuesAdapter(private val onItemClick: (Venue) -> Unit) :
     getItem(position)?.let(holder::bind)
   }
 
-  inner class ViewHolder(
-    private val binding: ItemVenueBinding,
-  ) : RecyclerView.ViewHolder(binding.root) {
+  inner class ViewHolder(private val binding: ItemVenueBinding) :
+    RecyclerView.ViewHolder(binding.root) {
     fun bind(item: VenueListItem) {
       with(binding) {
-        venueLetterIcon.letter = item.venue.name.first().toString()
+        venueLetterIcon.letter = (item.venue.name.firstOrNull() ?: '?').toString()
         venueNameTextView.text = item.venue.name
         venueCategoryTextView.text = item.venue.category
         item.distanceMeters?.let {
@@ -39,7 +38,7 @@ internal class VenuesAdapter(private val onItemClick: (Venue) -> Unit) :
             binding.root.context.getString(
               if (it > 1_000.0) R.string.venue_distance_kilometers
               else R.string.venue_distance_meters,
-              if (it > 1_000.0) it / 1_000.0 else it
+              if (it > 1_000.0) it / 1_000.0 else it,
             )
         }
         root.setOnClickListener { onItemClick(item.venue) }
