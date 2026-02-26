@@ -31,7 +31,6 @@ abstract class OpenCoinMapDatabase : RoomDatabase() {
     private val MIGRATION_1_2 =
       object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
-          // Create the new table
           db.execSQL(
             """
             CREATE TABLE IF NOT EXISTS `venue_details_new` (
@@ -60,7 +59,6 @@ abstract class OpenCoinMapDatabase : RoomDatabase() {
               .trimIndent()
           )
 
-          // Copy the data
           db.execSQL(
             """
             INSERT INTO `venue_details_new` (
@@ -77,10 +75,7 @@ abstract class OpenCoinMapDatabase : RoomDatabase() {
               .trimIndent()
           )
 
-          // Remove the old table
           db.execSQL("DROP TABLE `venue_details`")
-
-          // Rename the new table
           db.execSQL("ALTER TABLE `venue_details_new` RENAME TO `venue_details`")
         }
       }
